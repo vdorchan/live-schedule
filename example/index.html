@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+    }
+
+    .example {
+      width: 100vw;
+      display: flex;
+      margin: 0 auto;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    .left {
+      width: 250px;
+      white-space: nowrap;
+      margin-right: 30px;
+    }
+
+    .left p {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .feature {
+      pointer-events: none;
+    }
+
+    #schedule {
+      flex: 1;
+      padding: 30px 0;
+      width: calc(100vw - 310px);
+      height: 100vh;
+      box-sizing: border-box;
+      min-width: 800px;
+    }
+
+    .colors {
+      display: flex;
+      list-style: none;
+      padding: 0;
+    }
+
+    .colors li {
+      display: block;
+      width: 50px;
+      cursor: pointer;
+      margin: 0 2px;
+      font-size: 12px;
+    }
+
+    .icons {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .icons label {
+      margin: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="example">
+    <div class="left">
+      <h3>功能（已完成/待完成）</h3>
+      <div class="feature">
+        <p>滑动选择 <Input checked type="checkbox" /></p>
+        <p>响应式 <Input checked type="checkbox" /></p>
+        <p>多列选择 <Input checked type="checkbox" /></p>
+        <p>键盘操作（del、ctrl、shift） <Input checked type="checkbox" /></p>
+        <p>跨天 <Input checked type="checkbox" /></p>
+        <p>行调整 <Input checked type="checkbox" /></p>
+        <p>右键上下文菜单 <Input checked type="checkbox" /></p>
+        <p>悬浮提示 <Input checked type="checkbox" /></p>
+        <p>时间比例 <Input checked type="checkbox" /></p>
+        <p>行调整 <Input checked type="checkbox" /></p>
+      </div>
+
+      <h3>操作</h3>
+      <h4>给点颜色</h4>
+      <ul class="colors">
+        <li style="background: #64C42D;" onclick="setColor('L1')">L1</li>
+        <li style="background: #E8A32F;" onclick="setColor('L2')">L2</li>
+        <li style="background: #F76B69;" onclick="setColor('L3')">L3</li>
+        <li style="background: #2A8DF8;" onclick="setColor('L4')">L4</li>
+        <li style="background: #442BB0;" onclick="setColor('L5')">L5</li>
+      </ul>
+
+      <h4>写几个字</h4>
+      <p>
+        <label for="text1">大姚<Input value="大姚" class="text" id="text1" type="checkbox" onchange="setText()" /></label>
+        <label for="text2">库日天<Input value="123444库日天123" class="text" id="text2" type="checkbox"
+            onchange="setText()" /></label>
+        <label for="text3">tmac<Input value="tamc" class="text" id="text3" type="checkbox"
+            onchange="setText()" /></label>
+      </p>
+      <h4>选个图标</h4>
+      <p class="icons" onclick="setIcon()">
+        <label for="icon1">
+          空<input name="icon" id="icon1" value="" type="radio" />
+        </label>
+        <label for="taobao">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/taobao.png" />
+          <Input name="icon" id="taobao" value="taobao" type="radio" />
+        </label>
+        <label for="jd">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/jd.png" />
+          <Input name="icon" id="jd" value="jd" type="radio" />
+        </label>
+        <label for="douyin">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/douyin.png" />
+          <Input name="icon" id="douyin" value="douyin" type="radio" />
+        </label>
+        <label for="suning">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/suning.png" />
+          <Input name="icon" id="suning" value="suning" type="radio" />
+        </label>
+        <label for="wx">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/wx.png" />
+          <Input name="icon" id="wx" value="wx" type="radio" />
+        </label>
+        <label for="lazada">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/lazada.png" />
+          <Input name="icon" id="lazada" value="lazada" type="radio" />
+        </label>
+        <label for="tiktok">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/tiktok.png" />
+          <Input name="icon" id="tiktok" value="tiktok" type="radio" />
+        </label>
+        <label for="shopee">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/shopee.png" />
+          <Input name="icon" id="shopee" value="shopee" type="radio" />
+        </label>
+        <label for="facebook">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/facebook.png" />
+          <Input name="icon" id="facebook" value="facebook" type="radio" />
+        </label>
+        <label for="ins">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/ins.png" />
+          <Input name="icon" id="ins" value="ins" type="radio" />
+        </label>
+        <label for="youtube">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/youtube.png" />
+          <Input name="icon" id="youtube" value="youtube" type="radio" />
+        </label>
+        <label for="qita">
+          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/qita.png" />
+          <Input name="icon" id="qita" value="qita" type="radio" />
+        </label>
+      </p>
+    </div>
+
+    <div id="schedule"></div>
+
+  </div>
+
+  <script src="../dist/schedule.js"></script>
+  <script>
+    const schedule = new Schedule(document.getElementById('schedule'), {
+      data: [{ "id": 10958, "startTime": "2020-07-05 03:00:00", "endTime": "2020-07-05 10:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10959, "startTime": "2020-07-09 01:00:00", "endTime": "2020-07-09 09:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L1", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10960, "startTime": "2020-07-12 04:00:00", "endTime": "2020-07-12 09:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10961, "startTime": "2020-07-16 04:00:00", "endTime": "2020-07-16 10:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L3", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 12313, "startTime": "2020-07-19 05:00:00", "endTime": "2020-07-19 12:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": "微信", "storeId": null, "storeName": null }, { "id": 12314, "startTime": "2020-07-23 08:00:00", "endTime": "2020-07-23 13:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L3", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 12919, "startTime": "2020-07-14 07:00:00", "endTime": "2020-07-14 15:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": "Lazada", "storeId": null, "storeName": null }],
+
+      colorKey: 'anchorLevel',
+      iconKey: 'platform',
+      textsKey: 'slAnchors',
+
+      dataMaps: {
+        color: [
+          { key: 'L1', value: '#64C42D' },
+          { key: 'L2', value: '#E8A32F' },
+          { key: 'L3', value: '#F76B69' },
+          { key: 'L4', value: '#2A8DF8' },
+          { key: 'L5', value: '#442BB0' },
+        ],
+        icon: [
+          { key: "taobao", value: "https://live.baowenonline.com/platform-icons/taobao.png" },
+          { key: "jd", value: "https://live.baowenonline.com/platform-icons/jd.png" },
+          { key: "douyin", value: "https://live.baowenonline.com/platform-icons/douyin.png" },
+          { key: "suning", value: "https://live.baowenonline.com/platform-icons/suning.png" },
+          { key: "wx", value: "https://live.baowenonline.com/platform-icons/wx.png" },
+          { key: "lazada", value: "https://live.baowenonline.com/platform-icons/lazada.png" },
+          { key: "tiktok", value: "https://live.baowenonline.com/platform-icons/tiktok.png" },
+          { key: "shopee", value: "https://live.baowenonline.com/platform-icons/shopee.png" },
+          { key: "facebook", value: "https://live.baowenonline.com/platform-icons/facebook.png" },
+          { key: "ins", value: "https://live.baowenonline.com/platform-icons/ins.png" },
+          { key: "youtube", value: "https://live.baowenonline.com/platform-icons/youtube.png" },
+          { key: "qita", value: "https://live.baowenonline.com/platform-icons/qita.png" }
+        ]
+      },
+    })
+
+    function setColor(anchorLevel) {
+      schedule.setDataAtCell(data => ({
+        ...data,
+        anchorLevel
+      }))
+    }
+
+    function setText() {
+      const slAnchors = [...document.querySelectorAll('.text')].map(checkbox => checkbox.checked ? checkbox.value : '').filter(text => text)
+      schedule.setDataAtCell(data => ({
+        ...data,
+        slAnchors
+      }))
+    }
+
+    function setIcon() {
+      const checkedRadio = [...document.getElementsByName('icon')].find(radio => radio.checked)
+      if (checkedRadio) {
+        const platform = checkedRadio.value
+        schedule.setDataAtCell(data => ({
+          ...data,
+          platform
+        }))
+      }
+    }
+  </script>
+</body>
+
+</html>
