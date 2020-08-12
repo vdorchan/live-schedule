@@ -205,6 +205,7 @@ export default class Schedule {
   exportData() {}
 
   showContextMenu(event) {
+    this.table.tooltip.hide()
     this.table.contextMenu.show(event)
   }
 

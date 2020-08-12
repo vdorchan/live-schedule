@@ -39,4 +39,8 @@ export default class Tooltip {
       this.icon.src = icon
     }
   }
+
+  hide() {
+    this.tooltip.style.visibility = 'hidden'
+  }
 }
