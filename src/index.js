@@ -108,6 +108,8 @@ export default class Schedule {
 
       tooltipColor: '#707070',
 
+      renderTooltip: () => {},
+
       ...userSettings,
 
       contextMenuItems: this.combineContextMenuItems(
@@ -224,11 +226,15 @@ export default class Schedule {
   getTooltipConfig(cell) {
     const { x, y } = cell.getCoords()
 
+    const { renderTooltip } = this.settings
+    const tooltipText = cell.data ? renderTooltip(cell.data) : ''
+
     return {
       x: x + cell.width,
       y,
-      text: this.getCellTimeStr(cell),
+      text: `<p>${this.getCellTimeStr(cell)}</p>${tooltipText}`,
       color: cell.hasData() ? cell.getColor() : null,
+      icon: cell.getIcon(),
     }
   }
 

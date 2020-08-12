@@ -67,7 +67,7 @@ export default class Tooltip {
 
   setText(text) {
     this._config.text = text
-    this.text.innerText = this._config.text
+    this.text.innerHTML = this._config.text
   }
 
   hide() {

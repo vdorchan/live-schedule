@@ -200,6 +200,21 @@
         ]
       },
 
+      renderTooltip(data) {
+        const titleMap = {
+          operationUser: "运营",
+          controlUser: "场控",
+          liveNumber: "直播间号",
+          storeName: "店铺名称",
+          platform: "平台",
+        }
+        return `
+          ${Object.keys(data).map(key => (data[key] && titleMap[key]) ? `<p>${titleMap[key]}: ${data[key]}<p/>` : '').join('')}
+          <p>${data.anchorLevel}</p>
+          <p>${data.slAnchors.join(',')}</p>
+        `
+      },
+
       contextMenuItems: [
         { action: 'alert', title: '弹一个' },
       ]
