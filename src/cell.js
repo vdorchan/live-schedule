@@ -79,6 +79,9 @@ export default class Cell extends BaseRender {
   }
 
   getDataValue(key, data = this.data) {
+    if (!data) {
+      return undefined
+    }
     const map = this.table.settings.dataMaps[key]
     key = this.table.settings[`${key}Key`]
     if (map) {
@@ -90,7 +93,7 @@ export default class Cell extends BaseRender {
   }
 
   render() {
-    const data = this.data
+    const { data } = this
     const { cellWidth, cellHeight } = this.parent
     const {
       cellBorderWidth,
@@ -192,22 +195,30 @@ export default class Cell extends BaseRender {
 
   mouseIn() {
     !this.hasData() && this.renderIfPropsChanged({ hovering: true })
+    return this
   }
 
   mouseOut() {
     !this.hasData() && this.renderIfPropsChanged({ hovering: false })
+    return this
   }
 
   select() {
-    this.renderIfPropsChanged({ selected: true })
+    if (this.hasData()) {
+      this.selected = true
+    } else {
+      this.renderIfPropsChanged({ selected: true })
+    }
+    return this
   }
 
   deselect() {
-    if (this.data) {
-      this.renderIfPropsChanged({ selected: false })
+    if (this.hasData()) {
+      this.selected = false
     } else {
       this.mergedCells.forEach((cell) => cell.clear())
     }
+    return this
   }
 
   renderIfPropsChanged(props, data = this) {
