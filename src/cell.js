@@ -191,11 +191,11 @@ export default class Cell extends BaseRender {
   }
 
   mouseIn() {
-    !this.isValid() && this.renderIfPropsChanged({ hovering: true })
+    !this.hasData() && this.renderIfPropsChanged({ hovering: true })
   }
 
   mouseOut() {
-    !this.isValid() && this.renderIfPropsChanged({ hovering: false })
+    !this.hasData() && this.renderIfPropsChanged({ hovering: false })
   }
 
   select() {
@@ -276,7 +276,7 @@ export default class Cell extends BaseRender {
     return this.__actualCell === this
   }
 
-  isValid() {
+  hasData() {
     return !!this.data
   }
 }

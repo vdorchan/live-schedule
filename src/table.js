@@ -208,7 +208,7 @@ export default class Table {
     const cellsBetween = []
     this.cellsEach(
       (cell) => {
-        if (cell.isValid() && !cell.isSame(_cellFrom)) {
+        if (cell.hasData() && !cell.isSame(_cellFrom)) {
           return false
         }
         cellsBetween.push(cell)

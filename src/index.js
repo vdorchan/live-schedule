@@ -222,7 +222,7 @@ export default class Schedule {
       x: x + cell.width,
       y,
       text: `${cell.colIdx + 1}, ${format(timeFrom)}~${format(timeTo)}`,
-      color: cell.isValid() ? cell.getColor() : null,
+      color: cell.hasData() ? cell.getColor() : null,
     }
   }
 
