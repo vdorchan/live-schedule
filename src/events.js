@@ -10,9 +10,6 @@ export default class Events {
     this.table = schedule.table
     this.canvas = this.table.canvas
 
-    this._movingCell = null
-    this._movingRowIdx = null
-
     /**
      * Cache cells to highlight.
      * @type {Array}
@@ -81,9 +78,6 @@ export default class Events {
   onMouseMove(event) {
     const { x, y } = this.getCoords(event)
     const cell = this.table.getCellByCoord({ x, y })
-    if (!cell || this._movingCell === cell) return
-
-    this._movingCell = cell
 
     if (this.currentSelection && this.currentSelection.isInProgress()) {
       const colIdx = this.table.getColIdx(x)

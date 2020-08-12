@@ -263,11 +263,14 @@ export default class Table {
    */
   mouseInCell(cell) {
     if (!this.contextMenu.isVisible()) {
-      cell = cell.getCell()
       this.cellsEach((cell) => cell.mouseOut())
-      cell.mouseIn()
-      const { x, y } = cell.getCoords()
-      this.schedule.showTooltip(cell)
+      this.schedule.hideTooltip()
+      if (cell) {
+        cell = cell.getCell()
+        cell.mouseIn()
+        const { x, y } = cell.getCoords()
+        this.schedule.showTooltip(cell)
+      }
     }
   }
 

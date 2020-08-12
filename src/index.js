@@ -238,6 +238,10 @@ export default class Schedule {
     }
   }
 
+  hideTooltip() {
+    this.table.tooltip.hide()
+  }
+
   /**
    *
    * @param {object} config
