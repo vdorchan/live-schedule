@@ -190,7 +190,7 @@ export default class Cell extends BaseRender {
     this.renderIfPropsChanged({ selected: true })
   }
 
-  unselect() {
+  deselect() {
     if (this.data) {
       this.renderIfPropsChanged({ selected: false })
     } else {
@@ -240,8 +240,10 @@ export default class Cell extends BaseRender {
   }
 
   clear() {
-    this.init()
-    this.render()
+    this.mergedCells.forEach(cell => {
+      cell.init()
+      cell.render()
+    })
   }
 
   isBefore(cell) {

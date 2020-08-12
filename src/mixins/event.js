@@ -31,10 +31,10 @@ const eventMixin = {
 
   /**
    * Generate an event with the given name and data
-   *  this.trigger('select', ...)
+   *  this.emit('select', ...)
    */
-  trigger(eventName, ...args) {
-    if (!this._eventHandlers[eventName]) {
+  emit(eventName, ...args) {
+    if (!this._eventHandlers && !this._eventHandlers[eventName]) {
       return // no handlers for that event name
     }
 
