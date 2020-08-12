@@ -209,25 +209,28 @@ export default class Schedule {
     this.table.contextMenu.show(event)
   }
 
+  getCellTimeStr(cell) {
+    const format = (date) => date.format('HH:mm')
+    const timeFrom = this.yearMonth.minute(cell.rowIdx * 60)
+    const timeTo = timeFrom.minute(cell.getRowSpan() * 60)
+
+    return `${cell.colIdx + 1}, ${format(timeFrom)}~${format(timeTo)}`
+  }
+
   /**
    *
    * @param {*} cell
    */
   getTooltipConfig(cell) {
     const { x, y } = cell.getCoords()
-    const format = (date) => date.format('HH:mm')
-    const timeFrom = this.yearMonth.minute(cell.rowIdx * 60)
-    const timeTo = timeFrom.minute(cell.getRowSpan() * 60)
 
     return {
       x: x + cell.width,
       y,
-      text: `${cell.colIdx + 1}, ${format(timeFrom)}~${format(timeTo)}`,
+      text: this.getCellTimeStr(cell),
       color: cell.hasData() ? cell.getColor() : null,
     }
   }
-
-  getCellDate(cell) {}
 
   /**
    *

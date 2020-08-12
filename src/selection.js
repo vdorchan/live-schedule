@@ -3,8 +3,9 @@
  * @class {Selction}
  */
 export default class Section {
-  constructor(table, oriCell) {
-    this.table = table
+  constructor(schedule, oriCell) {
+    this.schedule = schedule
+    this.table = schedule.table
     this.oriCell = oriCell
     this.oriRowIdx = oriCell
 
@@ -32,10 +33,8 @@ export default class Section {
     this.selectedCells = []
     selectedCells.forEach((cell) => (this.selectedCells[cell.colIdx] = cell))
     this.deselect(cellsToClear)
-  }
 
-  mergeCols(rowIdx) {
-    this.table.mergeCols(oriCell, rowIdx)
+    this.schedule.showTooltip(this.selectedCells[colTo])
   }
 
   /**

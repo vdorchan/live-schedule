@@ -60,7 +60,7 @@ export default class Events {
     this.selections.forEach((selection) => selection.deselect())
     this.selections = []
     if (cell) {
-      this.currentSelection = new Selection(this.table, cell)
+      this.currentSelection = new Selection(this.schedule, cell)
       this.selections.push(this.currentSelection)
     }
   }
