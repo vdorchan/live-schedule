@@ -1,0 +1,25 @@
+.schedule-contextmenu {
+  position: absolute;
+  padding: 5px 0;
+  margin: 0;
+  background: #707070;
+  border: 1px solid #707070;
+  border-radius: 4px;
+  box-shadow: 2px 2px 8px 0px rgba(150, 150, 150, 0.2);
+  list-style: none;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+  z-index: 2800;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.schedule-contextmenu-item {
+  padding: 5px 14px;
+  line-height: 1;
+  color: #fff;
+}
+
+.schedule-contextmenu-item:hover {
+  background: #585858;
+}

@@ -11,6 +11,11 @@ export default class Section {
     this.oriCell.getCell().select()
     this.selectedCells = []
     this.selectedCells[this.oriCell.colIdx] = this.oriCell
+    this.inProgress = true
+  }
+
+  getSelectedCell() {
+    return this.selectedCells[this.oriCell.colIdx].getCell()
   }
 
   multiCols(colTo, rowIdx) {
@@ -26,23 +31,53 @@ export default class Section {
     )
     this.selectedCells = []
     selectedCells.forEach((cell) => (this.selectedCells[cell.colIdx] = cell))
-    this.clear(cellsToClear)
+    this.deselect(cellsToClear)
   }
 
   mergeCols(rowIdx) {
     this.table.mergeCols(oriCell, rowIdx)
   }
 
-  finish() {}
+  /**
+   * Indicate that selection procell began.
+   */
+  begin() {
+    this.inProgress = true
+  }
 
-  clear(cells) {
+  /**
+   * Indicate that selection procell finished.
+   */
+  finish() {
+    this.inProgress = false
+  }
+
+  /**
+   * Check if the process of selecting the cell/cells is in progress.
+   */
+  isInProgress() {
+    return this.inProgress
+  }
+
+  /**
+   * Deselect all cells.
+   * @param {array} cells 
+   */
+  deselect(cells) {
     ;(cells || this.selectedCells).forEach((cell) => {
-      cell.getCell().unselect()
+      cell.getCell().deselect()
       this.table.removeHighlights()
     })
   }
 
   highlight() {
-    this.selectedCells.forEach((cell) => cell && this.table.highlightCell(cell.getCell()))
+    this.selectedCells.forEach(
+      (cell) => cell && this.table.highlightCell(cell.getCell())
+    )
+  }
+
+  deleteCell() {
+    this.deselect()
+    this.getSelectedCell().clear()
   }
 }

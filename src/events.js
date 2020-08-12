@@ -5,9 +5,10 @@ import Selection from './selection'
  * @class {Event}
  */
 export default class Events {
-  constructor(table) {
-    this.table = table
-    this.canvas = table.canvas
+  constructor(schedule) {
+    this.schedule = schedule
+    this.table = schedule.table
+    this.canvas = this.table.canvas
 
     this._movingCell = null
     this._movingRowIdx = null
@@ -18,20 +19,22 @@ export default class Events {
      */
     this._highlightCells = []
 
-    this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this))
-    window.addEventListener('mouseup', this.onMouseUp.bind(this))
-    window.addEventListener('mousemove', this.onMouseMove.bind(this))
+    this.onMouseDown = this.onMouseDown.bind(this)
+    this.onMouseUp = this.onMouseUp.bind(this)
+    this.onMouseMove = this.onMouseMove.bind(this)
+    this.onContextMenu = this.onContextMenu.bind(this)
+    this.onContextMenuItemSelect = this.onContextMenuItemSelect.bind(this)
+
+    this.canvas.addEventListener('mousedown', this.onMouseDown)
+    window.addEventListener('mouseup', this.onMouseUp)
+    window.addEventListener('mousemove', this.onMouseMove)
     this.canvas.addEventListener('contextmenu', this.onContextMenu)
-    // this.addResizeListener(this.table.rootNode, this.onResize)
+
+    this.table.contextMenu.onContextMenuItemSelect(this.onContextMenuItemSelect)
 
     this.currentSelection = null
     this.selections = []
   }
-
-  /**
-   * @private
-   */
-  clearEvents() {}
 
   addResizeListener(el, cb) {
     const ro = new ResizeObserver((entries, _) => {
@@ -54,7 +57,7 @@ export default class Events {
   onMouseDown(event) {
     const { x, y } = this.getCoords(event)
     const cell = this.table.getCellByCoord({ x, y })
-    this.selections.forEach((selection) => selection.clear())
+    this.selections.forEach((selection) => selection.deselect())
     this.selections = []
     if (cell) {
       this.currentSelection = new Selection(this.table, cell)
@@ -68,7 +71,7 @@ export default class Events {
   onMouseUp() {
     if (this.currentSelection) {
       this.selections.forEach((selection) => selection.highlight())
-      this.currentSelection = null
+      this.currentSelection.finish()
     }
   }
 
@@ -82,7 +85,7 @@ export default class Events {
 
     this._movingCell = cell
 
-    if (this.currentSelection) {
+    if (this.currentSelection && this.currentSelection.isInProgress()) {
       const colIdx = this.table.getColIdx(x)
       const rowIdx = this.table.getRowIdx(y)
       this.currentSelection.multiCols(colIdx, rowIdx)
@@ -99,12 +102,34 @@ export default class Events {
   /**
    *
    */
-  onContextMenu() {}
+  onContextMenu(event) {
+    event.preventDefault()
+    if (this.currentSelection) {
+      this.schedule.showContextMenu(event)
+    }
+  }
+
+  onContextMenuItemSelect(action, item) {
+    if (this.currentSelection && action) {
+      const cell = this.currentSelection.getSelectedCell()
+
+      if (action === 'delete') {
+        this.currentSelection.deleteCell()
+      }
+
+      this.schedule.emit('contextMenuItemSelect', action, item)
+    }
+  }
 
   /**
    *
    */
-  destroy() {}
+  destroy() {
+    this.canvas.removeListener('mousedown', this.onMouseDown)
+    window.removeListener('mouseup', this.onMouseUp)
+    window.removeListener('mousemove', this.onMouseMove)
+    this.canvas.removeListener('contextmenu', this.onContextMenu)
+  }
 
   getCoords(event) {
     const { left, top } = this.canvas.getBoundingClientRect()

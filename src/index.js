@@ -6,9 +6,14 @@ import RowHeader from './rowHeader'
 import ColHeader from './colHeader'
 
 import Highlights from './highlights'
+import ContextMenu from './contextMenu'
+import eventMixin from './mixins/event'
+
+import Events from './events'
 
 import './styles/_base.css'
 import './styles/highlight.css'
+import './styles/contextMenu.css'
 
 /**
  * Schedule.
@@ -93,17 +98,25 @@ export default class Schedule {
       timeScale: 1,
 
       ...userSettings,
+
+      contextMenuItems: this.combineContextMenuItems(
+        userSettings.contextMenuItems || [],
+        [{ action: 'delete', title: '删除' }]
+      ),
     }
 
     const items = this.getItemsFromData()
 
     // Create table renderer for the schedule.
-    this.table = new Table(this.canvas, this.settings, items, {
+    this.table = new Table(this, items, {
       cells: new Cells(this),
       rowHeader: new RowHeader(this),
       colHeader: new ColHeader(this),
       highlights: new Highlights(this.container),
+      contextMenu: new ContextMenu(this.settings.contextMenuItems),
     })
+
+    this.events = new Events(this)
 
     this.render()
   }
@@ -129,6 +142,26 @@ export default class Schedule {
     ro.observe(this.rootNode)
   }
 
+  combineContextMenuItems(...contextMenuItems) {
+    const actions = []
+    const _contextMenuItems = []
+    contextMenuItems
+      .reduce(
+        (previousValue, currentValue, currentIndex) => [
+          ...previousValue,
+          ...currentValue,
+        ],
+        []
+      )
+      .forEach(
+        (item) =>
+          !_contextMenuItems.find((i) => i.action === item.action) &&
+          _contextMenuItems.push(item)
+      )
+
+    return _contextMenuItems
+  }
+
   setDataAtCell(callback) {
     let data = callback
     this.table.cellsEach((cell) => {
@@ -144,7 +177,8 @@ export default class Schedule {
       const { startTime, endTime } = live
       const m = moment(startTime)
       const colIdx = m.date() - 1
-      const rowIdx = (m.hours() * 60 + m.minutes()) / 60 / this.settings.timeScale
+      const rowIdx =
+        (m.hours() * 60 + m.minutes()) / 60 / this.settings.timeScale
       const minutes = Math.abs(m.diff(endTime, 'minutes'))
       const rowSpan = minutes / (this.settings.timeScale * 60) - 1
       return {
@@ -157,4 +191,10 @@ export default class Schedule {
   }
 
   exportData() {}
+
+  showContextMenu(event) {
+    this.table.contextMenu.show(event)
+  }
 }
+
+Object.assign(Schedule.prototype, eventMixin)

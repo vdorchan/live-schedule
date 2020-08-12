@@ -1,6 +1,5 @@
 import Draw from './draw'
-import Events from './events'
-import eventMixin from './mixins/event'
+import ContextMenu from './contextMenu'
 
 /**
  * Table render and managing.
@@ -8,23 +7,23 @@ import eventMixin from './mixins/event'
  */
 export default class Table {
   constructor(
-    canvas,
-    settings,
+    schedule,
     items,
-    { cells, rowHeader, colHeader, highlights } = {}
+    { cells, rowHeader, colHeader, highlights, contextMenu } = {}
   ) {
+    this.schedule = schedule
     /**
      * The root node to which newly created table will be inserted
      * @type {HTMLElement}
      */
 
-    this.canvas = canvas
+    this.canvas = schedule.canvas
 
     /**
      * Cache the settings.
      * @type {Cells}
      */
-    this.settings = settings
+    this.settings = schedule.settings
 
     this.items = items
 
@@ -48,9 +47,15 @@ export default class Table {
 
     /**
      * Reference to the instance of highlights.
-     * @type {highlights}
+     * @type {Highlights}
      */
     this.highlights = highlights
+
+    /**
+     * Reference to the instance of highlights.
+     * @type {ContextMenu}
+     */
+    this.contextMenu = contextMenu
 
     /**
      * Set table renderer.
@@ -60,8 +65,6 @@ export default class Table {
     this.colHeader.setTable(this)
 
     this.container = null
-
-    this.events = new Events(this)
   }
 
   /**
@@ -76,7 +79,14 @@ export default class Table {
       this.draw.resize(tableWidth, tableHeight)
     }
 
-    const { fontSize, fontFamily, numberOfCols, numberOfRows, cellBorderWidth, colHeaderWidth } = this.settings
+    const {
+      fontSize,
+      fontFamily,
+      numberOfCols,
+      numberOfRows,
+      cellBorderWidth,
+      colHeaderWidth,
+    } = this.settings
     /**
      * Set global font config.
      */
@@ -246,8 +256,10 @@ export default class Table {
    * @param {Cell} cell
    */
   mouseInCell(cell) {
-    this.cellsEach((cell) => cell.mouseOut())
-    cell.getCell().mouseIn()
+    if (!this.contextMenu.isVisible()) {
+      this.cellsEach((cell) => cell.mouseOut())
+      cell.getCell().mouseIn()
+    }
   }
 
   /**
@@ -265,5 +277,3 @@ export default class Table {
     this.highlights.clear()
   }
 }
-
-Object.assign(Table.prototype, eventMixin)
