@@ -14,8 +14,7 @@
   },
   "dependencies": {
     "@juggle/resize-observer": "^3.2.0",
-    "dayjs": "^1.8.30",
-    "moment": "^2.27.0"
+    "dayjs": "^1.8.33"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",

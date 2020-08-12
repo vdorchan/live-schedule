@@ -1,5 +1,5 @@
 import { ResizeObserver } from '@juggle/resize-observer'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import Table from './table'
 import Cells from './cells'
 import RowHeader from './rowHeader'
@@ -7,6 +7,7 @@ import ColHeader from './colHeader'
 
 import Highlights from './highlights'
 import ContextMenu from './contextMenu'
+import Tooltip from './tooltip'
 import eventMixin from './mixins/event'
 
 import Events from './events'
@@ -14,6 +15,7 @@ import Events from './events'
 import './styles/_base.css'
 import './styles/highlight.css'
 import './styles/contextMenu.css'
+import './styles/tooltip.css'
 
 /**
  * Schedule.
@@ -49,8 +51,15 @@ export default class Schedule {
 
     this.createCanvas()
 
+    this.yearMonth = dayjs(userSettings.yearMonth || dayjs().format('YYYY-MM'))
+
     this.settings = {
-      numberOfCols: 31,
+      numberOfCols: this.yearMonth.daysInMonth(),
+
+      /**
+       * Hours in day.
+       * @type {number}
+       */
       numberOfRows: 24,
 
       /**
@@ -97,6 +106,8 @@ export default class Schedule {
 
       timeScale: 1,
 
+      tooltipColor: '#707070',
+
       ...userSettings,
 
       contextMenuItems: this.combineContextMenuItems(
@@ -114,6 +125,7 @@ export default class Schedule {
       colHeader: new ColHeader(this),
       highlights: new Highlights(this.container),
       contextMenu: new ContextMenu(this.settings.contextMenuItems),
+      tooltip: new Tooltip(this.container, this.settings.tooltipColor),
     })
 
     this.events = new Events(this)
@@ -175,11 +187,11 @@ export default class Schedule {
   getItemsFromData() {
     return this.settings.data.map((live) => {
       const { startTime, endTime } = live
-      const m = moment(startTime)
-      const colIdx = m.date() - 1
+      const time = dayjs(startTime)
+      const colIdx = time.date() - 1
       const rowIdx =
-        (m.hours() * 60 + m.minutes()) / 60 / this.settings.timeScale
-      const minutes = Math.abs(m.diff(endTime, 'minutes'))
+        (time.hour() * 60 + time.minute()) / 60 / this.settings.timeScale
+      const minutes = Math.abs(time.diff(endTime, 'minute'))
       const rowSpan = minutes / (this.settings.timeScale * 60) - 1
       return {
         colIdx,
@@ -194,6 +206,39 @@ export default class Schedule {
 
   showContextMenu(event) {
     this.table.contextMenu.show(event)
+  }
+
+  /**
+   *
+   * @param {*} cell
+   */
+  getTooltipConfig(cell) {
+    const { x, y } = cell.getCoords()
+    const format = (date) => date.format('HH:mm')
+    const timeFrom = this.yearMonth.minute(cell.rowIdx * 60)
+    const timeTo = timeFrom.minute(cell.getRowSpan() * 60)
+
+    return {
+      x: x + cell.width,
+      y,
+      text: `${cell.colIdx + 1}, ${format(timeFrom)}~${format(timeTo)}`,
+      color: cell.isValid() ? cell.getColor() : null,
+    }
+  }
+
+  getCellDate(cell) {}
+
+  /**
+   *
+   * @param {object} config
+   * @param {number} config.x
+   * @param {number} config.y
+   * @param {string} config.text
+   * @param {string} config.icon
+   */
+  showTooltip(cell) {
+    const config = this.getTooltipConfig(cell)
+    this.table.tooltip.show(config)
   }
 }
 

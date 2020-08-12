@@ -46,6 +46,25 @@ export default class Cell extends BaseRender {
     return this.__actualCell
   }
 
+  getColor() {
+    const { cellSelectedColor, bgColor, cellActiveColor } = this.table.settings
+    let cellColor = this.selected || this.hovering ? cellSelectedColor : bgColor
+
+    if (this.data) {
+      cellColor = this.getDataValue('color') || cellActiveColor
+    }
+
+    return cellColor
+  }
+
+  getIcon() {
+    return this.getDataValue('icon')
+  }
+
+  getTexts() {
+    return this.getDataValue('texts')
+  }
+
   getCoords(isCenter) {
     const { cellWidth, cellHeight } = this.parent
     const x =
@@ -84,11 +103,7 @@ export default class Cell extends BaseRender {
       textsKey,
     } = this.table.settings
 
-    let cellColor = this.selected || this.hovering ? cellSelectedColor : bgColor
-
-    if (data) {
-      cellColor = this.getDataValue('color') || cellActiveColor
-    }
+    const cellColor = this.getColor()
 
     this.width = cellWidth - cellBorderWidth
     this.height = cellHeight * this.mergedCells.length - cellBorderWidth
@@ -103,10 +118,7 @@ export default class Cell extends BaseRender {
     })
 
     if (data) {
-      this.renderIconAndTexts(
-        this.getDataValue('icon'),
-        this.getDataValue('texts')
-      )
+      this.renderIconAndTexts(this.getIcon(), this.getTexts())
     }
 
     this.renderLabel(this.label)
@@ -239,8 +251,12 @@ export default class Cell extends BaseRender {
     return actualCell
   }
 
+  getRowSpan() {
+    return this.mergedCells.length
+  }
+
   clear() {
-    this.mergedCells.forEach(cell => {
+    this.mergedCells.forEach((cell) => {
       cell.init()
       cell.render()
     })

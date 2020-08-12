@@ -9,7 +9,7 @@ export default class Table {
   constructor(
     schedule,
     items,
-    { cells, rowHeader, colHeader, highlights, contextMenu } = {}
+    { cells, rowHeader, colHeader, highlights, contextMenu, tooltip } = {}
   ) {
     this.schedule = schedule
     /**
@@ -56,6 +56,12 @@ export default class Table {
      * @type {ContextMenu}
      */
     this.contextMenu = contextMenu
+
+    /**
+     * Reference to the instance of tooltip.
+     * @type {Tooltip}
+     */
+    this.tooltip = tooltip
 
     /**
      * Set table renderer.
@@ -257,8 +263,11 @@ export default class Table {
    */
   mouseInCell(cell) {
     if (!this.contextMenu.isVisible()) {
+      cell = cell.getCell()
       this.cellsEach((cell) => cell.mouseOut())
-      cell.getCell().mouseIn()
+      cell.mouseIn()
+      const { x, y } = cell.getCoords()
+      this.schedule.showTooltip(cell)
     }
   }
 
