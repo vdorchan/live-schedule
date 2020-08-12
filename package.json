@@ -4,6 +4,7 @@
   "main": "src/main.js",
   "license": "MIT",
   "scripts": {
+    "start": "npm run dev",
     "lint": "eslint src/",
     "dev": "rollup -c -w",
     "build": "rollup -c"
