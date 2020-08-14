@@ -4,6 +4,7 @@ import {
   HIGHLIGHT_UP_RESIZE_CLASS,
   HIGHLIGHT_DOWN_RESIZE_CLASS,
 } from './highlights'
+import keycode from 'keycode'
 
 /**
  * @class {Event}
@@ -26,11 +27,13 @@ export default class Events {
     this.onMouseMove = this.onMouseMove.bind(this)
     this.onContextMenu = this.onContextMenu.bind(this)
     this.onContextMenuItemSelect = this.onContextMenuItemSelect.bind(this)
+    this.onKeydown = this.onKeydown.bind(this)
 
     this.container.addEventListener('mousedown', this.onMouseDown)
     window.addEventListener('mouseup', this.onMouseUp)
     window.addEventListener('mousemove', this.onMouseMove)
     this.container.addEventListener('contextmenu', this.onContextMenu)
+    document.addEventListener('keydown', this.onKeydown)
 
     this.table.contextMenu.onContextMenuItemSelect(this.onContextMenuItemSelect)
 
@@ -68,8 +71,17 @@ export default class Events {
       return this.currentSelection.begin(cell, 'up')
     }
 
-    this.selections.forEach((selection) => selection.deselect())
-    this.selections = []
+    if (event.shiftKey) {
+      const colIdx = this.table.getColIdx(x)
+      const rowIdx = this.table.getRowIdx(y)
+      return this.currentSelection.move(colIdx, rowIdx)
+    }
+
+    if (!event.ctrlKey && !event.metaKey) {
+      this.selections.forEach((selection) => selection.deselect())
+      this.selections = []
+    }
+
     if (cell) {
       this.currentSelection = new Selection(this.schedule, cell)
       this.currentSelection.begin(cell)
@@ -125,6 +137,12 @@ export default class Events {
       }
 
       this.schedule.emit('contextMenuItemSelect', action, item)
+    }
+  }
+
+  onKeydown(event) {
+    if (keycode(event) === 'backspace') {
+      this.currentSelection.deleteCell()
     }
   }
 

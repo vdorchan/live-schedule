@@ -84,6 +84,13 @@ export default class Section {
     _batchedCells.forEach((cell) => cell.getCell().deselect())
   }
 
+  move(colIdx, rowIdx) {
+    this.table.removeHighlights()
+    const { numberOfRows } = this.table.settings
+    const cellsToMerged = this.adjust(this.colFrom, rowIdx + (colIdx - this.colFrom) * numberOfRows)
+    this.mergeRow(cellsToMerged)
+  }
+
   cutCells(cells, length) {
     if (cells.length === 1) {
       return cells
