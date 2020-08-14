@@ -119,7 +119,7 @@ export default class Schedule {
       ),
     }
 
-    const items = this.getItemsFromData()
+    const items = this.getItemsFromData(this.settings.data)
 
     // Create table renderer for the schedule.
     this.table = new Table(this, items, {
@@ -162,10 +162,7 @@ export default class Schedule {
     const _contextMenuItems = []
     contextMenuItems
       .reduce(
-        (previousValue, currentValue, _) => [
-          ...previousValue,
-          ...currentValue,
-        ],
+        (previousValue, currentValue, _) => [...previousValue, ...currentValue],
         []
       )
       .forEach(
@@ -177,18 +174,19 @@ export default class Schedule {
     return _contextMenuItems
   }
 
-  setDataAtCell(callback) {
-    let data = callback
+  setData(data) {
+    const items = this.getItemsFromData(data)
+    this.table.setItems(items)
+  }
+
+  setDataAtSelectedCell(callback) {
     this.table.cellsEach((cell) => {
-      if (typeof callback === 'function') {
-        data = callback(cell.data || {})
-      }
-      cell.setData(data)
+      cell.setData(callback)
     })
   }
 
-  getItemsFromData() {
-    return this.settings.data.map((live) => {
+  getItemsFromData(data) {
+    return data.map((live) => {
       const { startTime, endTime } = live
       const time = dayjs(startTime)
       const colIdx = time.date() - 1

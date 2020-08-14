@@ -73,6 +73,11 @@ export default class Table {
     this.container = null
   }
 
+  setItems(items) {
+    this.items = items
+    this.cells.refresh()
+  }
+
   /**
    * Render the Table.
    * @param {number} tableWidth Width of Table.

@@ -48,6 +48,11 @@ export default class Cells extends BaseRender {
     }
   }
 
+  refresh() {
+    this.cellGroupsEach((cell) => !cell.selected && cell.clear())
+    this.render()
+  }
+
   adjust() {
     const {
       colHeaderWidth,
