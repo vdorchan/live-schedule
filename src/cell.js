@@ -1,5 +1,6 @@
 import BaseRender from './_base'
 import { objHasChanged, getHexAlpha, hexHasAlpha } from './helper'
+import eventMixin from './mixins/event'
 
 /**
  * @class {Cell}
@@ -226,7 +227,10 @@ export default class Cell extends BaseRender {
     }
   }
 
-  setData(data) {
+  setData(callback) {
+    if (typeof callback === 'function') {
+      data = callback(cell.data || {})
+    }
     if (this.selected && this.isVisible()) {
       if (!this.data) {
         this.data = {}
@@ -376,3 +380,5 @@ export default class Cell extends BaseRender {
     return !!this.data
   }
 }
+
+Object.assign(Cell.prototype, eventMixin)
