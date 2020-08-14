@@ -1,5 +1,5 @@
 import BaseRender from './_base'
-import { objHasChanged } from './helper'
+import { objHasChanged, getHexAlpha, hexHasAlpha } from './helper'
 
 /**
  * @class {Cell}
@@ -47,14 +47,24 @@ export default class Cell extends BaseRender {
   }
 
   getColor() {
-    const { cellSelectedColor, bgColor, cellActiveColor } = this.table.settings
+    const { cellSelectedColor, bgColor, cellActiveColor, cellCrossColAlpha } = this.table.settings
+
     let cellColor = this.selected || this.hovering ? cellSelectedColor : bgColor
 
     if (this.data) {
       cellColor = this.getDataValue('color') || cellActiveColor
     }
 
+    if (this.isCrossCol()) {
+      cellColor = this.getCell().getColor() + getHexAlpha(cellCrossColAlpha)
+    }
+
     return cellColor
+  }
+
+  isCrossCol() {
+    const _cell = this.getCell()
+    return _cell !== this && this.rowIdx === 0 && this.colIdx !== _cell.colIdx
   }
 
   getIcon() {
@@ -92,7 +102,36 @@ export default class Cell extends BaseRender {
     return data[key]
   }
 
-  render() {
+  getHighlightConfigs() {
+    const { cellWidth, cellHeight } = this.parent
+    const { cellBorderWidth } = this.table.settings
+    const mergedCells = this.getMergedCells()
+    let colIdx = null
+    let i = -1
+    const cellsGroup = []
+    mergedCells.forEach((cell) => {
+      if (colIdx === null || cell.colIdx !== colIdx) {
+        cellsGroup.push([])
+        colIdx = cell.colIdx
+        i++
+      }
+      cellsGroup[i].push(cell)
+    })
+
+    console.log(cellsGroup);
+
+    return cellsGroup.map((cells) => ({
+      width: cellWidth - cellBorderWidth,
+      height: cells.length * cellHeight - cellBorderWidth,
+      coords: cells[0].getCoords(),
+    }))
+  }
+
+  getMergedCells() {
+    return this.mergedCells
+  }
+
+  renderRect(cellColor) {
     const { data } = this
     const { cellWidth, cellHeight } = this.parent
     const {
@@ -106,10 +145,8 @@ export default class Cell extends BaseRender {
       textsKey,
     } = this.table.settings
 
-    const cellColor = this.getColor()
-
     this.width = cellWidth - cellBorderWidth
-    this.height = cellHeight * this.mergedCells.length - cellBorderWidth
+    this.height = this.getColHeight(cellHeight) - cellBorderWidth
 
     this.draw.rect({
       ...this.getCoords(),
@@ -119,8 +156,21 @@ export default class Cell extends BaseRender {
       borderColor: cellBorderColor,
       borderWidth: cellBorderWidth,
     })
+  }
 
-    if (data) {
+  render() {
+    const { bgColor } = this.table.settings
+
+    const cellColor = this.getColor()
+
+    // Fill background color if color has alpha.
+    if (hexHasAlpha(cellColor)) {
+      this.renderRect(bgColor)
+    }
+
+    this.renderRect(cellColor)
+
+    if (this.data) {
       this.renderIconAndTexts(this.getIcon(), this.getTexts())
     }
 
@@ -222,8 +272,8 @@ export default class Cell extends BaseRender {
   }
 
   renderIfPropsChanged(props, data = this) {
-    if (this.__actualCell !== this) {
-      return this.__actualCell.renderIfPropsChanged(props)
+    if (this.getCell() !== this && !this.isCrossCol()) {
+      return this.getCell().renderIfPropsChanged(props)
     }
 
     let hasChaned = false
@@ -234,32 +284,59 @@ export default class Cell extends BaseRender {
       }
     })
     if (hasChaned) {
-      this.render()
+      this.renderMerged()
     }
 
     return hasChaned
   }
 
+  renderMerged() {
+    this.render()
+    this.mergedCells.forEach((cell) => cell.isCrossCol() && cell.render())
+  }
+
   cloneFrom(cell) {
     this.selected = cell.selected
+    this.data = cell.data
     return this
   }
 
-  merge(cellsToMerge, renderImmediately = true) {
-    const actualCell =
-      cellsToMerge[0] === this ? this : cellsToMerge[0].cloneFrom(this)
+  merge(cellsToMerge) {
+    const actualCell = cellsToMerge[0]
+    if (actualCell !== this) {
+      return
+    }
+
     const oriMergedCells = this.__actualCell.mergedCells
     oriMergedCells
       .filter((cell) => !cellsToMerge.includes(cell))
-      .forEach((cell) => cell.clear())
+      .forEach((cell) => {
+        cell.init()
+        cell.render()
+      })
 
+    actualCell.mergedCells = cellsToMerge
     cellsToMerge.map((cell) => {
       cell.__actualCell = actualCell
+
+      // render if col is crowss col
+      if (cell.isCrossCol()) {
+        cell.render()
+      }
     })
-    actualCell.mergedCells = cellsToMerge
+
+    // actualCell.mergeCrossCol()
     actualCell.render()
 
     return actualCell
+  }
+
+  getColHeight(cellHeight) {
+    const _cell = this.isCrossCol() ? this.getCell() : this
+    return (
+      _cell.mergedCells.filter((cell) => cell.colIdx === this.colIdx).length *
+      cellHeight
+    )
   }
 
   getRowSpan() {
@@ -280,7 +357,7 @@ export default class Cell extends BaseRender {
   }
 
   isSame(cell) {
-    return this.colIdx === cell.colIdx && this.rowIdx === cell.rowIdx
+    return this.getCell() === cell.getCell()
   }
 
   isVisible() {

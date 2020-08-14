@@ -1,3 +1,9 @@
+export const HIGHLIGHT_CLASS = 'schedule-highlight'
+export const HIGHLIGHT_UP_RESIZE_CLASS = 'schedule-highlight-up-resize'
+export const HIGHLIGHT_DOWN_RESIZE_CLASS = 'schedule-highlight-down-resize'
+export const HIGHLIGHT_DISABLED_UP_RESIZE = 'disabled-up-resize'
+export const HIGHLIGHT_DISABLED_DOWN_RESIZE = 'disabled-down-resize'
+
 /**
  * @class {Highlights}
  */
@@ -20,41 +26,74 @@ export default class Highlights {
     this._highlightList = []
   }
 
-  clearHighlight(highlight) {
-    highlight.visible = false
-    highlight.style.visibility = 'hidden'
-    highlight.cell = null
+  clearHighlights(highlightGroup) {
+    highlightGroup._members.forEach((highlight) => {
+      highlight.style.visibility = 'hidden'
+    })
+    highlightGroup.cell = null
   }
 
   /**
    * @returns {HTMLElement}
    */
   createNew() {
+    const highlightGroup = {
+      _members: [],
+      cell: null,
+    }
+
+    this._highlightList.push(highlightGroup)
+
+    return highlightGroup
+  }
+
+  createHighlight(highlightGroup) {
     const highlight = document.createElement('div')
-    highlight.className = 'schedule-highlight'
+    highlight.className = HIGHLIGHT_CLASS
 
     highlight.upResize = document.createElement('div')
-    highlight.upResize.className = 'schedule-highlight-up-resize'
+    highlight.upResize.className = HIGHLIGHT_UP_RESIZE_CLASS
 
     highlight.downResize = document.createElement('div')
-    highlight.downResize.className = 'schedule-highlight-down-resize'
+    highlight.downResize.className = HIGHLIGHT_DOWN_RESIZE_CLASS
 
     highlight.appendChild(highlight.upResize)
     highlight.appendChild(highlight.downResize)
-
     this.rootNode.appendChild(highlight)
-    this._highlightList.push(highlight)
+    highlightGroup._members.push(highlight)
 
     return highlight
   }
 
-  adjust(highlight) {
-    const { cell } = highlight
-    const coords = cell.getCoords()
-    highlight.style.left = `${coords.x}px`
-    highlight.style.top = `${coords.y}px`
-    highlight.style.width = `${cell.width}px`
-    highlight.style.height = `${cell.height}px`
+  getCoords(event) {
+    const { left, top } = this.rootNode.getBoundingClientRect()
+    return { x: event.clientX - left, y: event.clientY - top }
+  }
+
+  adjust(highlightGroup) {
+    const { cell } = highlightGroup
+    const configs = cell.getHighlightConfigs()
+    console.log({configs});
+    const nuhmberOfHighlights = configs.length
+
+    configs.forEach((config, idx) => {
+      const { coords, width, height } = config
+      const highlight =
+        highlightGroup._members[idx] || this.createHighlight(highlightGroup)
+      highlight.className = HIGHLIGHT_CLASS
+      highlight.style.left = `${coords.x}px`
+      highlight.style.top = `${coords.y}px`
+      highlight.style.width = `${width}px`
+      highlight.style.height = `${height}px`
+      highlight.style.visibility = 'visible'
+    })
+
+    if (nuhmberOfHighlights > 1) {
+      highlightGroup._members[0].classList.add(HIGHLIGHT_DISABLED_DOWN_RESIZE)
+      highlightGroup._members[nuhmberOfHighlights - 1].classList.add(
+        HIGHLIGHT_DISABLED_UP_RESIZE
+      )
+    }
   }
 
   /**
@@ -62,19 +101,19 @@ export default class Highlights {
    * @param {Cell} cell
    */
   show(cell) {
-    let highlight = this._highlightList.find((h) => !h.cell)
-    if (!highlight) {
-      highlight = this.createNew()
+    let highlightGroup = this._highlightList.find((h) => !h.cell)
+    if (!highlightGroup) {
+      highlightGroup = this.createNew()
     }
 
-    highlight.cell = cell
+    highlightGroup.cell = cell
 
-    this.adjust(highlight)
-    highlight.visible = true
-    highlight.style.visibility = 'visible'
+    this.adjust(highlightGroup)
   }
 
   clear() {
-    this._highlightList.forEach((h) => this.clearHighlight(h))
+    this._highlightList.forEach((highlightGroup) =>
+      this.clearHighlights(highlightGroup)
+    )
   }
 }
