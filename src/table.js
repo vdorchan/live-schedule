@@ -146,9 +146,10 @@ export default class Table {
    * Get cell specified by index of column and index of row.
    * @param {number} colIdx Index of col.
    * @param {*} rowIdx  Index of row.
+   * @param {boolean} crossCol Cross col when col index bigger than max col idx.
    */
-  getCell(colIdx, rowIdx) {
-    return this.cells.getCell(colIdx, rowIdx)
+  getCell(colIdx, rowIdx, crossCol) {
+    return this.cells.getCell(colIdx, rowIdx, crossCol)
   }
 
   /**
@@ -168,17 +169,18 @@ export default class Table {
   }
 
   /**
-   * Return cell specified y coord.
-   * @param {number} coord
+   * Return cell specified y coords.
+   * @param {number} coords
+   * @param {boolean} crossCol Cross col when col index bigger than max col idx.
    */
-  getCellByCoord({ x, y }) {
+  getCellByCoord({ x, y }, crossCol) {
     const colIdx = Math.floor(
       (x - this.cells.startingCoords.x) / this.cellWidth
     )
     const rowIdx = Math.floor(
       (y - this.cells.startingCoords.y) / this.cellHeight
     )
-    return this.getCell(colIdx, rowIdx)
+    return this.getCell(colIdx, rowIdx, crossCol)
   }
 
   /**
@@ -259,16 +261,16 @@ export default class Table {
 
   /**
    *
-   * @param {Cell} cell
+   * @param {object} coords
    */
-  mouseInCell(cell) {
+  mouseInCell(coords) {
     if (!this.contextMenu.isVisible()) {
       this.cellsEach((cell) => cell.mouseOut())
       this.schedule.hideTooltip()
+      let cell = this.getCellByCoord(coords, false)
       if (cell) {
         cell = cell.getCell()
         cell.mouseIn()
-        const { x, y } = cell.getCoords()
         this.schedule.showTooltip(cell)
       }
     }

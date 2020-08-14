@@ -99,7 +99,7 @@ export default class Events {
       const rowIdx = this.table.getRowIdx(y)
       this.currentSelection.adjust(colIdx, rowIdx)
     } else {
-      this.table.mouseInCell(cell)
+      this.table.mouseInCell({ x, y })
     }
   }
 
