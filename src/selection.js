@@ -1,4 +1,4 @@
-import { numberEach } from './helper'
+import { numberEach, arrayRemoveItem } from './helper'
 
 /**
  * Manage cell selection.
@@ -6,15 +6,37 @@ import { numberEach } from './helper'
  */
 export default class Section {
   constructor(schedule, cell) {
+    /**
+     * @type {Cell}
+     */
     this.cell = null
+
+    /**
+     * @type {number}
+     */
     this.rowFrom = null
+
+    /**
+     * @type {number}
+     */
     this.colFrom = null
+
+    /**
+     * @type {number}
+     */
     this.rowSpan = null
 
-    this.setCell(cell)
+    /**
+     * @type {number}
+     */
+    this.rowIdxOfLastCell = null
+
     this.schedule = schedule
     this.table = schedule.table
     this.inProgress = true
+
+    this.batchedCells = []
+    this.setCell(cell)
 
     /**
      * Position of adjust, up of down.
@@ -23,23 +45,70 @@ export default class Section {
     this.positionOfAdjustment = null
   }
 
-  selectMultiCol() {}
+  selectMultiCol(colIdx, rowIdx) {
+    const _batchedCells = [...this.batchedCells]
+    this.batchedCells = []
+    const cellsToMergedList = []
 
-  mergeRow(rowFrom, rowTo) {
+    this.schedule.showTooltip(this.table.getCell(colIdx, rowIdx))
+
+    numberEach(
+      (idx) => {
+        const cellsToMerged = this.adjust(idx, rowIdx)
+        if (this.colMeetData(cellsToMerged)) {
+          return false
+        }
+
+        cellsToMergedList.push(cellsToMerged)
+
+        arrayRemoveItem(_batchedCells, (cell) => cell.colIdx === idx)
+      },
+      this.colFrom,
+      colIdx
+    )
+
+    const maxNumberOfMerge = cellsToMergedList.reduce(
+      (prev, current) => Math.min(prev, current.length),
+      cellsToMergedList[0].length
+    )
+
+    cellsToMergedList.forEach((cellsToMerged) => {
+      cellsToMerged =
+        this.rowFrom > rowIdx
+          ? cellsToMerged.reverse().slice(0, maxNumberOfMerge).reverse()
+          : cellsToMerged.slice(0, maxNumberOfMerge)
+      const mergedCell = this.mergeRow(cellsToMerged)
+      this.setCell(mergedCell)
+      this.batchedCells.push(mergedCell)
+    })
+    _batchedCells.forEach((cell) => cell.getCell().deselect())
+  }
+
+  cutCells(cells, length) {
+    if (cells.length === 1) {
+      return cells
+    }
+
+    return cells[0].rowIdx > cells[1].rowIdx
+      ? cells.reverse().slice(0, length).reverse()
+      : cells.slice(0, length)
+  }
+
+  mergeRow(cellToMerged) {
     const currentCell = this.cell.getCell()
-
-    let cellToMerged = this.getEmptyCellsAtCol(rowFrom, rowTo)
-
-    cellToMerged = rowFrom > rowTo ? cellToMerged.reverse() : cellToMerged
     return cellToMerged[0].cloneFrom(currentCell).merge(cellToMerged)
   }
 
-  getEmptyCellsAtCol(rowFrom, rowTo) {
-    let emptyColCells = []
+  colMeetData(cells) {
+    return !cells.length || cells.some((cell) => cell.getCell().hasData())
+  }
+
+  getEmptyCellsAtCol(colFrom, rowFrom, rowTo) {
+    const emptyColCells = []
     const currentCell = this.cell
     numberEach(
       (idx) => {
-        const cell = this.table.getCell(this.colFrom, idx)
+        const cell = this.table.getCell(colFrom, idx)
         if (!currentCell.isSame(cell) && cell.getCell().hasData()) {
           return false
         }
@@ -49,16 +118,15 @@ export default class Section {
       rowTo
     )
 
-    return emptyColCells
+    return rowFrom > rowTo ? emptyColCells.reverse() : emptyColCells
   }
 
   adjust(colIdx, rowIdx) {
     if (!this.positionOfAdjustment && !this.cell.hasData()) {
-      if (colIdx === this.colFrom) {
-        this.mergeRow(this.rowFrom, rowIdx)
-      }
+      return this.getEmptyCellsAtCol(colIdx, this.rowFrom, rowIdx)
     } else if (this.positionOfAdjustment === 'down') {
-      this.mergeRow(
+      return this.getEmptyCellsAtCol(
+        colIdx,
         this.rowFrom,
         Math.max(
           this.rowFrom,
@@ -66,8 +134,11 @@ export default class Section {
         )
       )
     } else if (this.positionOfAdjustment === 'up') {
-      const mergedCell = this.mergeRow(rowIdx, this.rowFrom + this.rowSpan)
-      this.setCell(mergedCell)
+      return this.getEmptyCellsAtCol(
+        colIdx,
+        rowIdx,
+        this.rowFrom + this.rowSpan
+      )
     }
   }
 
@@ -77,7 +148,6 @@ export default class Section {
    */
   setCell(cell) {
     this.cell = cell.getCell().select()
-    this.rowIdxOfLastCell = this.cell.getRowIdxOfLastCell()
   }
 
   /**
@@ -92,10 +162,12 @@ export default class Section {
    */
   begin(cell, positionOfAdjustment) {
     this.setCell(cell)
+    this.batchedCells = [this.cell]
     this.positionOfAdjustment = positionOfAdjustment || null
     this.rowFrom = this.cell.rowIdx
     this.colFrom = this.cell.colIdx
     this.rowSpan = this.cell.getRowSpan()
+    this.rowIdxOfLastCell = this.cell.getRowIdxOfLastCell()
     this.table.removeHighlights()
     this.inProgress = true
   }
@@ -120,13 +192,13 @@ export default class Section {
    * Deselect all cells.
    * @param {array} cells
    */
-  deselect(cells) {
+  deselect() {
     this.table.removeHighlights()
-    this.cell.getCell().deselect()
+    this.batchedCells.map((cell) => cell.getCell().deselect())
   }
 
   highlight() {
-    this.table.highlights.show(this.cell.getCell())
+    this.batchedCells.map((cell) => this.table.highlights.show(cell.getCell()))
   }
 
   deleteCell() {

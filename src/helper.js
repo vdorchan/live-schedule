@@ -26,9 +26,16 @@ export function getAlphaFromHex(hex) {
 }
 
 export function getHexAlpha(alpha) {
-  return (Math.round(alpha * 255)).toString(16)
+  return Math.round(alpha * 255).toString(16)
 }
 
 export function hexHasAlpha(hex) {
   return hex.length > 7
+}
+
+export function arrayRemoveItem(array, callback) {
+  const itemIndex = array.findIndex(callback)
+  if (itemIndex > -1) {
+    array.splice(itemIndex, 1)
+  }
 }
