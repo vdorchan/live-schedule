@@ -42,7 +42,6 @@ export default class Draw {
     const { x, y, width, height, borderColor, borderWidth } = config
     let { fill } = config
     ctx.save()
-    
     const alpha = getAlphaFromHex(fill)
     if (alpha < 1) {
       ctx.globalAlpha = alpha

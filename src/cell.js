@@ -47,7 +47,12 @@ export default class Cell extends BaseRender {
   }
 
   getColor() {
-    const { cellSelectedColor, bgColor, cellActiveColor, cellCrossColAlpha } = this.table.settings
+    const {
+      cellSelectedColor,
+      bgColor,
+      cellActiveColor,
+      cellCrossColAlpha,
+    } = this.table.settings
 
     let cellColor = this.selected || this.hovering ? cellSelectedColor : bgColor
 
@@ -117,8 +122,6 @@ export default class Cell extends BaseRender {
       }
       cellsGroup[i].push(cell)
     })
-
-    console.log(cellsGroup);
 
     return cellsGroup.map((cells) => ({
       width: cellWidth - cellBorderWidth,

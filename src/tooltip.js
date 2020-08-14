@@ -19,7 +19,7 @@ export default class Tooltip {
     this._config = {
       color,
       text: null,
-      icon: null
+      icon: null,
     }
 
     container.appendChild(this.tooltip)
@@ -39,11 +39,12 @@ export default class Tooltip {
   }
 
   /**
-   * 
-   * @param {object||Function} callback 
+   *
+   * @param {object||Function} callback
    */
   refresh(callback) {
-    const { color, text, icon, x, y } = typeof callback === 'function' ? callback(this._config) : callback
+    const { color, text, icon, x, y } =
+      typeof callback === 'function' ? callback(this._config) : callback
     this.showIcon(icon)
     this.setBackgroundColor(color)
     this.setText(text)

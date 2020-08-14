@@ -42,7 +42,7 @@ export default class ContextMenu {
   }
 
   show(event) {
-    const { pageX: left, pageY: top } = event
+    let { pageX: left, pageY: top } = event
 
     const contextmenuWidth = this.menu.clientWidth
     const contextmenuHeight = this.menu.clientHeight

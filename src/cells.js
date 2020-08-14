@@ -87,8 +87,8 @@ export default class Cells extends BaseRender {
 
   cellsEach(cb, { cellFrom, cellTo, rowSpan, reverse } = {}) {
     const { _cells } = this
-    let colIdx = 0,
-      rowIdx = 0
+    let colIdx = 0
+    let rowIdx = 0
 
     if (cellFrom) {
       colIdx = cellFrom.colIdx

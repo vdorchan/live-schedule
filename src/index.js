@@ -162,7 +162,7 @@ export default class Schedule {
     const _contextMenuItems = []
     contextMenuItems
       .reduce(
-        (previousValue, currentValue, currentIndex) => [
+        (previousValue, currentValue, _) => [
           ...previousValue,
           ...currentValue,
         ],
