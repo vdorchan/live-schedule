@@ -1,46 +1,102 @@
+import { numberEach } from './helper'
+
 /**
  * Manage cell selection.
  * @class {Selction}
  */
 export default class Section {
-  constructor(schedule, oriCell) {
+  constructor(schedule, cell) {
+    this.cell = null
+    this.rowFrom = null
+    this.colFrom = null
+    this.rowSpan = null
+
+    this.setCell(cell)
     this.schedule = schedule
     this.table = schedule.table
-    this.oriCell = oriCell
-    this.oriRowIdx = oriCell
-
-    this.oriCell.getCell().select()
-    this.selectedCells = []
-    this.selectedCells[this.oriCell.colIdx] = this.oriCell
     this.inProgress = true
+
+    /**
+     * Position of adjust, up of down.
+     * @type {string}
+     */
+    this.positionOfAdjustment = null
   }
 
-  getSelectedCell() {
-    return this.selectedCells[this.oriCell.colIdx].getCell()
+  selectMultiCol() {}
+
+  mergeRow(rowFrom, rowTo) {
+    const currentCell = this.cell.getCell()
+
+    let cellToMerged = this.getEmptyCellsAtCol(rowFrom, rowTo)
+
+    cellToMerged = rowFrom > rowTo ? cellToMerged.reverse() : cellToMerged
+    return cellToMerged[0].cloneFrom(currentCell).merge(cellToMerged)
   }
 
-  multiCols(colTo, rowIdx) {
-    const selectedCells = this.table.selectMultiCols(
-      this.oriCell,
-      colTo,
-      rowIdx
+  getEmptyCellsAtCol(rowFrom, rowTo) {
+    let emptyColCells = []
+    const currentCell = this.cell
+    numberEach(
+      (idx) => {
+        const cell = this.table.getCell(this.colFrom, idx)
+        if (!currentCell.isSame(cell) && cell.getCell().hasData()) {
+          return false
+        }
+        emptyColCells.push(cell)
+      },
+      rowFrom,
+      rowTo
     )
-    const selectedColIdxs = selectedCells.map((cell) => cell.colIdx)
 
-    const cellsToClear = this.selectedCells.filter(
-      (cell, idx) => !selectedColIdxs.includes(idx)
-    )
-    this.selectedCells = []
-    selectedCells.forEach((cell) => (this.selectedCells[cell.colIdx] = cell))
-    this.deselect(cellsToClear)
+    return emptyColCells
+  }
 
-    this.schedule.showTooltip(this.selectedCells[colTo])
+  adjust(colIdx, rowIdx) {
+    if (!this.positionOfAdjustment && !this.cell.hasData()) {
+      if (colIdx === this.colFrom) {
+        this.mergeRow(this.rowFrom, rowIdx)
+      }
+    } else if (this.positionOfAdjustment === 'down') {
+      this.mergeRow(
+        this.rowFrom,
+        Math.max(
+          this.rowFrom,
+          rowIdx - this.rowIdxOfLastCell + this.rowFrom + this.rowSpan - 1
+        )
+      )
+    } else if (this.positionOfAdjustment === 'up') {
+      const mergedCell = this.mergeRow(rowIdx, this.rowFrom + this.rowSpan)
+      this.setCell(mergedCell)
+    }
+  }
+
+  /**
+   *
+   * @param {Cell} cell
+   */
+  setCell(cell) {
+    this.cell = cell.getCell().select()
+    this.rowIdxOfLastCell = this.cell.getRowIdxOfLastCell()
+  }
+
+  /**
+   * @returns {Cell} cell
+   */
+  getCell() {
+    return this.cell
   }
 
   /**
    * Indicate that selection procell began.
    */
-  begin() {
+  begin(cell, positionOfAdjustment) {
+    this.setCell(cell)
+    this.positionOfAdjustment = positionOfAdjustment || null
+    this.rowFrom = this.cell.rowIdx
+    this.colFrom = this.cell.colIdx
+    this.rowSpan = this.cell.getRowSpan()
+    this.table.removeHighlights()
     this.inProgress = true
   }
 
@@ -48,7 +104,9 @@ export default class Section {
    * Indicate that selection procell finished.
    */
   finish() {
+    this.currentCell = null
     this.inProgress = false
+    this.positionOfAdjustment = null
   }
 
   /**
@@ -60,23 +118,19 @@ export default class Section {
 
   /**
    * Deselect all cells.
-   * @param {array} cells 
+   * @param {array} cells
    */
   deselect(cells) {
-    ;(cells || this.selectedCells).forEach((cell) => {
-      cell.getCell().deselect()
-      this.table.removeHighlights()
-    })
+    this.table.removeHighlights()
+    this.cell.getCell().deselect()
   }
 
   highlight() {
-    this.selectedCells.forEach(
-      (cell) => cell && this.table.highlightCell(cell.getCell())
-    )
+    this.table.highlights.show(this.cell.getCell())
   }
 
   deleteCell() {
     this.deselect()
-    this.getSelectedCell().clear()
+    this.getCell().clear()
   }
 }

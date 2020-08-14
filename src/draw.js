@@ -1,3 +1,5 @@
+import { getAlphaFromHex } from './helper'
+
 function dpr() {
   return window.devicePixelRatio || 1
 }
@@ -37,8 +39,16 @@ export default class Draw {
 
   rect(config = {}) {
     const { ctx } = this
-    const { x, y, width, height, fill, borderColor, borderWidth } = config
+    const { x, y, width, height, borderColor, borderWidth } = config
+    let { fill } = config
     ctx.save()
+    
+    const alpha = getAlphaFromHex(fill)
+    if (alpha < 1) {
+      ctx.globalAlpha = alpha
+      fill = fill.slice(0, 7)
+    }
+
     ctx.beginPath()
     ctx.fillStyle = fill
     ctx.rect(x, y, width, height)

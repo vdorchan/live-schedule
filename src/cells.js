@@ -85,9 +85,20 @@ export default class Cells extends BaseRender {
     })
   }
 
-  cellsEach(cb, { cellFrom, cellTo, rowSpan } = {}) {
+  cellsEach(cb, { cellFrom, cellTo, rowSpan, reverse } = {}) {
     const { _cells } = this
-    let { colIdx = 0, rowIdx = 0 } = cellFrom || {}
+    let colIdx = 0,
+      rowIdx = 0
+
+    if (cellFrom) {
+      colIdx = cellFrom.colIdx
+      rowIdx = cellFrom.rowIdx
+    } else if (reverse) {
+      const { settings } = this.table
+      colIdx = settings.numberOfCols.length - 1
+      rowIdx = settings.numberOfRows.length - 1
+    }
+
     let colCells = _cells[colIdx]
     let curRowSpan = 0
     let stop = false
@@ -101,10 +112,10 @@ export default class Cells extends BaseRender {
 
         if (cellTo && cellTo.isSame(cell)) colCells = null
 
-        rowIdx++
+        reverse ? rowIdx-- : rowIdx++
       } else {
         rowIdx = 0
-        colCells = _cells[++colIdx]
+        colCells = _cells[reverse ? --colIdx : ++colIdx]
       }
 
       if (rowSpan && curRowSpan++ === rowSpan) colCells = null
@@ -131,13 +142,17 @@ export default class Cells extends BaseRender {
    * Get cell specified by index of column and index of row.
    * @param {number} colIdx Index of col.
    * @param {number} rowIdx  Index of row.
+   * @param {boolean} crossCol Cross col when col index bigger than max col idx.
    */
-  getCell(colIdx, rowIdx) {
+  getCell(colIdx, rowIdx, crossCol = true) {
     try {
-      const rowMax = this.numberOfRows - 1
-      if (rowIdx > rowMax) {
-        colIdx += Math.floor(rowIdx / rowMax)
-        rowIdx = rowIdx % rowMax
+      if (crossCol) {
+        const { numberOfRows } = this.table.settings
+        if (rowIdx > numberOfRows - 1 || rowIdx < 0) {
+          const _numberOfRows = colIdx * numberOfRows + rowIdx
+          colIdx = Math.floor(_numberOfRows / numberOfRows)
+          rowIdx = _numberOfRows % numberOfRows
+        }
       }
 
       return this.getCells()[colIdx][rowIdx] || null

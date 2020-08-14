@@ -1,5 +1,9 @@
 import { ResizeObserver } from '@juggle/resize-observer'
 import Selection from './selection'
+import {
+  HIGHLIGHT_UP_RESIZE_CLASS,
+  HIGHLIGHT_DOWN_RESIZE_CLASS,
+} from './highlights'
 
 /**
  * @class {Event}
@@ -9,6 +13,7 @@ export default class Events {
     this.schedule = schedule
     this.table = schedule.table
     this.canvas = this.table.canvas
+    this.container = schedule.container
 
     /**
      * Cache cells to highlight.
@@ -22,10 +27,10 @@ export default class Events {
     this.onContextMenu = this.onContextMenu.bind(this)
     this.onContextMenuItemSelect = this.onContextMenuItemSelect.bind(this)
 
-    this.canvas.addEventListener('mousedown', this.onMouseDown)
+    this.container.addEventListener('mousedown', this.onMouseDown)
     window.addEventListener('mouseup', this.onMouseUp)
     window.addEventListener('mousemove', this.onMouseMove)
-    this.canvas.addEventListener('contextmenu', this.onContextMenu)
+    this.container.addEventListener('contextmenu', this.onContextMenu)
 
     this.table.contextMenu.onContextMenuItemSelect(this.onContextMenuItemSelect)
 
@@ -54,10 +59,20 @@ export default class Events {
   onMouseDown(event) {
     const { x, y } = this.getCoords(event)
     const cell = this.table.getCellByCoord({ x, y })
+
+    if (event.target.classList.contains(HIGHLIGHT_DOWN_RESIZE_CLASS)) {
+      return this.currentSelection.begin(cell, 'down')
+    }
+
+    if (event.target.classList.contains(HIGHLIGHT_UP_RESIZE_CLASS)) {
+      return this.currentSelection.begin(cell, 'up')
+    }
+
     this.selections.forEach((selection) => selection.deselect())
     this.selections = []
     if (cell) {
       this.currentSelection = new Selection(this.schedule, cell)
+      this.currentSelection.begin(cell)
       this.selections.push(this.currentSelection)
     }
   }
@@ -82,7 +97,7 @@ export default class Events {
     if (this.currentSelection && this.currentSelection.isInProgress()) {
       const colIdx = this.table.getColIdx(x)
       const rowIdx = this.table.getRowIdx(y)
-      this.currentSelection.multiCols(colIdx, rowIdx)
+      this.currentSelection.adjust(colIdx, rowIdx)
     } else {
       this.table.mouseInCell(cell)
     }
@@ -105,8 +120,6 @@ export default class Events {
 
   onContextMenuItemSelect(action, item) {
     if (this.currentSelection && action) {
-      const cell = this.currentSelection.getSelectedCell()
-
       if (action === 'delete') {
         this.currentSelection.deleteCell()
       }

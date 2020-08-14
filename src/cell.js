@@ -343,6 +343,11 @@ export default class Cell extends BaseRender {
     return this.mergedCells.length
   }
 
+  getRowIdxOfLastCell() {
+    const mergedCells = this.getMergedCells()
+    return mergedCells[mergedCells.length - 1].rowIdx
+  }
+
   clear() {
     this.mergedCells.forEach((cell) => {
       cell.init()

@@ -73,7 +73,6 @@ export default class Highlights {
   adjust(highlightGroup) {
     const { cell } = highlightGroup
     const configs = cell.getHighlightConfigs()
-    console.log({configs});
     const nuhmberOfHighlights = configs.length
 
     configs.forEach((config, idx) => {
@@ -93,6 +92,14 @@ export default class Highlights {
       highlightGroup._members[nuhmberOfHighlights - 1].classList.add(
         HIGHLIGHT_DISABLED_UP_RESIZE
       )
+      highlightGroup._members
+        .slice(1, nuhmberOfHighlights - 1)
+        .forEach((h) =>
+          h.classList.add(
+            HIGHLIGHT_DISABLED_DOWN_RESIZE,
+            HIGHLIGHT_DISABLED_UP_RESIZE
+          )
+        )
     }
   }
 

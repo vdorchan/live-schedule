@@ -66,7 +66,7 @@ export default class Schedule {
        * Table background color.
        * @type {String}
        */
-      bgColor: '#fff',
+      bgColor: '#ffffff',
 
       /**
        * Some table cell config.
@@ -75,6 +75,7 @@ export default class Schedule {
       cellBorderWidth: 1,
       cellSelectedColor: '#EBEEF5',
       cellActiveColor: '#D9D6EE',
+      cellCrossColAlpha: 0.4,
 
       /**
        * Width of the col header
@@ -251,6 +252,9 @@ export default class Schedule {
    * @param {string} config.icon
    */
   showTooltip(cell) {
+    if (!cell) {
+      return
+    }
     const config = this.getTooltipConfig(cell)
     this.table.tooltip.show(config)
   }
