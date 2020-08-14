@@ -170,7 +170,7 @@
   <script src="../dist/schedule.js"></script>
   <script>
     const schedule = new Schedule(document.getElementById('schedule'), {
-      data: [{ "id": 10958, "startTime": "2020-07-05 03:00:00", "endTime": "2020-07-05 10:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10959, "startTime": "2020-07-09 01:00:00", "endTime": "2020-07-09 09:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L1", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10960, "startTime": "2020-07-12 04:00:00", "endTime": "2020-07-12 09:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10961, "startTime": "2020-07-16 04:00:00", "endTime": "2020-07-16 10:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L3", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 12313, "startTime": "2020-07-19 05:00:00", "endTime": "2020-07-19 12:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": "微信", "storeId": null, "storeName": null }, { "id": 12314, "startTime": "2020-07-23 08:00:00", "endTime": "2020-07-23 13:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L3", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 12919, "startTime": "2020-07-14 07:00:00", "endTime": "2020-07-14 15:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": "Lazada", "storeId": null, "storeName": null }],
+      data: [{ "id": 10958, "startTime": "2020-07-05 03:00:00", "endTime": "2020-07-06 8:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10959, "startTime": "2020-07-09 01:00:00", "endTime": "2020-07-09 09:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L1", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10960, "startTime": "2020-07-12 04:00:00", "endTime": "2020-07-12 09:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10961, "startTime": "2020-07-16 04:00:00", "endTime": "2020-07-16 10:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L3", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 12313, "startTime": "2020-07-19 05:00:00", "endTime": "2020-07-19 12:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": "微信", "storeId": null, "storeName": null }, { "id": 12314, "startTime": "2020-07-23 08:00:00", "endTime": "2020-07-23 13:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L3", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 12919, "startTime": "2020-07-14 07:00:00", "endTime": "2020-07-14 15:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": "Lazada", "storeId": null, "storeName": null }],
 
       colorKey: 'anchorLevel',
       iconKey: 'platform',
@@ -210,8 +210,8 @@
         }
         return `
           ${Object.keys(data).map(key => (data[key] && titleMap[key]) ? `<p>${titleMap[key]}: ${data[key]}<p/>` : '').join('')}
-          <p>${data.anchorLevel}</p>
-          <p>${data.slAnchors.join(',')}</p>
+          <p>${data.anchorLevel || ''}</p>
+          <p>${(data.slAnchors || []).join(',')}</p>
         `
       },
 
@@ -228,7 +228,7 @@
     })
 
     function setColor(anchorLevel) {
-      schedule.setDataAtCell(data => ({
+      schedule.setDataAtSelectedCell(data => ({
         ...data,
         anchorLevel
       }))
@@ -236,7 +236,7 @@
 
     function setText() {
       const slAnchors = [...document.querySelectorAll('.text')].map(checkbox => checkbox.checked ? checkbox.value : '').filter(text => text)
-      schedule.setDataAtCell(data => ({
+      schedule.setDataAtSelectedCell(data => ({
         ...data,
         slAnchors
       }))
@@ -246,7 +246,7 @@
       const checkedRadio = [...document.getElementsByName('icon')].find(radio => radio.checked)
       if (checkedRadio) {
         const platform = checkedRadio.value
-        schedule.setDataAtCell(data => ({
+        schedule.setDataAtSelectedCell(data => ({
           ...data,
           platform
         }))
