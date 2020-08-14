@@ -1,3 +1,9 @@
+export const events = {
+  CONTEXT_MENU_ITEM_SELECT: 'contextMenuItemSelect',
+  CELL_SELECT: 'cellSelect',
+  DATA_CHANGE: 'dataChange',
+}
+
 const eventMixin = {
   /**
    * Subscribe to event, usage:

@@ -4,6 +4,7 @@ import {
   HIGHLIGHT_UP_RESIZE_CLASS,
   HIGHLIGHT_DOWN_RESIZE_CLASS,
 } from './highlights'
+import { events } from './mixins/event'
 import keycode from 'keycode'
 
 /**
@@ -136,7 +137,7 @@ export default class Events {
         this.currentSelection.deleteCell()
       }
 
-      this.schedule.emit('contextMenuItemSelect', action, item)
+      this.schedule.emit(events.CONTEXT_MENU_ITEM_SELECT, action, item)
     }
   }
 
