@@ -49,13 +49,13 @@ export default class Section {
     const _batchedCells = [...this.batchedCells]
     this.batchedCells = []
     const cellsToMergedList = []
-
-    this.schedule.showTooltip(this.table.getCell(colIdx, rowIdx))
+    let currentColIdx = colIdx
 
     numberEach(
       (idx) => {
         const cellsToMerged = this.adjust(idx, rowIdx)
         if (this.colMeetData(cellsToMerged)) {
+          currentColIdx = idx - 1
           return false
         }
 
@@ -66,6 +66,8 @@ export default class Section {
       this.colFrom,
       colIdx
     )
+
+    this.schedule.showTooltip(this.table.getCell(currentColIdx, rowIdx))
 
     const maxNumberOfMerge = cellsToMergedList.reduce(
       (prev, current) => Math.min(prev, current.length),
