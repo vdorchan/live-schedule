@@ -80,8 +80,7 @@ export default class Highlights {
       const highlight =
         highlightGroup._members[idx] || this.createHighlight(highlightGroup)
       highlight.className = HIGHLIGHT_CLASS
-      highlight.style.left = `${coords.x}px`
-      highlight.style.top = `${coords.y}px`
+      highlight.style.transform = `translate3d(${coords.x}px, ${coords.y}px, 0)`
       highlight.style.width = `${width}px`
       highlight.style.height = `${height}px`
       highlight.style.visibility = 'visible'

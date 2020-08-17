@@ -49,8 +49,7 @@ export default class Tooltip {
     this.setBackgroundColor(color)
     this.setText(text)
     const distanceToCol = 3
-    this.tooltip.style.left = `${x + distanceToCol}px`
-    this.tooltip.style.top = `${y}px`
+    this.tooltip.style.transform = `translate3d(${x + distanceToCol}px, ${y}px, 0)`
   }
 
   setBackgroundColor(color) {
