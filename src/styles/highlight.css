@@ -5,6 +5,7 @@
   border: 2px solid #999999;
   pointer-events: none;
   margin: -2px;
+  visibility: hidden;
 }
 
 .schedule-highlight-up-resize {

@@ -12,6 +12,7 @@
   white-space: nowrap;
   z-index: 999;
   background:#707070;
+  visibility: hidden;
 }
 .schedule-tooltip-icon {
   width: 24px;
