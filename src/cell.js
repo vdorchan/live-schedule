@@ -6,7 +6,7 @@ import eventMixin from './mixins/event'
  * @class {Cell}
  */
 export default class Cell extends BaseRender {
-  constructor({ colIdx, rowIdx, label, parent }) {
+  constructor({ colIdx, rowIdx, label, parent, dashLine }) {
     super()
 
     this.colIdx = colIdx
@@ -19,6 +19,8 @@ export default class Cell extends BaseRender {
     this.borderRight = 1
     this.borderBottom = 1
     this.borderLeft = 1
+
+    this.dashLine = dashLine
 
     this.init()
 
@@ -143,7 +145,7 @@ export default class Cell extends BaseRender {
   }
 
   renderRect(cellColor) {
-    const { data } = this
+    const { data, rowIdx } = this
     const { cellWidth, cellHeight } = this.parent
     const {
       cellBorderWidth,
@@ -166,6 +168,12 @@ export default class Cell extends BaseRender {
       fill: cellColor,
       borderColor: cellBorderColor,
       borderWidth: cellBorderWidth,
+      ...(this.dashLine
+        ? {
+            borderTop: rowIdx % (1 / 0.5) !== 0 ? 'dash' : true,
+            borderBottom: rowIdx % (1 / 0.5) === 0 ? 'dash' : true,
+          }
+        : {}),
     })
   }
 
@@ -231,7 +239,7 @@ export default class Cell extends BaseRender {
             text: text.slice(0, maxFontLength),
             x,
             y,
-            fill: fontColor
+            fill: fontColor,
           })
           y += lineHeight
         })

@@ -27,16 +27,17 @@ export default class Cells extends BaseRender {
   }
 
   init() {
-    const { numberOfCols, numberOfRows } = this.table.settings
+    const { numberOfCols, numberOfRows, timeScale } = this.table.settings
     const { cellWidth, cellHeight } = this.table
     for (let colIdx = 0; colIdx < numberOfCols; colIdx++) {
       this._cells[colIdx] = []
 
-      for (let rowIdx = 0; rowIdx < numberOfRows; rowIdx++) {
+      for (let rowIdx = 0; rowIdx < numberOfRows / timeScale; rowIdx++) {
         const cell = new Cell({
           colIdx,
           rowIdx,
           parent: this,
+          dashLine: true
         })
         cell.setRenderer(this.draw)
         cell.setTable(this.table)
@@ -152,7 +153,7 @@ export default class Cells extends BaseRender {
   getCell(colIdx, rowIdx, crossCol = true) {
     try {
       if (crossCol) {
-        const { numberOfRows } = this.table.settings
+        const numberOfRows = this.table.settings.numberOfRows / this.table.settings.timeScale
         if (rowIdx > numberOfRows - 1 || rowIdx < 0) {
           const _numberOfRows = colIdx * numberOfRows + rowIdx
           colIdx = Math.floor(_numberOfRows / numberOfRows)

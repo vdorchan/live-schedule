@@ -100,6 +100,7 @@ export default class Table {
       numberOfRows,
       cellBorderWidth,
       colHeaderWidth,
+      timeScale
     } = this.settings
     /**
      * Set global font config.
@@ -118,10 +119,10 @@ export default class Table {
 
     // calculate height of row.
     const totalNumberOfRows = numberOfRows + (this.rowHeader ? 1 : 0)
-    this.cellHeight = (tableHeight - cellBorderWidth) / totalNumberOfRows
+    this.cellHeight = (tableHeight - cellBorderWidth) / totalNumberOfRows * timeScale
 
     // Set width of height of row header.
-    this.settings.rowHeaderHeight = this.cellHeight
+    this.settings.rowHeaderHeight = this.cellHeight / timeScale
 
     this.cells.render()
     this.rowHeader.render()

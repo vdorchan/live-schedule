@@ -63,13 +63,13 @@ export default class ColHeader extends BaseRender {
 
   adjust() {
     const { cellHeight, settings } = this.table
-    const { cellBorderWidth, colHeaderWidth } = settings
+    const { cellBorderWidth, colHeaderWidth, timeScale } = settings
     this.startingCoords = {
       x: cellBorderWidth,
       y: cellBorderWidth,
     }
     this.cellWidth = colHeaderWidth
-    this.cellHeight = cellHeight
+    this.cellHeight = cellHeight / timeScale
   }
 
   render() {

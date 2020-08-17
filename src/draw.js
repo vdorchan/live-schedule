@@ -39,7 +39,17 @@ export default class Draw {
 
   rect(config = {}) {
     const { ctx } = this
-    const { x, y, width, height, borderColor, borderWidth } = config
+    const {
+      x,
+      y,
+      width,
+      height,
+      borderColor,
+      borderWidth,
+      borderTop,
+      borderRight,
+      borderBottom,
+    } = config
     let { fill } = config
     ctx.save()
     const alpha = getAlphaFromHex(fill)
@@ -62,6 +72,9 @@ export default class Draw {
         y: config.y - borderWidth,
         borderWidth,
         borderColor,
+        borderTop,
+        borderRight,
+        borderBottom,
       })
     }
   }
@@ -106,7 +119,7 @@ export default class Draw {
 
     const drawLine = (border, from, to) => {
       ctx.beginPath()
-      ctx.setLineDash(border === 'dash' ? [2, 4] : [])
+      ctx.setLineDash(border === 'dash' ? [1, 4] : [])
       ctx.strokeStyle = border ? borderColor : fill
       ctx.moveTo(...from)
       ctx.lineTo(...to)

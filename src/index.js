@@ -157,9 +157,10 @@ export default class Schedule {
   }
 
   getCellTimeStr(cell) {
+    const { timeScale } = this.settings
     const format = (date) => date.format('HH:mm')
-    const timeFrom = this.yearMonth.minute(cell.rowIdx * 60)
-    const timeTo = timeFrom.minute(cell.getRowSpan() * 60)
+    const timeFrom = this.yearMonth.add(cell.rowIdx * 60 * timeScale, 'minute')
+    const timeTo = timeFrom.add(cell.getRowSpan() * 60 * timeScale, 'minute')
 
     return `${cell.colIdx + 1}, ${format(timeFrom)}~${format(timeTo)}`
   }
