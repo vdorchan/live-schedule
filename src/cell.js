@@ -98,7 +98,12 @@ export default class Cell extends BaseRender {
     if (!data) {
       return undefined
     }
-    const map = this.table.settings.dataMaps[key]
+    let map
+    const { dataMaps } = this.table.settings
+    if (dataMaps) {
+      map = dataMaps[key]
+    }
+
     key = this.table.settings[`${key}Key`]
     if (map) {
       const obj = map.find((o) => o.key === data[key])
@@ -228,12 +233,15 @@ export default class Cell extends BaseRender {
   }
 
   setData(callback) {
-    if (typeof callback === 'function') {
-      data = callback(cell.data || {})
-    }
     if (this.selected && this.isVisible()) {
       if (!this.data) {
         this.data = {}
+      }
+
+      let data = { ...this.data, ...(callback || {}) }
+
+      if (typeof callback === 'function') {
+        data = callback(cell.data || {})
       }
 
       const { colorKey, iconKey, textsKey } = this.table.settings
