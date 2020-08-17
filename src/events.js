@@ -17,12 +17,6 @@ export default class Events {
     this.canvas = this.table.canvas
     this.container = schedule.container
 
-    /**
-     * Cache cells to highlight.
-     * @type {Array}
-     */
-    this._highlightCells = []
-
     this.onMouseDown = this.onMouseDown.bind(this)
     this.onMouseUp = this.onMouseUp.bind(this)
     this.onMouseMove = this.onMouseMove.bind(this)

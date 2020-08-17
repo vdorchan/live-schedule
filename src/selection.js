@@ -49,13 +49,13 @@ export default class Section {
     const _batchedCells = [...this.batchedCells]
     this.batchedCells = []
     const cellsToMergedList = []
-    let currentColIdx = colIdx
+
+    this.schedule.showTooltip(this.table.getCell(colIdx, rowIdx))
 
     numberEach(
       (idx) => {
         const cellsToMerged = this.adjust(idx, rowIdx)
         if (this.colMeetData(cellsToMerged)) {
-          currentColIdx = idx - 1
           return false
         }
 
@@ -66,8 +66,6 @@ export default class Section {
       this.colFrom,
       colIdx
     )
-
-    this.schedule.showTooltip(this.table.getCell(currentColIdx, rowIdx))
 
     const maxNumberOfMerge = cellsToMergedList.reduce(
       (prev, current) => Math.min(prev, current.length),
@@ -89,7 +87,10 @@ export default class Section {
   move(colIdx, rowIdx) {
     this.table.removeHighlights()
     const { numberOfRows } = this.table.settings
-    const cellsToMerged = this.adjust(this.colFrom, rowIdx + (colIdx - this.colFrom) * numberOfRows)
+    const cellsToMerged = this.adjust(
+      this.colFrom,
+      rowIdx + (colIdx - this.colFrom) * numberOfRows
+    )
     this.mergeRow(cellsToMerged)
   }
 
@@ -171,6 +172,7 @@ export default class Section {
    */
   begin(cell, positionOfAdjustment) {
     this.setCell(cell)
+    this.schedule.emit(events.SELECTED, this.cell.data)
     this.batchedCells = [this.cell]
     this.positionOfAdjustment = positionOfAdjustment || null
     this.rowFrom = this.cell.rowIdx
