@@ -1,13 +1,13 @@
 export const events = {
   CONTEXT_MENU_ITEM_SELECT: 'contextMenuItemSelect',
-  CELL_SELECT: 'cellSelect',
+  SELECTED: 'selected',
   DATA_CHANGE: 'dataChange',
 }
 
 const eventMixin = {
   /**
    * Subscribe to event, usage:
-   *  schdule.on('select', (item) => { ... }
+   *  schedule.on('select', (item) => { ... }
    */
   on(eventName, handler) {
     if (!this._eventHandlers) this._eventHandlers = {}
@@ -19,7 +19,7 @@ const eventMixin = {
 
   /**
    * Cancel the subscription, usage:
-   *  schdule.off('select', handler)
+   *  schedule.off('select', handler)
    */
   off(eventName, handler) {
     const handlers = this._eventHandlers[eventName]
@@ -36,7 +36,7 @@ const eventMixin = {
    *  this.emit('select', ...)
    */
   emit(eventName, ...args) {
-    if (!this._eventHandlers && !this._eventHandlers[eventName]) {
+    if (!this._eventHandlers || !this._eventHandlers[eventName]) {
       return // no handlers for that event name
     }
 

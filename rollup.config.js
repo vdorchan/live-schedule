@@ -6,6 +6,7 @@ import { terser } from 'rollup-plugin-terser'
 import postcss from 'rollup-plugin-postcss'
 import livereload from 'rollup-plugin-livereload'
 import serve from 'rollup-plugin-serve'
+import Vue from 'rollup-plugin-vue'
 
 export default [
   // UMD Development
@@ -57,6 +58,49 @@ export default [
         },
       }),
       commonjs(),
+      postcss(),
+    ],
+  },
+
+  {
+    input: 'src/index.js',
+    output: {
+      file: 'dist/schedule.esm.js',
+      format: 'es',
+      name: 'Schedlue',
+      indent: false,
+    },
+    plugins: [
+      nodeResolve(),
+      babel({
+        exclude: 'node_modules/**',
+      }),
+      replace({
+        'process.env.NODE_ENV': JSON.stringify('development'),
+      }),
+      commonjs(),
+      postcss(),
+    ],
+  },
+
+  {
+    input: 'src/components/index.js',
+    output: {
+      file: 'vue/schedule-vue.esm.js',
+      format: 'es',
+      name: 'schedule',
+      indent: false,
+    },
+    plugins: [
+      commonjs(),
+      Vue(),
+      nodeResolve(),
+      babel({
+        exclude: 'node_modules/**',
+      }),
+      replace({
+        'process.env.NODE_ENV': JSON.stringify('development'),
+      }),
       postcss(),
     ],
   },
