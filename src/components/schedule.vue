@@ -48,6 +48,10 @@ export default {
   mounted () {
     this.init()
   },
+
+  beforeDestroy() {
+    this.schedule.destroy()
+  },
 }
 </script>
 

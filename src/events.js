@@ -148,11 +148,12 @@ export default class Events {
   /**
    *
    */
-  destroy() {
-    this.canvas.removeListener('mousedown', this.onMouseDown)
-    window.removeListener('mouseup', this.onMouseUp)
-    window.removeListener('mousemove', this.onMouseMove)
-    this.canvas.removeListener('contextmenu', this.onContextMenu)
+  clear() {
+    this.container.removeEventListener('mousedown', this.onMouseDown)
+    window.removeEventListener('mouseup', this.onMouseUp)
+    window.removeEventListener('mousemove', this.onMouseMove)
+    this.container.removeEventListener('contextmenu', this.onContextMenu)
+    document.removeEventListener('keydown', this.onKeydown)
   }
 
   getCoords(event) {
