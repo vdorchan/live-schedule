@@ -63,6 +63,9 @@ export default class Table {
      */
     this.tooltip = tooltip
 
+    this.currentSelection = null
+    this.selections = []
+
     /**
      * Set table renderer.
      */
@@ -127,6 +130,8 @@ export default class Table {
     this.cells.render()
     this.rowHeader.render()
     this.colHeader.render()
+
+    this.highlights.adjustAll()
   }
 
   /**
@@ -285,8 +290,8 @@ export default class Table {
    * Highlight specified cell.
    * @param {Cell} cell
    */
-  highlightCell(cell) {
-    this.highlights.show(cell)
+  highlightSelections(cell) {
+    this.selections.forEach((selection) => selection.highlight())
   }
 
   /**
@@ -294,5 +299,18 @@ export default class Table {
    */
   removeHighlights() {
     this.highlights.clear()
+  }
+
+  setSelection(selection) {
+    this.currentSelection = selection
+  }
+
+  addSelection(selection) {
+    this.selections.push(selection)
+  }
+
+  clearSelection() {
+    this.selections.forEach((selection) => selection.deselect())
+    this.selections = []
   }
 }

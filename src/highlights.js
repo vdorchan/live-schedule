@@ -103,6 +103,14 @@ export default class Highlights {
     }
   }
 
+  adjustAll() {
+    this._highlightList.forEach(highlightGroup => {
+      if (highlightGroup.cell) {
+        this.adjust(highlightGroup)
+      }
+    })
+  }
+
   /**
    * Show the cell highlight.
    * @param {Cell} cell

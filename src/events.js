@@ -31,9 +31,6 @@ export default class Events {
     document.addEventListener('keydown', this.onKeydown)
 
     this.table.contextMenu.onContextMenuItemSelect(this.onContextMenuItemSelect)
-
-    this.currentSelection = null
-    this.selections = []
   }
 
   addResizeListener(el, cb) {
@@ -58,29 +55,31 @@ export default class Events {
     const { x, y } = this.getCoords(event)
     const cell = this.table.getCellByCoord({ x, y })
 
+    const { currentSelection } = this.table
+
     if (event.target.classList.contains(HIGHLIGHT_DOWN_RESIZE_CLASS)) {
-      return this.currentSelection.begin(cell, 'down')
+      return currentSelection.begin(cell, 'down')
     }
 
     if (event.target.classList.contains(HIGHLIGHT_UP_RESIZE_CLASS)) {
-      return this.currentSelection.begin(cell, 'up')
+      return currentSelection.begin(cell, 'up')
     }
 
     if (event.shiftKey) {
       const colIdx = this.table.getColIdx(x)
       const rowIdx = this.table.getRowIdx(y)
-      return this.currentSelection.move(colIdx, rowIdx)
+      return currentSelection.move(colIdx, rowIdx)
     }
 
     if (!event.ctrlKey && !event.metaKey) {
-      this.selections.forEach((selection) => selection.deselect())
-      this.selections = []
+      this.table.clearSelection()
     }
 
     if (cell) {
-      this.currentSelection = new Selection(this.schedule, cell)
-      this.currentSelection.begin(cell)
-      this.selections.push(this.currentSelection)
+      const _currentSelection = new Selection(this.schedule, cell)
+      _currentSelection.begin(cell)
+      this.table.setSelection(_currentSelection)
+      this.table.addSelection(_currentSelection)
     }
   }
 
@@ -88,9 +87,10 @@ export default class Events {
    *
    */
   onMouseUp() {
-    if (this.currentSelection) {
-      this.selections.forEach((selection) => selection.highlight())
-      this.currentSelection.finish()
+    const { currentSelection } = this.table
+    if (currentSelection) {
+      this.table.highlightSelections()
+      currentSelection.finish()
     }
   }
 
@@ -101,10 +101,12 @@ export default class Events {
     const { x, y } = this.getCoords(event)
     const cell = this.table.getCellByCoord({ x, y })
 
-    if (this.currentSelection && this.currentSelection.isInProgress()) {
+    const { currentSelection } = this.table
+
+    if (currentSelection && currentSelection.isInProgress()) {
       const colIdx = this.table.getColIdx(x)
       const rowIdx = this.table.getRowIdx(y)
-      this.currentSelection.selectMultiCol(colIdx, rowIdx)
+      currentSelection.selectMultiCol(colIdx, rowIdx)
     } else {
       this.table.mouseInCell({ x, y })
     }
@@ -120,15 +122,17 @@ export default class Events {
    */
   onContextMenu(event) {
     event.preventDefault()
-    if (this.currentSelection) {
+
+    if (this.table.currentSelection) {
       this.schedule.showContextMenu(event)
     }
   }
 
   onContextMenuItemSelect(action, item) {
-    if (this.currentSelection && action) {
+    const { currentSelection } = this.table
+    if (currentSelection && action) {
       if (action === 'delete') {
-        this.currentSelection.deleteCell()
+        currentSelection.deleteCell()
       }
 
       this.schedule.emit(events.CONTEXT_MENU_ITEM_SELECT, action, item)
@@ -137,7 +141,7 @@ export default class Events {
 
   onKeydown(event) {
     if (keycode(event) === 'backspace') {
-      this.currentSelection.deleteCell()
+      this.table.currentSelection.deleteCell()
     }
   }
 
