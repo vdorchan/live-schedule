@@ -114,15 +114,11 @@ export default class Table {
     this.colHeader.setRenderer(this.draw)
 
     // calculate width of col.
-    this.cellWidth = Math.floor(
-      (tableWidth - cellBorderWidth - colHeaderWidth) / numberOfCols
-    )
+    this.cellWidth = (tableWidth - cellBorderWidth - colHeaderWidth) / numberOfCols
 
     // calculate height of row.
     const totalNumberOfRows = numberOfRows + (this.rowHeader ? 1 : 0)
-    this.cellHeight = Math.floor(
-      (tableHeight - cellBorderWidth) / totalNumberOfRows
-    )
+    this.cellHeight = (tableHeight - cellBorderWidth) / totalNumberOfRows
 
     // Set width of height of row header.
     this.settings.rowHeaderHeight = this.cellHeight
