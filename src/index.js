@@ -12,6 +12,8 @@ import eventMixin from './mixins/event'
 
 import Events from './events'
 
+import settingsFactory from './defaultSettings'
+
 import './styles/_base.css'
 import './styles/highlight.css'
 import './styles/contextMenu.css'
@@ -51,73 +53,17 @@ export default class Schedule {
 
     this.createCanvas()
 
+    this.defaultSettings = settingsFactory()
+
+    this.settings = { ...this.defaultSettings, ...this.userSettings }
+
+    this.settings.contextMenuItems = this.combineContextMenuItems(
+      userSettings.contextMenuItems || [],
+      [{ action: 'delete', title: '删除' }]
+    )
+
     this.yearMonth = dayjs(userSettings.yearMonth || dayjs().format('YYYY-MM'))
-
-    this.settings = {
-      numberOfCols: this.yearMonth.daysInMonth(),
-
-      /**
-       * Hours in day.
-       * @type {number}
-       */
-      numberOfRows: 24,
-
-      /**
-       * Table background color.
-       * @type {String}
-       */
-      bgColor: '#ffffff',
-
-      /**
-       * Some table cell config.
-       */
-      cellBorderColor: '#EBEEF5',
-      cellBorderWidth: 1,
-      cellSelectedColor: '#EBEEF5',
-      cellActiveColor: '#D9D6EE',
-      cellCrossColAlpha: 0.4,
-
-      /**
-       * Width of the col header
-       * @type {number}
-       */
-      colHeaderWidth: 50,
-
-      /**
-       * Height of the col header
-       * @type {number}
-       */
-      rowHeaderHeight: 0,
-
-      /**
-       * Some font config.
-       */
-      fontSize: 12,
-      fontFamily:
-        'PingFang SC,Helvetica Neue,Helvetica,microsoft yahei,arial,STHeiTi,sans-serif',
-      lineHeight: 20,
-      cellTextColor: '#fff',
-      headerTextColor: '#606266',
-
-      colorKey: 'color',
-      iconKey: 'icon',
-      textsKey: 'texts',
-
-      dataMaps: {},
-
-      timeScale: 1,
-
-      tooltipColor: '#707070',
-
-      renderTooltip: () => {},
-
-      ...userSettings,
-
-      contextMenuItems: this.combineContextMenuItems(
-        userSettings.contextMenuItems || [],
-        [{ action: 'delete', title: '删除' }]
-      ),
-    }
+    this.settings.numberOfCols = this.yearMonth.daysInMonth()
 
     const items = this.getItemsFromData(this.settings.data)
 
@@ -203,7 +149,7 @@ export default class Schedule {
     })
   }
 
-  exportData() {}
+  exportData() { }
 
   showContextMenu(event) {
     this.table.tooltip.hide()
@@ -226,7 +172,7 @@ export default class Schedule {
     const { x, y } = cell.getCoords()
 
     const { renderTooltip } = this.settings
-    const tooltipText = cell.data ? renderTooltip(cell.data) : ''
+    const tooltipText = cell.data && renderTooltip ? renderTooltip(cell.data) : ''
 
     return {
       x: x + cell.width,
@@ -259,3 +205,4 @@ export default class Schedule {
 }
 
 Object.assign(Schedule.prototype, eventMixin)
+Schedule.settingsFactory = settingsFactory
