@@ -113,6 +113,8 @@ export default () => {
     fontFamily:
       'PingFang SC,Helvetica Neue,Helvetica,microsoft yahei,arial,STHeiTi,sans-serif',
 
+    fontColor: '#fff',
+
     /**
      * 行高
      * @param {number}

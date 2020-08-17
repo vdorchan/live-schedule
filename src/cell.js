@@ -208,7 +208,7 @@ export default class Cell extends BaseRender {
   renderIconAndTexts(icon, texts) {
     let { x, y } = this.getCoords(true)
     if (texts || icon) {
-      const { fontSize, lineHeight } = this.table.settings
+      const { fontSize, fontColor, lineHeight } = this.table.settings
 
       y = y - (((texts || []).length + (icon ? 1 : 0) - 1) / 2) * lineHeight
 
@@ -231,6 +231,7 @@ export default class Cell extends BaseRender {
             text: text.slice(0, maxFontLength),
             x,
             y,
+            fill: fontColor
           })
           y += lineHeight
         })
