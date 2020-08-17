@@ -11,7 +11,7 @@
  *  yearMonth: '2020-01'
  * })
  * ```
- * 
+ *
  */
 export default () => {
   return {
@@ -81,7 +81,7 @@ export default () => {
      * 跨天格子透明度
      * @param {number}
      * @default 0.4
-    */
+     */
     cellCrossColAlpha: 0.4,
 
     /**
@@ -197,14 +197,22 @@ export default () => {
      * ```js
      * // 直接设置字符串
      * renderTooltip: '标题'
-     * 
+     *
      * // 通过函数
      * renderTooltip: function (data) {
      *   return `<p>Level: ${data.level}</p>`
      * }
      * ```
      */
-    renderTooltip: () => { },
+    renderTooltip: () => {},
+
+    /**
+     * 自定义渲染单元格，return 一个对象，包含 texts数组、color字符串、icon字符串
+     * 当前格子的 data 将作为参数返回
+     * @param {Function}
+     * @default undefined
+     */
+    renderCell: void 0,
 
     /**
      * 右键菜单项目列表，然后可以通过 on 方法监听设置事件方法
@@ -219,4 +227,4 @@ export default () => {
      */
     contextMenuItems: void 0
   }
-};
+}

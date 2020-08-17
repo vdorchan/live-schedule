@@ -99,19 +99,24 @@ export default class Cell extends BaseRender {
   }
 
   getDataValue(key, data = this.data) {
-    if (!data) {
-      return undefined
+    const { renderCell, dataMaps } = this.table.settings
+    key = this.table.settings[`${key}Key`]
+    if (typeof renderCell === 'function') {
+      const obj = renderCell(data)
+      return obj ? obj[key] : null
     }
+
+    if (!data) {
+      return null
+    }
+
     let map
-    const { dataMaps } = this.table.settings
     if (dataMaps) {
       map = dataMaps[key]
     }
-
-    key = this.table.settings[`${key}Key`]
     if (map) {
       const obj = map.find((o) => o.key === data[key])
-      return obj ? obj.value : undefined
+      return obj ? obj.value : null
     }
 
     return data[key]
@@ -220,8 +225,9 @@ export default class Cell extends BaseRender {
 
       y = y - (((texts || []).length + (icon ? 1 : 0) - 1) / 2) * lineHeight
 
-      if (icon) {
+      if (icon && this.height > this.width) {
         const imgSize = this.width - 5
+
         this.draw.image({
           src: icon,
           x: x - imgSize / 2,
@@ -236,7 +242,7 @@ export default class Cell extends BaseRender {
         const maxFontLength = this.width / parseInt(fontSize)
         const posList = texts.forEach((text) => {
           this.draw.text({
-            text: text.slice(0, maxFontLength),
+            text: String(text).slice(0, maxFontLength),
             x,
             y,
             fill: fontColor,
@@ -260,16 +266,17 @@ export default class Cell extends BaseRender {
       }
 
       const { colorKey, iconKey, textsKey } = this.table.settings
+      const oriData = {...this.data}
+      this.data = data
 
       this.renderIfPropsChanged(
         {
-          [colorKey]: data[colorKey],
-          [iconKey]: data[iconKey],
-          [textsKey]: data[textsKey],
+          [colorKey]: this.getDataValue('color', data),
+          [iconKey]: this.getDataValue('icon', data),
+          [textsKey]: this.getDataValue('texts', data),
         },
-        this.data
+        oriData
       )
-      this.data = data
     }
   }
 
