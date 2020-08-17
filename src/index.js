@@ -203,6 +203,10 @@ export default class Schedule {
     const config = this.getTooltipConfig(cell)
     this.table.tooltip.show(config)
   }
+
+  destroy() {
+    this.events.clear()
+  }
 }
 
 Object.assign(Schedule.prototype, eventMixin)
