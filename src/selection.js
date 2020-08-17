@@ -1,4 +1,5 @@
 import { numberEach, arrayRemoveItem } from './helper'
+import { events } from './mixins/event'
 
 /**
  * Manage cell selection.
