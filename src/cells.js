@@ -75,7 +75,7 @@ export default class Cells extends BaseRender {
     const items = this.table.sort(this.table.items)
     let item = items.shift()
     let cellsToMerge
-    this.cellGroupsEach((cell) => {
+    this.cellsEach((cell) => {
       if (item && cell.colIdx === item.colIdx && cell.rowIdx === item.rowIdx) {
         cell.data = item.data
         cellsToMerge = this.table.getEmptyCellsBetween(

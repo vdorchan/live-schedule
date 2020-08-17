@@ -63,6 +63,8 @@ export default class Cell extends BaseRender {
 
     if (this.isCrossCol()) {
       cellColor = this.getCell().getColor() + getHexAlpha(cellCrossColAlpha)
+    } else if (this.getCell() !== this) {
+      cellColor = null
     }
 
     return cellColor
@@ -171,6 +173,10 @@ export default class Cell extends BaseRender {
     const { bgColor } = this.table.settings
 
     const cellColor = this.getColor()
+
+    if (!cellColor) {
+      return
+    }
 
     // Fill background color if color has alpha.
     if (hexHasAlpha(cellColor)) {
