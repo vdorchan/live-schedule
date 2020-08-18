@@ -24,20 +24,18 @@ export default {
     return props
   })(),
 
-  watch: {
-    data (data) {
-      this.setData(data)
-    }
-  },
-
   methods: {
     init () {
       this.schedule = new Schedule(this.$refs.schedule, this.$props || {})
       Object.values(events).forEach(eventName => this.schedule.on(eventName, (...args) => this.$emit(eventName, ...args)))
+
+      this.$watch('data', data => {
+        this.setData(data)
+      })
     },
 
-    setData (...args) {
-      return this.schedule.setData(...args)
+    setData (data) {
+      this.schedule.setData(data)
     },
 
     setDataAtSelectedCell (...args) {
@@ -49,7 +47,7 @@ export default {
     this.init()
   },
 
-  beforeDestroy() {
+  beforeDestroy () {
     this.schedule.destroy()
   },
 }
