@@ -1,6 +1,6 @@
 export const events = {
   CONTEXT_MENU_ITEM_SELECT: 'contextMenuItemSelect',
-  SELECTED: 'select',
+  SELECTE: 'select',
   DATA_CHANGE: 'dataChange',
 }
 

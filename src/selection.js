@@ -173,7 +173,6 @@ export default class Section {
    */
   begin(cell, positionOfAdjustment) {
     this.setCell(cell)
-    this.schedule.emit(events.SELECTED, this.cell.data)
     this.batchedCells = [this.cell]
     this.positionOfAdjustment = positionOfAdjustment || null
     this.rowFrom = this.cell.rowIdx
@@ -191,6 +190,13 @@ export default class Section {
     this.currentCell = null
     this.inProgress = false
     this.positionOfAdjustment = null
+    this.schedule.emit(
+      events.SELECTE,
+      this.batchedCells.map((cell) => ({
+        data: cell.data,
+        timeRange: this.schedule.getCellTimeRange(cell),
+      }))
+    )
   }
 
   /**
