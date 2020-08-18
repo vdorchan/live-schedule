@@ -272,14 +272,19 @@ export default class Table {
 
   /**
    *
-   * @param {object} coords
+   * @param {object} coord
    */
-  mouseInCell(coords) {
+  mouseInCell(coord) {
     if (!this.contextMenu.isVisible()) {
       this.cellsEach((cell) => cell.mouseOut())
       this.schedule.hideTooltip()
-      let cell = this.getCellByCoord(coords, false)
-      if (cell) {
+      this.colHeader.mouseOut()
+      if (this.colHeader.includesRange(coord)) {
+        return this.colHeader.mouseInCell(coord)
+      }
+
+      let cell = this.getCellByCoord(coord, false)
+      if (cell && (this.settings.readOnly ? cell.hasData(true) : true)) {
         cell = cell.getCell()
         cell.mouseIn()
         this.schedule.showTooltip(cell)

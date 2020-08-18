@@ -24,11 +24,15 @@ export default class Events {
     this.onContextMenuItemSelect = this.onContextMenuItemSelect.bind(this)
     this.onKeydown = this.onKeydown.bind(this)
 
-    this.container.addEventListener('mousedown', this.onMouseDown)
-    window.addEventListener('mouseup', this.onMouseUp)
+    const readOnly = this.table.settings
+
+    if (!readOnly) {
+      this.container.addEventListener('mousedown', this.onMouseDown)
+      window.addEventListener('mouseup', this.onMouseUp)
+      this.container.addEventListener('contextmenu', this.onContextMenu)
+      document.addEventListener('keydown', this.onKeydown)
+    }
     window.addEventListener('mousemove', this.onMouseMove)
-    this.container.addEventListener('contextmenu', this.onContextMenu)
-    document.addEventListener('keydown', this.onKeydown)
 
     this.table.contextMenu.onContextMenuItemSelect(this.onContextMenuItemSelect)
   }
@@ -52,8 +56,8 @@ export default class Events {
    *
    */
   onMouseDown(event) {
-    const { x, y } = this.getCoords(event)
-    const cell = this.table.getCellByCoord({ x, y })
+    const coord = this.getCoords(event)
+    const cell = this.table.getCellByCoord(coord)
 
     const { currentSelection } = this.table
 
@@ -66,8 +70,8 @@ export default class Events {
     }
 
     if (event.shiftKey) {
-      const colIdx = this.table.getColIdx(x)
-      const rowIdx = this.table.getRowIdx(y)
+      const colIdx = this.table.getColIdx(coord.x)
+      const rowIdx = this.table.getRowIdx(coord.y)
       return currentSelection.move(colIdx, rowIdx)
     }
 
@@ -98,17 +102,17 @@ export default class Events {
    *
    */
   onMouseMove(event) {
-    const { x, y } = this.getCoords(event)
-    const cell = this.table.getCellByCoord({ x, y })
+    const coord = this.getCoords(event)
+    const cell = this.table.getCellByCoord(coord)
 
     const { currentSelection } = this.table
 
     if (currentSelection && currentSelection.isInProgress()) {
-      const colIdx = this.table.getColIdx(x)
-      const rowIdx = this.table.getRowIdx(y)
+      const colIdx = this.table.getColIdx(coord.x)
+      const rowIdx = this.table.getRowIdx(coord.y)
       currentSelection.selectMultiCol(colIdx, rowIdx)
     } else {
-      this.table.mouseInCell({ x, y })
+      this.table.mouseInCell(coord)
     }
   }
 
@@ -131,11 +135,17 @@ export default class Events {
   onContextMenuItemSelect(action, item) {
     const { currentSelection } = this.table
     if (currentSelection && action) {
-      if (action === 'delete') {
+      const hasBindEvent = this.schedule.emit(
+        events.CONTEXT_MENU_ITEM_SELECT,
+        action,
+        this.schedule,
+        currentSelection.getCell().data,
+        item
+      )
+
+      if (!hasBindEvent && action === 'delete') {
         currentSelection.deleteCell()
       }
-
-      this.schedule.emit(events.CONTEXT_MENU_ITEM_SELECT, action, item)
     }
   }
 

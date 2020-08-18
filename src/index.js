@@ -73,7 +73,10 @@ export default class Schedule {
       rowHeader: new RowHeader(this),
       colHeader: new ColHeader(this),
       highlights: new Highlights(this.container),
-      contextMenu: new ContextMenu(this.settings.contextMenuItems),
+      contextMenu: new ContextMenu(
+        this.container,
+        this.settings.contextMenuItems
+      ),
       tooltip: new Tooltip(this.container, this.settings.tooltipColor),
     })
 
@@ -95,11 +98,13 @@ export default class Schedule {
   }
 
   render() {
+    const { width, height } = this.rootNode.getBoundingClientRect()
+    this.table.render(width, height)
+
     const ro = new ResizeObserver((entries, _) => {
       const { width, height } = entries[0].contentRect
       this.table.render(width, height)
     })
-
     ro.observe(this.rootNode)
   }
 
@@ -133,7 +138,7 @@ export default class Schedule {
 
   getItemsFromData(data) {
     return data.map((live) => {
-      const { startTime, endTime } = live
+      const [startTime, endTime] = live.liveTime
       const time = dayjs(startTime)
       const colIdx = time.date() - 1
       const rowIdx =
@@ -149,7 +154,7 @@ export default class Schedule {
     })
   }
 
-  exportData() { }
+  exportData() {}
 
   showContextMenu(event) {
     this.table.tooltip.hide()
@@ -157,12 +162,19 @@ export default class Schedule {
   }
 
   getCellTimeStr(cell) {
-    const { timeScale } = this.settings
-    const format = (date) => date.format('HH:mm')
-    const timeFrom = this.yearMonth.add(cell.rowIdx * 60 * timeScale, 'minute')
-    const timeTo = timeFrom.add(cell.getRowSpan() * 60 * timeScale, 'minute')
+    const [timeFrom, timeTo] = this.getCellTimeRange(cell, 'HH:mm')
 
-    return `${cell.colIdx + 1}, ${format(timeFrom)}~${format(timeTo)}`
+    return `${cell.colIdx + 1}, ${timeFrom}~${timeTo}`
+  }
+
+  getCellTimeRange(cell, format = 'YYYY-MM-DD HH:mm:ss') {
+    const { timeScale } = this.settings
+    const timeFrom = this.yearMonth.add(
+      cell.rowIdx * 60 * timeScale + cell.colIdx * 24 * 60,
+      'minute'
+    )
+    const timeTo = timeFrom.add(cell.getRowSpan() * 60 * timeScale, 'minute')
+    return [timeFrom, timeTo].map((t) => t.format(format))
   }
 
   /**
@@ -205,7 +217,15 @@ export default class Schedule {
   }
 
   destroy() {
-    this.events.clear()
+    if (this.events) {
+      this.events.clear()
+    }
+  }
+
+  deleteSelectedCell() {
+    if (this.table.currentSelection) {
+      this.table.currentSelection.deleteCell()
+    }
   }
 }
 

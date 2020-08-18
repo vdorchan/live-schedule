@@ -43,6 +43,13 @@ export default () => {
     numberOfRows: 24,
 
     /**
+     * 只读模式
+     * @param {boolean}
+     * @default false
+     */
+    readOnly: false,
+
+    /**
      * 表格背景色.
      * @param {string}
      * @default '#fff'
