@@ -1,5 +1,6 @@
 export default class ContextMenu {
-  constructor(items) {
+  constructor(container,items) {
+    this.container = container
     this.onSelect = () => {}
 
     const ul = document.createElement('ul')
@@ -30,7 +31,7 @@ export default class ContextMenu {
       }
     }
 
-    document.body.appendChild(this.menu)
+    this.container.appendChild(this.menu)
   }
 
   onContextMenuItemSelect(onSelect) {
