@@ -1,5 +1,5 @@
 import BaseRender from './_base'
-import { objHasChanged, getHexAlpha, hexHasAlpha } from './helper'
+import { objHasChanged, getHexAlpha, hexHasAlpha, arrayScale } from './helper'
 import eventMixin from './mixins/event'
 
 /**
@@ -22,6 +22,7 @@ export default class Cell extends BaseRender {
 
     this.dashLine = dashLine
 
+    this.mergedCells = [this]
     this.init()
 
     /**
@@ -40,7 +41,6 @@ export default class Cell extends BaseRender {
   init() {
     this.selected = false
     this.hovering = false
-    this.mergedCells = [this]
     this.__actualCell = this
     this.data = null
   }
@@ -123,7 +123,8 @@ export default class Cell extends BaseRender {
   }
 
   getHighlightConfigs() {
-    const { cellWidth, cellHeight } = this.parent
+    const { cellWidth } = this.parent
+    const cellHeight = this.getColHeight(false)
     const { cellBorderWidth } = this.table.settings
     const mergedCells = this.getMergedCells()
     let colIdx = null
@@ -151,7 +152,7 @@ export default class Cell extends BaseRender {
 
   renderRect(cellColor) {
     const { data, rowIdx } = this
-    const { cellWidth, cellHeight } = this.parent
+    const { cellWidth } = this.parent
     const {
       cellBorderWidth,
       cellSelectedColor,
@@ -164,7 +165,7 @@ export default class Cell extends BaseRender {
     } = this.table.settings
 
     this.width = cellWidth - cellBorderWidth
-    this.height = this.getColHeight(cellHeight) - cellBorderWidth
+    this.height = this.getColHeight(true) - cellBorderWidth
 
     this.draw.rect({
       ...this.getCoords(),
@@ -183,6 +184,10 @@ export default class Cell extends BaseRender {
   }
 
   render() {
+    if (this.hidden) {
+      return
+    }
+
     const { bgColor } = this.table.settings
 
     const cellColor = this.getColor()
@@ -266,7 +271,7 @@ export default class Cell extends BaseRender {
       }
 
       const { colorKey, iconKey, textsKey } = this.table.settings
-      const oriData = {...this.data}
+      const oriData = { ...this.data }
       this.data = data
 
       this.renderIfPropsChanged(
@@ -349,6 +354,7 @@ export default class Cell extends BaseRender {
       .filter((cell) => !cellsToMerge.includes(cell))
       .forEach((cell) => {
         cell.init()
+        cell.unMerge()
         cell.render()
       })
 
@@ -368,12 +374,17 @@ export default class Cell extends BaseRender {
     return actualCell
   }
 
-  getColHeight(cellHeight) {
+  unMerge() {
+    this.mergedCells = [this]
+  }
+
+  getColHeight(includesMerged) {
+    const cellHeight = this.parent.cellHeight
     const _cell = this.isCrossCol() ? this.getCell() : this
-    return (
-      _cell.mergedCells.filter((cell) => cell.colIdx === this.colIdx).length *
-      cellHeight
-    )
+    return includesMerged
+      ? _cell.mergedCells.filter((cell) => cell.colIdx === this.colIdx).length *
+          cellHeight
+      : cellHeight
   }
 
   getRowSpan() {
@@ -386,10 +397,17 @@ export default class Cell extends BaseRender {
   }
 
   clear() {
+    const cellsToUnMerge = []
     this.mergedCells.forEach((cell) => {
       cell.init()
       cell.render()
     })
+
+    this.mergedCells[0].unMerge()
+  }
+
+  delete() {
+    this.clear()
   }
 
   isBefore(cell) {
@@ -406,8 +424,8 @@ export default class Cell extends BaseRender {
     return this.__actualCell === this
   }
 
-  hasData() {
-    return !!this.data
+  hasData(includesMerged) {
+    return includesMerged ? !!this.getCell().data : !!this.data
   }
 }
 
