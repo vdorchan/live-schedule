@@ -127,9 +127,7 @@ export default class Events {
   onContextMenu(event) {
     event.preventDefault()
 
-    if (this.table.currentSelection) {
-      this.schedule.showContextMenu(event)
-    }
+    this.table.showContextMenu(this.getCoords(event))
   }
 
   onContextMenuItemSelect(action, item) {

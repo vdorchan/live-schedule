@@ -319,4 +319,12 @@ export default class Table {
     this.selections.forEach((selection) => selection.deselect())
     this.selections = []
   }
+
+  showContextMenu(coord) {
+    if (this.table.currentSelection) {
+      const cell = this.table.currentSelection.getCell()
+      this.table.tooltip.hide()
+      this.table.contextMenu.show(coord)
+    }
+  }
 }

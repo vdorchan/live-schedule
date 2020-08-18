@@ -42,22 +42,9 @@ export default class ContextMenu {
     return this.menu.style.visibility === 'visible'
   }
 
-  show(event) {
-    let { pageX: left, pageY: top } = event
-
-    const contextmenuWidth = this.menu.clientWidth
-    const contextmenuHeight = this.menu.clientHeight
-
-    if (contextmenuHeight + top >= window.innerHeight) {
-      top -= contextmenuHeight
-    }
-    if (contextmenuWidth + left >= window.innerWidth) {
-      left -= contextmenuWidth
-    }
-
+  show({x, y}) {
     this.menu.style.visibility = 'visible'
-    this.menu.style.left = `${left}px`
-    this.menu.style.top = `${top}px`
+    this.menu.style.transform = `translate3d(${x}px, ${y}px, 0)`
   }
 
   hide() {

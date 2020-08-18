@@ -156,10 +156,6 @@ export default class Schedule {
 
   exportData() {}
 
-  showContextMenu(event) {
-    this.table.tooltip.hide()
-    this.table.contextMenu.show(event)
-  }
 
   getCellTimeStr(cell) {
     const [timeFrom, timeTo] = this.getCellTimeRange(cell, 'HH:mm')
