@@ -317,10 +317,10 @@ export default class Table {
   }
 
   showContextMenu(coord) {
-    if (this.table.currentSelection) {
-      const cell = this.table.currentSelection.getCell()
-      this.table.tooltip.hide()
-      this.table.contextMenu.show(coord)
+    if (this.currentSelection) {
+      const cell = this.currentSelection.getCell()
+      this.tooltip.hide()
+      this.contextMenu.show(coord)
     }
   }
 }
