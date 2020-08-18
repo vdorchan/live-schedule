@@ -1,5 +1,5 @@
 import BaseRender from './_base'
-import { objHasChanged, getHexAlpha, hexHasAlpha, arrayScale } from './helper'
+import { objHasChanged, getHexAlpha, hexHasAlpha } from './helper'
 import eventMixin from './mixins/event'
 
 /**

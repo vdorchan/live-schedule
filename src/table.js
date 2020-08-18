@@ -278,10 +278,6 @@ export default class Table {
     if (!this.contextMenu.isVisible()) {
       this.cellsEach((cell) => cell.mouseOut())
       this.schedule.hideTooltip()
-      this.colHeader.mouseOut()
-      if (this.colHeader.includesRange(coord)) {
-        return this.colHeader.mouseInCell(coord)
-      }
 
       let cell = this.getCellByCoord(coord, false)
       if (cell && (this.settings.readOnly ? cell.hasData(true) : true)) {
