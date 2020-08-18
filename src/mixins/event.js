@@ -1,6 +1,6 @@
 export const events = {
   CONTEXT_MENU_ITEM_SELECT: 'contextMenuItemSelect',
-  SELECTED: 'selected',
+  SELECTED: 'select',
   DATA_CHANGE: 'dataChange',
 }
 
@@ -36,14 +36,20 @@ const eventMixin = {
    *  this.emit('select', ...)
    */
   emit(eventName, ...args) {
-    if (!this._eventHandlers || !this._eventHandlers[eventName]) {
-      return // no handlers for that event name
+    if (
+      !this._eventHandlers ||
+      !this._eventHandlers[eventName] ||
+      !this._eventHandlers[eventName].length
+    ) {
+      return false // no handlers for that event name
     }
 
     // call the handlers
     this._eventHandlers[eventName].forEach((handler) =>
       handler.apply(this, args)
     )
+
+    return true
   },
 }
 
