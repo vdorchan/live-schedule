@@ -24,7 +24,7 @@ export default class Events {
     this.onContextMenuItemSelect = this.onContextMenuItemSelect.bind(this)
     this.onKeydown = this.onKeydown.bind(this)
 
-    const readOnly = this.table.settings
+    const { readOnly } = this.table.settings
 
     if (!readOnly) {
       this.container.addEventListener('mousedown', this.onMouseDown)
