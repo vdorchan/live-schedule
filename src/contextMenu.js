@@ -1,14 +1,17 @@
+export const CONTEXTMENU_CLASS = 'schedule-contextmenu'
+export const CONTEXTMENU_ITEM_CLASS = 'schedule-contextmenu-item'
+
 export default class ContextMenu {
   constructor(container,items) {
     this.container = container
     this.onSelect = () => {}
 
     const ul = document.createElement('ul')
-    ul.className = 'schedule-contextmenu'
+    ul.className = CONTEXTMENU_CLASS
 
     items.forEach((m) => {
       const li = document.createElement('li')
-      li.className = 'schedule-contextmenu-item'
+      li.className = CONTEXTMENU_ITEM_CLASS
       li.innerText = m.title
       li.dataset.action = m.action
       ul.appendChild(li)

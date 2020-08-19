@@ -4,6 +4,7 @@ import {
   HIGHLIGHT_UP_RESIZE_CLASS,
   HIGHLIGHT_DOWN_RESIZE_CLASS,
 } from './highlights'
+import { CONTEXTMENU_ITEM_CLASS } from './contextMenu'
 import { events } from './mixins/event'
 import keycode from 'keycode'
 
@@ -56,6 +57,10 @@ export default class Events {
    *
    */
   onMouseDown(event) {
+    if (event.target.classList.contains(CONTEXTMENU_ITEM_CLASS)) {
+      return
+    }
+
     const coord = this.getCoords(event)
     const cell = this.table.getCellByCoord(coord)
 
