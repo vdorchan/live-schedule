@@ -56,7 +56,7 @@ export default class Section {
     numberEach(
       (idx) => {
         const cellsToMerged = this.adjust(idx, rowIdx)
-        if (this.colMeetData(cellsToMerged)) {
+        if (idx !== this.colFrom && this.colMeetData(cellsToMerged)) {
           return false
         }
 
