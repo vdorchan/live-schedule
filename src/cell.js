@@ -23,6 +23,13 @@ export default class Cell extends BaseRender {
     this.dashLine = dashLine
 
     this.mergedCells = [this]
+
+    this.setTable(parent.table)
+    this.setRenderer(parent.draw)
+
+    this.table = parent.table
+    this.timeRange = null
+    this.setTimeRange()
     this.init()
 
     /**
@@ -83,6 +90,16 @@ export default class Cell extends BaseRender {
 
   getTexts() {
     return this.getDataValue('texts')
+  }
+
+  setTimeRange() {
+    const { timeScale, yearMonth } = this.table.settings
+    const timeFrom = yearMonth.add(
+      this.rowIdx * 60 * timeScale + this.colIdx * 24 * 60,
+      'minute'
+    )
+    const timeTo = timeFrom.add(this.getRowSpan() * 60 * timeScale, 'minute')
+    this.timeRange = [timeFrom, timeTo]
   }
 
   getCoords(isCenter) {
@@ -226,12 +243,12 @@ export default class Cell extends BaseRender {
   renderIconAndTexts(icon, texts) {
     let { x, y } = this.getCoords(true)
     if (texts || icon) {
-      const { fontSize, fontColor, lineHeight } = this.table.settings
+      const { fontSize, fontColor, lineHeight, iconMaxWidth } = this.table.settings
 
       y = y - (((texts || []).length + (icon ? 1 : 0) - 1) / 2) * lineHeight
 
       if (icon && this.height > this.width) {
-        const imgSize = this.width - 5
+        const imgSize = Math.min(this.width - 5, this.iconMaxWidth)
 
         this.draw.image({
           src: icon,
@@ -261,7 +278,10 @@ export default class Cell extends BaseRender {
   setData(callback) {
     if (this.selected && this.isVisible()) {
       if (!this.data) {
-        this.data = {}
+        const { timeRangeKey } = this.table.settings
+        this.data = {
+          [timeRangeKey]: this.timeRange,
+        }
       }
 
       let data = { ...this.data, ...(callback || {}) }
@@ -282,7 +302,10 @@ export default class Cell extends BaseRender {
         },
         oriData
       )
+
+      return true
     }
+    return false
   }
 
   mouseIn() {
@@ -368,14 +391,16 @@ export default class Cell extends BaseRender {
       }
     })
 
-    // actualCell.mergeCrossCol()
     actualCell.render()
+
+    this.setTimeRange()
 
     return actualCell
   }
 
   unMerge() {
     this.mergedCells = [this]
+    this.setTimeRange()
   }
 
   getColHeight(includesMerged) {

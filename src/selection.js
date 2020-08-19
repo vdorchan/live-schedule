@@ -190,12 +190,14 @@ export default class Section {
     this.currentCell = null
     this.inProgress = false
     this.positionOfAdjustment = null
+
+    const selectedItems = this.batchedCells.map((cell) => ({
+      data: cell.data,
+      timeRange: cell.timeRange.map(t => t.format('YYYY-MM-DD HH:mm:ss'))
+    }))
     this.schedule.emit(
       events.SELECTE,
-      this.batchedCells.map((cell) => ({
-        data: cell.data,
-        timeRange: this.schedule.getCellTimeRange(cell),
-      }))
+      selectedItems
     )
   }
 
