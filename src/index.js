@@ -62,8 +62,8 @@ export default class Schedule {
       [{ action: 'delete', title: '删除' }]
     )
 
-    this.yearMonth = dayjs(userSettings.yearMonth || dayjs().format('YYYY-MM'))
-    this.settings.numberOfCols = this.yearMonth.daysInMonth()
+    this.settings.yearMonth = dayjs(userSettings.yearMonth || dayjs().format('YYYY-MM'))
+    this.settings.numberOfCols = this.settings.yearMonth.daysInMonth()
 
     const items = this.getItemsFromData(this.settings.data)
 
@@ -98,12 +98,12 @@ export default class Schedule {
   }
 
   render() {
-    const { width, height } = this.rootNode.getBoundingClientRect()
+    const { width, height  } = this.rootNode.getBoundingClientRect()
     this.table.render(width, height)
 
     const ro = new ResizeObserver((entries, _) => {
       const { width, height } = entries[0].contentRect
-      this.table.render(width, height)
+      this.table.resize(width, height)
     })
     ro.observe(this.rootNode)
   }
@@ -127,7 +127,8 @@ export default class Schedule {
 
   setData(data) {
     const items = this.getItemsFromData(data)
-    this.table.setItems(items)
+    const oldItem = this.getItemsFromData(this.getData())
+    this.table.setItems(items, oldItem)
   }
 
   setDataAtSelectedCell(callback) {
@@ -137,14 +138,14 @@ export default class Schedule {
   }
 
   getItemsFromData(data) {
+    const { timeRangeKey, timeScale } = this.settings
     return data.map((live) => {
-      const [startTime, endTime] = live.liveTime
+      const [startTime, endTime] = live[timeRangeKey]
       const time = dayjs(startTime)
       const colIdx = time.date() - 1
-      const rowIdx =
-        (time.hour() * 60 + time.minute()) / 60 / this.settings.timeScale
+      const rowIdx = (time.hour() * 60 + time.minute()) / 60 / timeScale
       const minutes = Math.abs(time.diff(endTime, 'minute'))
-      const rowSpan = minutes / (this.settings.timeScale * 60) - 1
+      const rowSpan = minutes / (timeScale * 60) - 1
       return {
         colIdx,
         rowIdx,
@@ -154,23 +155,22 @@ export default class Schedule {
     })
   }
 
-  exportData() {}
-
-
-  getCellTimeStr(cell) {
-    const [timeFrom, timeTo] = this.getCellTimeRange(cell, 'HH:mm')
-
-    return `${cell.colIdx + 1}, ${timeFrom}~${timeTo}`
+  getData() {
+    const data = []
+    this.table.cellGroupsEach(cell => {
+      if (cell.hasData()) {
+        data.push(cell.data)
+      }
+    })
+    return data
   }
 
-  getCellTimeRange(cell, format = 'YYYY-MM-DD HH:mm:ss') {
-    const { timeScale } = this.settings
-    const timeFrom = this.yearMonth.add(
-      cell.rowIdx * 60 * timeScale + cell.colIdx * 24 * 60,
-      'minute'
-    )
-    const timeTo = timeFrom.add(cell.getRowSpan() * 60 * timeScale, 'minute')
-    return [timeFrom, timeTo].map((t) => t.format(format))
+  exportData() {}
+
+  getCellTimeStr(cell) {
+    return `${cell.colIdx + 1}, ${cell.timeRange
+      .map((t) => t.format('HH:mm'))
+      .join('~')}`
   }
 
   /**
@@ -181,7 +181,8 @@ export default class Schedule {
     const { x, y } = cell.getCoords()
 
     const { renderTooltip } = this.settings
-    const tooltipText = cell.data && renderTooltip ? renderTooltip(cell.data) : ''
+    const tooltipText =
+      cell.data && renderTooltip ? renderTooltip(cell.data) : ''
 
     return {
       x: x + cell.width,

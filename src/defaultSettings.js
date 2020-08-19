@@ -144,6 +144,20 @@ export default () => {
     headerTextColor: '#606266',
 
     /**
+     * 时间范围 key 值
+     * @param {string[]}
+     * @default 'timeRange'
+     */
+    timeRangeKey: 'timeRange',
+
+    /**
+     * icon 最大宽度
+     * @param {number}
+     * @default '36'
+     */
+    iconMaxWidth: 36,
+
+    /**
      * 颜色对应的 key 值
      * @param {number}
      * @default 'color'

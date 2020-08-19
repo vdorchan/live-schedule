@@ -39,8 +39,7 @@ export default class Cells extends BaseRender {
           parent: this,
           dashLine: true
         })
-        cell.setRenderer(this.draw)
-        cell.setTable(this.table)
+
         if (rowIdx === 0 && colIdx === 0) {
           cell.colSpan = 2
         }
@@ -69,17 +68,18 @@ export default class Cells extends BaseRender {
     this.cellHeight = cellHeight
   }
 
-  render() {
+  render(items) {
     if (!this._cells.length) this.init()
     this.adjust()
+    
+    items = this.table.sort(items || this.table.items)
 
-    const items = this.table.sort(this.table.items)
     let item = items.shift()
     let cellsToMerge
     this.cellsEach((cell) => {
       if (item && cell.colIdx === item.colIdx && cell.rowIdx === item.rowIdx) {
         cell.data = item.data
-        cellsToMerge = this.table.getEmptyCellsBetween(
+        cellsToMerge = this.table.getCellsBetween(
           cell,
           this.getCell(cell.colIdx, cell.rowIdx + item.rowSpan)
         )
@@ -116,7 +116,7 @@ export default class Cells extends BaseRender {
           stop = true
         }
 
-        if (cellTo && cellTo.isSame(cell)) colCells = null
+        if (cellTo && cellTo === cell) colCells = null
 
         reverse ? rowIdx-- : rowIdx++
       } else {

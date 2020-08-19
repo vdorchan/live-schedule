@@ -36,6 +36,89 @@ export function hexHasAlpha(hex) {
 export function arrayRemoveItem(array, callback) {
   const itemIndex = array.findIndex(callback)
   if (itemIndex > -1) {
-    array.splice(itemIndex, 1)
+    return array.splice(itemIndex, 1)[0]
   }
 }
+
+export function diffOwnProperties(a, b) {
+  if (a === b) {
+    return {
+      changed: 'equal',
+      value: a
+    }
+  }
+
+  const diff = {}
+  let equal = true
+  let keys = Object.keys(a)
+
+  for (let i = 0, length = keys.length; i < length; i++) {
+    const key = keys[i]
+    if (b.hasOwnProperty(key)) {
+      if (a[key] === b[key]) {
+        diff[key] = {
+          changed: 'equal',
+          value: a[key]
+        }
+      } else {
+        const typeA = typeof a[key]
+        const typeB = typeof b[key]
+        if (
+          a[key] &&
+          b[key] &&
+          (typeA == 'object' || typeA == 'function') &&
+          (typeB == 'object' || typeB == 'function')
+        ) {
+          const valueDiff = diffOwnProperties(a[key], b[key])
+          if (valueDiff.changed == 'equal') {
+            diff[key] = {
+              changed: 'equal',
+              value: a[key]
+            }
+          } else {
+            equal = false
+            diff[key] = valueDiff
+          }
+        } else {
+          equal = false
+          diff[key] = {
+            changed: 'primitive change',
+            removed: a[key],
+            added: b[key]
+          }
+        }
+      }
+    } else {
+      equal = false
+      diff[key] = {
+        changed: 'removed',
+        value: a[key]
+      }
+    }
+  }
+
+  keys = Object.keys(b)
+
+  for (let i = 0, length = keys.length; i < length; i++) {
+    let key = keys[i]
+    if (!a.hasOwnProperty(key)) {
+      equal = false
+      diff[key] = {
+        changed: 'added',
+        value: b[key]
+      }
+    }
+  }
+
+  if (equal) {
+    return {
+      value: a,
+      changed: 'equal'
+    }
+  } else {
+    return {
+      changed: 'object change',
+      value: diff
+    }
+  }
+};

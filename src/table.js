@@ -1,5 +1,6 @@
 import Draw from './draw'
 import ContextMenu from './contextMenu'
+import { arrayRemoveItem, diffOwnProperties } from './helper'
 
 /**
  * Table render and managing.
@@ -76,9 +77,37 @@ export default class Table {
     this.container = null
   }
 
-  setItems(items) {
+  setItems(items, oldItems) {
+    const itemsToDelete = [...oldItems]
+    const itemsToRender = []
+
+    items.forEach((item) => {
+      const oldItem = arrayRemoveItem(itemsToDelete, (i) => i.id === item.id)
+      if (oldItem) {
+        const diff = diffOwnProperties(item, oldItem)
+        if (diff.changed !== 'equal') {
+          itemsToRender.push(item)
+        }
+      } else {
+        itemsToRender.push(item)
+      }
+    })
+    this.cells.render(itemsToRender)
+    itemsToDelete.forEach((item) => {
+      const cell = this.getCell(item.colIdx, item.rowIdx)
+      if (cell) {
+        cell.getCell().delete()
+      }
+    })
+
     this.items = items
-    this.cells.refresh()
+  }
+
+  resize() {
+    if (tableWidth === this.tableWidth && tableHeight === this.tableHeight) {
+      return
+    }
+    this.render()
   }
 
   /**
@@ -87,6 +116,9 @@ export default class Table {
    * @param {number} tableHeight Height of Table.
    */
   render(tableWidth, tableHeight) {
+    this.tableWidth = tableWidth
+    this.tableHeight = tableHeight
+
     if (!this.draw) {
       this.draw = new Draw(this.canvas, tableWidth, tableHeight)
     } else {
@@ -100,7 +132,7 @@ export default class Table {
       numberOfRows,
       cellBorderWidth,
       colHeaderWidth,
-      timeScale
+      timeScale,
     } = this.settings
     /**
      * Set global font config.
@@ -201,7 +233,7 @@ export default class Table {
    */
   sort(cells, reverse) {
     const judge = (a, b) => (reverse ? a > b : a < b)
-    return cells.sort((a, b) => {
+    return [...cells].sort((a, b) => {
       if (judge(a.colIdx, b.colIdx)) {
         return -1
       } else if (a.colIdx === b.colIdx) {
@@ -214,14 +246,15 @@ export default class Table {
    *
    * @param {Cell} cellFrom
    * @param {Cell} cellTo
+   * @param {Function} filter
    */
-  getEmptyCellsBetween(cellFrom, cellTo) {
+  getCellsBetween(cellFrom, cellTo, filter) {
     const [_cellFrom, _cellTo] = this.sort([cellFrom, cellTo])
 
     const cellsBetween = []
     this.cellsEach(
       (cell) => {
-        if (cell.hasData() && !cell.isSame(_cellFrom)) {
+        if (filter && filter(cell)) {
           return false
         }
         cellsBetween.push(cell)
@@ -230,6 +263,19 @@ export default class Table {
     )
 
     return cellsBetween
+  }
+
+  /**
+   *
+   * @param {Cell} cellFrom
+   * @param {Cell} cellTo
+   */
+  getEmptyCellsBetween(cellFrom, cellTo) {
+    return this.getCellsBetween(
+      cellFrom,
+      cellTo,
+      (cell) => cell.hasData() && !cell.isSame(_cellFrom)
+    )
   }
 
   /**
