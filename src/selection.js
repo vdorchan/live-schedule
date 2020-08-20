@@ -62,7 +62,9 @@ export default class Section {
 
         cellsToMergedList.push(cellsToMerged)
 
-        arrayRemoveItem(_batchedCells, (cell) => cell.colIdx === idx)
+        arrayRemoveItem(_batchedCells, (cell) =>
+          cellsToMerged.some((c) => c.colIdx === cell.getCell().colIdx)
+        )
       },
       this.colFrom,
       colIdx
@@ -120,10 +122,12 @@ export default class Section {
     numberEach(
       (idx) => {
         const cell = this.table.getCell(colFrom, idx)
-        if (!currentCell.isSame(cell) && cell.getCell().hasData()) {
-          return false
+        if (cell) {
+          if (!currentCell.isSame(cell) && cell.getCell().hasData()) {
+            return false
+          }
+          emptyColCells.push(cell)
         }
-        emptyColCells.push(cell)
       },
       rowFrom,
       rowTo
@@ -137,7 +141,7 @@ export default class Section {
       return this.getEmptyCellsAtCol(colIdx, this.rowFrom, rowIdx)
     } else if (this.positionOfAdjustment === 'down') {
       return this.getEmptyCellsAtCol(
-        colIdx,
+        this.colFrom,
         this.rowFrom,
         Math.max(
           this.rowFrom,
@@ -145,10 +149,11 @@ export default class Section {
         )
       )
     } else if (this.positionOfAdjustment === 'up') {
+      const rowTo = this.rowFrom + this.rowSpan - 1
       return this.getEmptyCellsAtCol(
-        colIdx,
-        rowIdx,
-        this.rowFrom + this.rowSpan
+        this.colFrom,
+        Math.min(rowTo, rowIdx),
+        rowTo
       )
     }
   }
