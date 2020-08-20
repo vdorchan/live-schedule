@@ -1,6 +1,6 @@
 {
-  "name": "schedule",
-  "version": "1.0.0",
+  "name": "@molife/schedule",
+  "version": "0.0.1",
   "main": "dist/schedule.min.js",
   "module": "dist/schedule.esm.js",
   "license": "MIT",
@@ -39,5 +39,14 @@
     "rollup-plugin-terser": "^6.1.0",
     "rollup-plugin-vue": "5.0.0",
     "vue-template-compiler": "^2.6.11"
-  }
+  },
+  "description": "> 日程排期表 >",
+  "directories": {
+    "example": "example"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@47.111.115.117:chenwudong/schedule.git"
+  },
+  "author": ""
 }
