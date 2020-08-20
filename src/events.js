@@ -57,6 +57,8 @@ export default class Events {
    *
    */
   onMouseDown(event) {
+    event.preventDefault()
+
     if (event.target.classList.contains(CONTEXTMENU_ITEM_CLASS)) {
       return
     }
@@ -96,6 +98,8 @@ export default class Events {
    *
    */
   onMouseUp() {
+    event.preventDefault()
+
     const { currentSelection } = this.table
     if (currentSelection) {
       this.table.highlightSelections()
@@ -107,6 +111,8 @@ export default class Events {
    *
    */
   onMouseMove(event) {
+    event.preventDefault()
+
     const coord = this.getCoords(event)
     const cell = this.table.getCellByCoord(coord)
 
