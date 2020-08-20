@@ -119,11 +119,15 @@ export default class Draw {
 
     const drawLine = (border, from, to) => {
       ctx.beginPath()
-      ctx.setLineDash(border === 'dash' ? [1, 4] : [])
       ctx.strokeStyle = border ? borderColor : fill
       ctx.moveTo(...from)
       ctx.lineTo(...to)
       ctx.stroke()
+      if (border === 'dash') {
+        ctx.setLineDash([5, 6])
+        drawLine(false, from, to)
+        ctx.setLineDash([])
+      }
     }
 
     const right = x + borderWidth * 2 + width
