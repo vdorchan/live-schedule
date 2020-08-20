@@ -157,13 +157,6 @@ export default class Table {
       (tableWidth - cellBorderWidth - colHeaderWidth) / numberOfCols
     )
 
-    // To fill the table.
-    const restWidth =
-      tableWidth -
-      this.cellWidth * numberOfCols -
-      colHeaderWidth -
-      cellBorderWidth
-    this.settings.colHeaderWidth += restWidth
 
     // calculate height of row.
     const totalNumberOfRows = numberOfRows + (this.rowHeader ? 1 : 0)
