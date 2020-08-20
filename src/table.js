@@ -1,6 +1,6 @@
 import Draw from './draw'
 import ContextMenu from './contextMenu'
-import { arrayRemoveItem, diffOwnProperties } from './helper'
+import { arrayRemoveItem, diffOwnProperties, diff } from './helper'
 
 /**
  * Table render and managing.
@@ -82,10 +82,13 @@ export default class Table {
     const itemsToRender = []
 
     items.forEach((item) => {
-      const oldItem = arrayRemoveItem(itemsToDelete, (i) => i.colIdx === item.colIdx && i.rowIdx && item.rowIdx)
+      const oldItem = arrayRemoveItem(
+        itemsToDelete,
+        (i) => i.colIdx === item.colIdx && i.rowIdx === item.rowIdx
+      )
       if (oldItem) {
-        const diff = diffOwnProperties(item, oldItem)
-        if (diff.changed !== 'equal') {
+        const changedKeys = diff(item.data, oldItem.data)
+        if (changedKeys.length) {
           itemsToRender.push(item)
         }
       } else {
@@ -102,7 +105,6 @@ export default class Table {
         this.currentSelection.deleteCell(cell)
       }
     })
-
 
     this.items = items
   }

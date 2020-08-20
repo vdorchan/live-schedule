@@ -40,85 +40,47 @@ export function arrayRemoveItem(array, callback) {
   }
 }
 
-export function diffOwnProperties(a, b) {
-  if (a === b) {
-    return {
-      changed: 'equal',
-      value: a
-    }
+export function isSame(a, b) {
+  const aType = typeof a
+  const bType = typeof b
+  if (aType !== bType) {
+    return false
   }
-
-  const diff = {}
-  let equal = true
-  let keys = Object.keys(a)
-
-  for (let i = 0, length = keys.length; i < length; i++) {
-    const key = keys[i]
-    if (b.hasOwnProperty(key)) {
-      if (a[key] === b[key]) {
-        diff[key] = {
-          changed: 'equal',
-          value: a[key]
-        }
-      } else {
-        const typeA = typeof a[key]
-        const typeB = typeof b[key]
-        if (
-          a[key] &&
-          b[key] &&
-          (typeA == 'object' || typeA == 'function') &&
-          (typeB == 'object' || typeB == 'function')
-        ) {
-          const valueDiff = diffOwnProperties(a[key], b[key])
-          if (valueDiff.changed == 'equal') {
-            diff[key] = {
-              changed: 'equal',
-              value: a[key]
-            }
-          } else {
-            equal = false
-            diff[key] = valueDiff
-          }
-        } else {
-          equal = false
-          diff[key] = {
-            changed: 'primitive change',
-            removed: a[key],
-            added: b[key]
-          }
-        }
-      }
-    } else {
-      equal = false
-      diff[key] = {
-        changed: 'removed',
-        value: a[key]
-      }
-    }
+  const type = aType
+  if (
+    ['string', 'number', 'undefined'].includes(type) ||
+    a === null ||
+    b === null
+  ) {
+    return a === b
   }
-
-  keys = Object.keys(b)
-
-  for (let i = 0, length = keys.length; i < length; i++) {
-    let key = keys[i]
-    if (!a.hasOwnProperty(key)) {
-      equal = false
-      diff[key] = {
-        changed: 'added',
-        value: b[key]
-      }
-    }
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.every((item, idx) => isSame(item, b[idx]))
   }
-
-  if (equal) {
-    return {
-      value: a,
-      changed: 'equal'
-    }
-  } else {
-    return {
-      changed: 'object change',
-      value: diff
-    }
+  if (type === 'object') {
+    const aKeys = Object.keys(a)
+    const bKeys = Object.keys(b)
+    return (
+      aKeys.length === bKeys.length &&
+      aKeys.every((key) => isSame(a[key], b[key]))
+    )
   }
-};
+  return true
+}
+
+export function diff(a, b) {
+  const aKeys = Object.keys(a)
+  const bKeys = Object.keys(b)
+  const changedKeys = []
+
+  new Set([...aKeys, ...bKeys]).forEach((key) => {
+    if (
+      !aKeys.includes(key) ||
+      !bKeys.includes(key) ||
+      !isSame(a[key], b[key])
+    ) {
+      changedKeys.push({ key, value: [ a[key], b[key] ] })
+    }
+  })
+  return changedKeys
+}
