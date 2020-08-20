@@ -82,7 +82,7 @@ export default class Table {
     const itemsToRender = []
 
     items.forEach((item) => {
-      const oldItem = arrayRemoveItem(itemsToDelete, (i) => i.id === item.id)
+      const oldItem = arrayRemoveItem(itemsToDelete, (i) => i.colIdx === item.colIdx && i.rowIdx && item.rowIdx)
       if (oldItem) {
         const diff = diffOwnProperties(item, oldItem)
         if (diff.changed !== 'equal') {
@@ -92,22 +92,26 @@ export default class Table {
         itemsToRender.push(item)
       }
     })
-    this.cells.render(itemsToRender)
+
+    if (itemsToRender.length) {
+      this.cells.render(itemsToRender)
+    }
     itemsToDelete.forEach((item) => {
       const cell = this.getCell(item.colIdx, item.rowIdx)
-      if (cell) {
-        cell.getCell().delete()
+      if (cell.hasData()) {
+        this.currentSelection.deleteCell(cell)
       }
     })
+
 
     this.items = items
   }
 
-  resize() {
+  resize(tableWidth, tableHeight) {
     if (tableWidth === this.tableWidth && tableHeight === this.tableHeight) {
       return
     }
-    this.render()
+    this.render(tableWidth, tableHeight)
   }
 
   /**
@@ -147,15 +151,23 @@ export default class Table {
     this.colHeader.setRenderer(this.draw)
 
     // calculate width of col.
-    this.cellWidth = Math.floor((tableWidth - cellBorderWidth - colHeaderWidth) / numberOfCols)
+    this.cellWidth = Math.floor(
+      (tableWidth - cellBorderWidth - colHeaderWidth) / numberOfCols
+    )
 
     // To fill the table.
-    const restWidth = tableWidth - this.cellWidth * numberOfCols - colHeaderWidth - cellBorderWidth
+    const restWidth =
+      tableWidth -
+      this.cellWidth * numberOfCols -
+      colHeaderWidth -
+      cellBorderWidth
     this.settings.colHeaderWidth += restWidth
 
     // calculate height of row.
     const totalNumberOfRows = numberOfRows + (this.rowHeader ? 1 : 0)
-    this.cellHeight = Math.floor((tableHeight - cellBorderWidth) / totalNumberOfRows) * timeScale
+    this.cellHeight =
+      Math.floor((tableHeight - cellBorderWidth) / totalNumberOfRows) *
+      timeScale
 
     // Set width of height of row header.
     this.settings.rowHeaderHeight = this.cellHeight / timeScale

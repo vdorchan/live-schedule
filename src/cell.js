@@ -432,6 +432,7 @@ export default class Cell extends BaseRender {
   }
 
   delete() {
+    this.deselect()
     this.clear()
   }
 

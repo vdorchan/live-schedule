@@ -221,8 +221,13 @@ export default class Section {
     this.batchedCells.map((cell) => this.table.highlights.show(cell.getCell()))
   }
 
-  deleteCell() {
-    this.deselect()
-    this.getCell().clear()
+  deleteCell(cell) {
+    const selectedCell = this.getCell()
+    const cellToDelete = cell || selectedCell
+    if (cellToDelete.isSame(selectedCell)) {
+      this.deselect()
+    }
+
+    cellToDelete.delete()
   }
 }
