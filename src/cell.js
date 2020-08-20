@@ -248,7 +248,7 @@ export default class Cell extends BaseRender {
       y = y - (((texts || []).length + (icon ? 1 : 0) - 1) / 2) * lineHeight
 
       if (icon && this.height > this.width) {
-        const imgSize = Math.min(this.width - 5, this.iconMaxWidth)
+        const imgSize = Math.min(this.width - 5, iconMaxWidth)
 
         this.draw.image({
           src: icon,
