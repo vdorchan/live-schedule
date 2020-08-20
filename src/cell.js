@@ -191,7 +191,7 @@ export default class Cell extends BaseRender {
       fill: cellColor,
       borderColor: cellBorderColor,
       borderWidth: cellBorderWidth,
-      ...(this.dashLine
+      ...(this.dashLine && !this.hasData()
         ? {
             borderTop: rowIdx % (1 / 0.5) !== 0 ? 'dash' : true,
             borderBottom: rowIdx % (1 / 0.5) === 0 ? 'dash' : true,
@@ -261,7 +261,7 @@ export default class Cell extends BaseRender {
       }
 
       if (texts) {
-        const maxFontLength = this.width / parseInt(fontSize)
+        const maxFontLength = this.width / parseInt(fontSize) + 1
         const posList = texts.forEach((text) => {
           this.draw.text({
             text: String(text).slice(0, maxFontLength),
