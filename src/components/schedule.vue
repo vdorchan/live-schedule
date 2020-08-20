@@ -41,6 +41,10 @@ export default {
     setDataAtSelectedCell (...args) {
       return this.schedule.setDataAtSelectedCell(...args)
     },
+
+    getCanvas () {
+      return this.schedule.getCanvas()
+    }
   },
 
   mounted () {

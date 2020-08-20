@@ -224,6 +224,10 @@ export default class Schedule {
       this.table.currentSelection.deleteCell()
     }
   }
+
+  getCanvas() {
+    return this.canvas
+  }
 }
 
 Object.assign(Schedule.prototype, eventMixin)
