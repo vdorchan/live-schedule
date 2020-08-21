@@ -61,8 +61,8 @@ export default class Schedule {
       userSettings.contextMenuItems || [],
       [{ action: 'delete', title: '删除' }]
     )
-
-    this.settings.yearMonth = dayjs(userSettings.yearMonth || dayjs().format('YYYY-MM'))
+    
+    this.settings.yearMonth = dayjs(userSettings.yearMonth || '')
     this.settings.numberOfCols = this.settings.yearMonth.daysInMonth()
 
     const items = this.getItemsFromData(this.settings.data)
