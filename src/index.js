@@ -61,8 +61,8 @@ export default class Schedule {
       userSettings.contextMenuItems || [],
       [{ action: 'delete', title: '删除' }]
     )
-    
-    this.settings.yearMonth = dayjs(userSettings.yearMonth || undefined)
+
+    this.settings.yearMonth = dayjs(userSettings.yearMonth)
     this.settings.numberOfCols = this.settings.yearMonth.daysInMonth()
 
     const items = this.getItemsFromData(this.settings.data)
@@ -98,7 +98,7 @@ export default class Schedule {
   }
 
   render() {
-    const { width, height  } = this.rootNode.getBoundingClientRect()
+    const { width, height } = this.rootNode.getBoundingClientRect()
     this.table.render(width, height)
 
     const ro = new ResizeObserver((entries, _) => {
@@ -157,7 +157,7 @@ export default class Schedule {
 
   getData() {
     const data = []
-    this.table.cellGroupsEach(cell => {
+    this.table.cellGroupsEach((cell) => {
       if (cell.hasData()) {
         data.push(cell.data)
       }
