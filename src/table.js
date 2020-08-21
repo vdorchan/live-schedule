@@ -1,6 +1,6 @@
 import Draw from './draw'
 import ContextMenu from './contextMenu'
-import { arrayRemoveItem, diffOwnProperties, diff } from './helper'
+import { arrayRemoveItem, diff } from './helper'
 
 /**
  * Table render and managing.
