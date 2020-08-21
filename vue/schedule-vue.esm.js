@@ -531,86 +531,45 @@ function arrayRemoveItem(array, callback) {
     return array.splice(itemIndex, 1)[0];
   }
 }
-function diffOwnProperties(a, b) {
-  if (a === b) {
-    return {
-      changed: 'equal',
-      value: a
-    };
+function isSame(a, b) {
+  const aType = typeof a;
+  const bType = typeof b;
+
+  if (aType !== bType) {
+    return false;
   }
 
-  const diff = {};
-  let equal = true;
-  let keys = Object.keys(a);
+  const type = aType;
 
-  for (let i = 0, length = keys.length; i < length; i++) {
-    const key = keys[i];
+  if (['string', 'number', 'undefined'].includes(type) || a === null || b === null) {
+    return a === b;
+  }
 
-    if (b.hasOwnProperty(key)) {
-      if (a[key] === b[key]) {
-        diff[key] = {
-          changed: 'equal',
-          value: a[key]
-        };
-      } else {
-        const typeA = typeof a[key];
-        const typeB = typeof b[key];
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.every((item, idx) => isSame(item, b[idx]));
+  }
 
-        if (a[key] && b[key] && (typeA == 'object' || typeA == 'function') && (typeB == 'object' || typeB == 'function')) {
-          const valueDiff = diffOwnProperties(a[key], b[key]);
+  if (type === 'object') {
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+    return aKeys.length === bKeys.length && aKeys.every(key => isSame(a[key], b[key]));
+  }
 
-          if (valueDiff.changed == 'equal') {
-            diff[key] = {
-              changed: 'equal',
-              value: a[key]
-            };
-          } else {
-            equal = false;
-            diff[key] = valueDiff;
-          }
-        } else {
-          equal = false;
-          diff[key] = {
-            changed: 'primitive change',
-            removed: a[key],
-            added: b[key]
-          };
-        }
-      }
-    } else {
-      equal = false;
-      diff[key] = {
-        changed: 'removed',
-        value: a[key]
-      };
+  return true;
+}
+function diff(a, b) {
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  const changedKeys = [];
+  new Set([...aKeys, ...bKeys]).forEach(key => {
+    if (!aKeys.includes(key) || !bKeys.includes(key) || !isSame(a[key], b[key])) {
+      changedKeys.push({
+        key,
+        value: [a[key], b[key]]
+      });
     }
-  }
-
-  keys = Object.keys(b);
-
-  for (let i = 0, length = keys.length; i < length; i++) {
-    let key = keys[i];
-
-    if (!a.hasOwnProperty(key)) {
-      equal = false;
-      diff[key] = {
-        changed: 'added',
-        value: b[key]
-      };
-    }
-  }
-
-  if (equal) {
-    return {
-      value: a,
-      changed: 'equal'
-    };
-  } else {
-    return {
-      changed: 'object change',
-      value: diff
-    };
-  }
+  });
+  return changedKeys;
 }
 
 function dpr() {
@@ -753,11 +712,16 @@ class Draw {
 
     const drawLine = (border, from, to) => {
       ctx.beginPath();
-      ctx.setLineDash(border === 'dash' ? [1, 4] : []);
       ctx.strokeStyle = border ? borderColor : fill;
       ctx.moveTo(...from);
       ctx.lineTo(...to);
       ctx.stroke();
+
+      if (border === 'dash') {
+        ctx.setLineDash([5, 6]);
+        drawLine(false, from, to);
+        ctx.setLineDash([]);
+      }
     };
 
     const right = x + borderWidth * 2 + width;
@@ -908,12 +872,12 @@ class Table {
     const itemsToDelete = [...oldItems];
     const itemsToRender = [];
     items.forEach(item => {
-      const oldItem = arrayRemoveItem(itemsToDelete, i => i.colIdx === item.colIdx && i.rowIdx && item.rowIdx);
+      const oldItem = arrayRemoveItem(itemsToDelete, i => i.colIdx === item.colIdx && i.rowIdx === item.rowIdx);
 
       if (oldItem) {
-        const diff = diffOwnProperties(item, oldItem);
+        const changedKeys = diff(item.data, oldItem.data);
 
-        if (diff.changed !== 'equal') {
+        if (changedKeys.length) {
           itemsToRender.push(item);
         }
       } else {
@@ -981,10 +945,7 @@ class Table {
     this.rowHeader.setRenderer(this.draw);
     this.colHeader.setRenderer(this.draw); // calculate width of col.
 
-    this.cellWidth = Math.floor((tableWidth - cellBorderWidth - colHeaderWidth) / numberOfCols); // To fill the table.
-
-    const restWidth = tableWidth - this.cellWidth * numberOfCols - colHeaderWidth - cellBorderWidth;
-    this.settings.colHeaderWidth += restWidth; // calculate height of row.
+    this.cellWidth = Math.floor((tableWidth - cellBorderWidth - colHeaderWidth) / numberOfCols); // calculate height of row.
 
     const totalNumberOfRows = numberOfRows + (this.rowHeader ? 1 : 0);
     this.cellHeight = Math.floor((tableHeight - cellBorderWidth) / totalNumberOfRows) * timeScale; // Set width of height of row header.
@@ -1506,7 +1467,7 @@ class Cell extends BaseRender {
       fill: cellColor,
       borderColor: cellBorderColor,
       borderWidth: cellBorderWidth,
-      ...(this.dashLine ? {
+      ...(this.dashLine && !this.hasData() ? {
         borderTop: rowIdx % (1 / 0.5) !== 0 ? 'dash' : true,
         borderBottom: rowIdx % (1 / 0.5) === 0 ? 'dash' : true
       } : {})
@@ -1586,7 +1547,7 @@ class Cell extends BaseRender {
       }
 
       if (texts) {
-        const maxFontLength = this.width / parseInt(fontSize);
+        const maxFontLength = this.width / parseInt(fontSize) + 1;
         const posList = texts.forEach(text => {
           this.draw.text({
             text: String(text).slice(0, maxFontLength),
@@ -2396,7 +2357,7 @@ class Section {
       }
 
       cellsToMergedList.push(cellsToMerged);
-      arrayRemoveItem(_batchedCells, cell => cell.colIdx === idx);
+      arrayRemoveItem(_batchedCells, cell => cellsToMerged.some(c => c.colIdx === cell.getCell().colIdx));
     }, this.colFrom, colIdx);
     const maxNumberOfMerge = cellsToMergedList.reduce((prev, current) => Math.min(prev, current.length), cellsToMergedList[0].length);
     cellsToMergedList.forEach(cellsToMerged => {
@@ -2441,11 +2402,13 @@ class Section {
     numberEach(idx => {
       const cell = this.table.getCell(colFrom, idx);
 
-      if (!currentCell.isSame(cell) && cell.getCell().hasData()) {
-        return false;
-      }
+      if (cell) {
+        if (!currentCell.isSame(cell) && cell.getCell().hasData()) {
+          return false;
+        }
 
-      emptyColCells.push(cell);
+        emptyColCells.push(cell);
+      }
     }, rowFrom, rowTo);
     return rowFrom > rowTo ? emptyColCells.reverse() : emptyColCells;
   }
@@ -2454,9 +2417,10 @@ class Section {
     if (!this.positionOfAdjustment && !this.cell.hasData()) {
       return this.getEmptyCellsAtCol(colIdx, this.rowFrom, rowIdx);
     } else if (this.positionOfAdjustment === 'down') {
-      return this.getEmptyCellsAtCol(colIdx, this.rowFrom, Math.max(this.rowFrom, rowIdx - this.rowIdxOfLastCell + this.rowFrom + this.rowSpan - 1));
+      return this.getEmptyCellsAtCol(this.colFrom, this.rowFrom, Math.max(this.rowFrom, rowIdx - this.rowIdxOfLastCell + this.rowFrom + this.rowSpan - 1));
     } else if (this.positionOfAdjustment === 'up') {
-      return this.getEmptyCellsAtCol(colIdx, rowIdx, this.rowFrom + this.rowSpan);
+      const rowTo = this.rowFrom + this.rowSpan - 1;
+      return this.getEmptyCellsAtCol(this.colFrom, Math.min(rowTo, rowIdx), rowTo);
     }
   }
   /**
@@ -2774,6 +2738,8 @@ class Events {
 
 
   onMouseDown(event) {
+    event.preventDefault();
+
     if (event.target.classList.contains(CONTEXTMENU_ITEM_CLASS)) {
       return;
     }
@@ -2817,6 +2783,7 @@ class Events {
 
 
   onMouseUp() {
+    event.preventDefault();
     const {
       currentSelection
     } = this.table;
@@ -2832,6 +2799,7 @@ class Events {
 
 
   onMouseMove(event) {
+    event.preventDefault();
     const coord = this.getCoords(event);
     const cell = this.table.getCellByCoord(coord);
     const {
@@ -3236,7 +3204,7 @@ class Schedule {
       action: 'delete',
       title: '删除'
     }]);
-    this.settings.yearMonth = dayjs_min(userSettings.yearMonth || dayjs_min().format('YYYY-MM'));
+    this.settings.yearMonth = dayjs_min(userSettings.yearMonth || undefined);
     this.settings.numberOfCols = this.settings.yearMonth.daysInMonth();
     const items = this.getItemsFromData(this.settings.data); // Create table renderer for the schedule.
 

@@ -48,5 +48,8 @@
     "type": "git",
     "url": "git@47.111.115.117:chenwudong/schedule.git"
   },
-  "author": ""
+  "author": "",
+  "publishConfig" : {
+    "registry" : "http://47.111.115.117:9082/repository/moli-npm-hosted/"
+  }
 }
