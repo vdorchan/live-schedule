@@ -398,8 +398,10 @@ export default class Table {
   showContextMenu(coord) {
     if (this.currentSelection) {
       const cell = this.currentSelection.getCell()
-      this.tooltip.hide()
-      this.contextMenu.show(coord)
+      if (cell.hasData(true)) {
+        this.tooltip.hide()
+        this.contextMenu.show(coord)
+      }
     }
   }
 }
