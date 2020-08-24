@@ -373,32 +373,28 @@ export default class Cell extends BaseRender {
     }
 
     const oriMergedCells = this.__actualCell.mergedCells
-    oriMergedCells
-      .filter((cell) => !cellsToMerge.includes(cell))
-      .forEach((cell) => {
-        cell.init()
-        cell.unMerge()
-        cell.render()
+    const cellsToRender = []
+
+    ;[...oriMergedCells, ...cellsToMerge]
+      .filter(cell => cell !== actualCell)
+      .forEach(cell => {
+        if (!cellsToRender.find(c => c.isSamePosition(cell))) {
+          cell.init()
+          cell.unMerge()
+          cellsToRender.push(cell)
+        }
+
+        if (cellsToMerge.includes(cell)) {
+          cell.__actualCell = actualCell
+        }
       })
 
-    actualCell.mergedCells = cellsToMerge
+    actualCell.mergedCells = [...cellsToMerge]
+    actualCell.__actualCell = actualCell
+    cellsToRender.push(actualCell)
+    cellsToRender.forEach(cell => cell.render())
 
-    // delete the cell if meet other merged cell
-    cellsToMerge.map((cell) => {
-      if (cell.getCell() !== actualCell && cell.getRowSpan() > 1) {
-        cell.delete()
-      }
-      cell.__actualCell = actualCell
-
-      // render if col is crowss col
-      if (cell.isCrossCol()) {
-        cell.render()
-      }
-    })
-
-    actualCell.render()
-
-    this.setTimeRange()
+    actualCell.setTimeRange()
 
     return actualCell
   }
@@ -450,6 +446,10 @@ export default class Cell extends BaseRender {
 
   isSame(cell) {
     return this.getCell() === cell.getCell()
+  }
+
+  isSamePosition(cell) {
+    return this.colIdx === cell.colIdx && this.rowIdx === cell.rowIdx
   }
 
   isVisible() {
