@@ -19,12 +19,15 @@ export default class Draw {
 
   _getImage(src) {
     return new Promise((resolve) => {
-      let img = this.__cacheImgs.find((i) => i === src)
+      let img = this.__cacheImgs.find((i) => i.src === location.origin + src)
       if (img) {
         return resolve(img)
       }
       img = new Image()
-      img.onload = () => resolve(img)
+      img.onload = () => {
+        this.__cacheImgs.push(img)
+        resolve(img)
+      }
       img.src = src
     })
   }
