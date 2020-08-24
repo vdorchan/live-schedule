@@ -101,7 +101,11 @@ export default class Table {
     itemsToDelete.forEach(item => {
       const cell = this.getCell(item.colIdx, item.rowIdx)
       if (cell.hasData()) {
-        this.currentSelection.deleteCell(cell)
+        if (this.currentSelection) {
+          this.currentSelection.deleteCell(cell)
+        } else {
+          cell.delete()
+        }
       }
     })
 
