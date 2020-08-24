@@ -244,25 +244,39 @@ export default class Cell extends BaseRender {
     let { x, y } = this.getCoords(true)
     if (texts || icon) {
       const { fontSize, fontColor, lineHeight, iconMaxWidth } = this.table.settings
+      const imgPadding = 5
+      const imgSize = Math.min(this.width - imgPadding, iconMaxWidth)
+      let maxNumberOfLines = 0
+      if (this.height < imgSize + lineHeight) {
+        if (texts || this.height < (imgSize + imgPadding)) {
+          icon = null
+          maxNumberOfLines = 1
+        }
+      } else if (texts) {
+        maxNumberOfLines = Math.min(
+          texts.length,
+          Math.floor((this.height - (icon ? imgSize : 0)) / lineHeight)
+        )
+      }
+      texts = texts.slice(0, maxNumberOfLines)
 
-      y = y - (((texts || []).length + (icon ? 1 : 0) - 1) / 2) * lineHeight
+      y -= (maxNumberOfLines - 1) / 2 * lineHeight
 
-      if (icon && this.height > this.width) {
-        const imgSize = Math.min(this.width - 5, iconMaxWidth)
-
+      if (icon) {
+        y -= imgSize
         this.draw.image({
           src: icon,
           x: x - imgSize / 2,
-          y: y - imgSize / 2,
+          y: y,
           width: imgSize,
           height: imgSize,
         })
-        y += lineHeight
+        y += imgPadding + lineHeight
       }
 
       if (texts) {
         const maxFontLength = this.width / parseInt(fontSize) + 1
-        const posList = texts.forEach((text) => {
+        texts.forEach((text) => {
           this.draw.text({
             text: String(text).slice(0, maxFontLength),
             x,
