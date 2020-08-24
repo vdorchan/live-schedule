@@ -571,6 +571,9 @@ function diff(a, b) {
   });
   return changedKeys;
 }
+function formatTimeRange(timeRange, formatStr) {
+  return timeRange.map(t => t.format(formatStr));
+}
 
 function dpr() {
   return window.devicePixelRatio || 1;
@@ -791,6 +794,59 @@ class ContextMenu {
   }
 
 }
+
+const events$1 = {
+  CONTEXT_MENU_ITEM_SELECT: 'contextMenuItemSelect',
+  SELECTE: 'select',
+  DATA_CHANGE: 'dataChange',
+  TIME_RANGE_CHANGE: 'timeRangeChange'
+};
+const eventMixin = {
+  /**
+   * Subscribe to event, usage:
+   *  schedule.on('select', (item) => { ... }
+   */
+  on(eventName, handler) {
+    if (!this._eventHandlers) this._eventHandlers = {};
+
+    if (!this._eventHandlers[eventName]) {
+      this._eventHandlers[eventName] = [];
+    }
+
+    this._eventHandlers[eventName].push(handler);
+  },
+
+  /**
+   * Cancel the subscription, usage:
+   *  schedule.off('select', handler)
+   */
+  off(eventName, handler) {
+    const handlers = this._eventHandlers[eventName];
+    if (!handlers) return;
+
+    for (let i = 0; i < handlers.length; i++) {
+      if (handlers[i] === handler) {
+        handlers.splice(i--, 1);
+      }
+    }
+  },
+
+  /**
+   * Generate an event with the given name and data
+   *  this.emit('select', ...)
+   */
+  emit(eventName, ...args) {
+    if (!this._eventHandlers || !this._eventHandlers[eventName] || !this._eventHandlers[eventName].length) {
+      return false; // no handlers for that event name
+    } // call the handlers
+
+
+    this._eventHandlers[eventName].forEach(handler => handler.apply(this, args));
+
+    return true;
+  }
+
+};
 
 /**
  * Table render and managing.
@@ -1165,11 +1221,41 @@ class Table {
     this.selections = [];
   }
 
+  getSelections() {
+    return this.selections;
+  }
+
+  finishSelection() {
+    const {
+      currentSelection,
+      selections
+    } = this;
+
+    if (currentSelection) {
+      this.highlightSelections();
+      currentSelection.finish();
+      const selectedItems = [];
+      this.selections.forEach(selection => selection.batchedCells.forEach(cell => selectedItems.push({
+        data: cell.data,
+        timeRange: cell.timeRange.map(t => t.format('YYYY-MM-DD HH:mm:ss'))
+      })));
+      this.schedule.emit(events$1.SELECTE, selectedItems);
+      const currentCell = currentSelection.getCell();
+
+      if (currentCell.data && currentCell.data.liveTime && currentCell.timeRange.some((t, idx) => !t.isSame(currentCell.data.liveTime[idx]))) {
+        this.schedule.emit(events$1.TIME_RANGE_CHANGE, formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss'));
+      }
+    }
+  }
+
   showContextMenu(coord) {
     if (this.currentSelection) {
       const cell = this.currentSelection.getCell();
-      this.tooltip.hide();
-      this.contextMenu.show(coord);
+
+      if (cell.hasData(true)) {
+        this.tooltip.hide();
+        this.contextMenu.show(coord);
+      }
     }
   }
 
@@ -1212,58 +1298,6 @@ class BaseRender {
   }
 
 }
-
-const events$1 = {
-  CONTEXT_MENU_ITEM_SELECT: 'contextMenuItemSelect',
-  SELECTE: 'select',
-  DATA_CHANGE: 'dataChange'
-};
-const eventMixin = {
-  /**
-   * Subscribe to event, usage:
-   *  schedule.on('select', (item) => { ... }
-   */
-  on(eventName, handler) {
-    if (!this._eventHandlers) this._eventHandlers = {};
-
-    if (!this._eventHandlers[eventName]) {
-      this._eventHandlers[eventName] = [];
-    }
-
-    this._eventHandlers[eventName].push(handler);
-  },
-
-  /**
-   * Cancel the subscription, usage:
-   *  schedule.off('select', handler)
-   */
-  off(eventName, handler) {
-    const handlers = this._eventHandlers[eventName];
-    if (!handlers) return;
-
-    for (let i = 0; i < handlers.length; i++) {
-      if (handlers[i] === handler) {
-        handlers.splice(i--, 1);
-      }
-    }
-  },
-
-  /**
-   * Generate an event with the given name and data
-   *  this.emit('select', ...)
-   */
-  emit(eventName, ...args) {
-    if (!this._eventHandlers || !this._eventHandlers[eventName] || !this._eventHandlers[eventName].length) {
-      return false; // no handlers for that event name
-    } // call the handlers
-
-
-    this._eventHandlers[eventName].forEach(handler => handler.apply(this, args));
-
-    return true;
-  }
-
-};
 
 /**
  * @class {Cell}
@@ -1679,8 +1713,13 @@ class Cell extends BaseRender {
       cell.unMerge();
       cell.render();
     });
-    actualCell.mergedCells = cellsToMerge;
+    actualCell.mergedCells = cellsToMerge; // delete the cell if meet other merged cell
+
     cellsToMerge.map(cell => {
+      if (cell.getCell() !== actualCell && cell.getRowSpan() > 1) {
+        cell.delete();
+      }
+
       cell.__actualCell = actualCell; // render if col is crowss col
 
       if (cell.isCrossCol()) {
@@ -1695,6 +1734,7 @@ class Cell extends BaseRender {
   unMerge() {
     this.mergedCells = [this];
     this.setTimeRange();
+    return this;
   }
 
   getColHeight(includesMerged) {
@@ -1737,6 +1777,10 @@ class Cell extends BaseRender {
 
   isVisible() {
     return this.__actualCell === this;
+  }
+
+  isSelected() {
+    return this.getCell().selected;
   }
 
   hasData(includesMerged) {
@@ -2348,11 +2392,15 @@ class Section {
     const _batchedCells = [...this.batchedCells];
     this.batchedCells = [];
     const cellsToMergedList = [];
-    this.schedule.showTooltip(this.table.getCell(colIdx, rowIdx));
+    const stopedCellConfig = {
+      colIdx,
+      rowIdx
+    };
     numberEach(idx => {
       const cellsToMerged = this.adjust(idx, rowIdx);
 
       if (idx !== this.colFrom && this.colMeetData(cellsToMerged)) {
+        stopedCellConfig.colIdx = idx;
         return false;
       }
 
@@ -2361,13 +2409,17 @@ class Section {
     }, this.colFrom, colIdx);
     const maxNumberOfMerge = cellsToMergedList.reduce((prev, current) => Math.min(prev, current.length), cellsToMergedList[0].length);
     cellsToMergedList.forEach(cellsToMerged => {
-      cellsToMerged = this.rowFrom > rowIdx ? cellsToMerged.reverse().slice(0, maxNumberOfMerge).reverse() : cellsToMerged.slice(0, maxNumberOfMerge);
+      const reverse = this.rowFrom > rowIdx;
+      cellsToMerged = reverse ? cellsToMerged.reverse().slice(0, maxNumberOfMerge).reverse() : cellsToMerged.slice(0, maxNumberOfMerge);
       const mergedCell = this.mergeRow(cellsToMerged);
       this.setCell(mergedCell);
       this.batchedCells.push(mergedCell);
+      stopedCellConfig.rowIdx = cellsToMerged[0].rowIdx;
     });
 
     _batchedCells.forEach(cell => cell.getCell().deselect());
+
+    this.schedule.showTooltip(this.table.getCell(stopedCellConfig.colIdx, stopedCellConfig.rowIdx));
   }
 
   move(colIdx, rowIdx) {
@@ -2447,6 +2499,7 @@ class Section {
 
   begin(cell, positionOfAdjustment) {
     this.setCell(cell);
+    this.batchedCells.forEach(cell => cell.deselect());
     this.batchedCells = [this.cell];
     this.positionOfAdjustment = positionOfAdjustment || null;
     this.rowFrom = this.cell.rowIdx;
@@ -2454,7 +2507,7 @@ class Section {
     this.rowSpan = this.cell.getRowSpan();
     this.rowIdxOfLastCell = this.cell.getRowIdxOfLastCell();
     this.table.removeHighlights();
-    this.inProgress = true;
+    this.inProgress = !cell.hasData(true) || positionOfAdjustment;
   }
   /**
    * Indicate that selection procell finished.
@@ -2465,11 +2518,6 @@ class Section {
     this.currentCell = null;
     this.inProgress = false;
     this.positionOfAdjustment = null;
-    const selectedItems = this.batchedCells.map(cell => ({
-      data: cell.data,
-      timeRange: cell.timeRange.map(t => t.format('YYYY-MM-DD HH:mm:ss'))
-    }));
-    this.schedule.emit(events$1.SELECTE, selectedItems);
   }
   /**
    * Check if the process of selecting the cell/cells is in progress.
@@ -2481,17 +2529,24 @@ class Section {
   }
   /**
    * Deselect all cells.
-   * @param {array} cells
+   * @param {boolean} includesDataSelection
    */
 
 
-  deselect() {
+  deselect(includesDataSelection) {
     this.table.removeHighlights();
-    this.batchedCells.map(cell => cell.getCell().deselect());
+    this.batchedCells.forEach(cell => cell.getCell().deselect());
   }
 
   highlight() {
-    this.batchedCells.map(cell => this.table.highlights.show(cell.getCell()));
+    this.batchedCells = this.batchedCells.filter(cell => {
+      if (cell.selected) {
+        this.table.highlights.show(cell.getCell());
+        return true;
+      }
+
+      return false;
+    });
   }
 
   deleteCell(cell) {
@@ -2768,7 +2823,7 @@ class Events {
       this.table.clearSelection();
     }
 
-    if (cell) {
+    if (cell && !cell.isSelected()) {
       const _currentSelection = new Section(this.schedule, cell);
 
       _currentSelection.begin(cell);
@@ -2784,14 +2839,7 @@ class Events {
 
   onMouseUp() {
     event.preventDefault();
-    const {
-      currentSelection
-    } = this.table;
-
-    if (currentSelection) {
-      this.table.highlightSelections();
-      currentSelection.finish();
-    }
+    this.table.finishSelection();
   }
   /**
    *
@@ -3204,7 +3252,7 @@ class Schedule {
       action: 'delete',
       title: '删除'
     }]);
-    this.settings.yearMonth = dayjs_min(userSettings.yearMonth || undefined);
+    this.settings.yearMonth = dayjs_min(userSettings.yearMonth);
     this.settings.numberOfCols = this.settings.yearMonth.daysInMonth();
     const items = this.getItemsFromData(this.settings.data); // Create table renderer for the schedule.
 
