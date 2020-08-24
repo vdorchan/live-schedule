@@ -61,11 +61,13 @@ export default class Section {
           return false
         }
 
-        cellsToMergedList.push(cellsToMerged)
-
-        arrayRemoveItem(_batchedCells, (cell) =>
-          cellsToMerged.some((c) => c.colIdx === cell.getCell().colIdx)
-        )
+        if (cellsToMerged.length) {
+          cellsToMergedList.push(cellsToMerged)
+  
+          arrayRemoveItem(_batchedCells, (cell) =>
+            cellsToMerged.some((c) => c.colIdx === cell.getCell().colIdx)
+          )
+        }
       },
       this.colFrom,
       colIdx
@@ -162,8 +164,8 @@ export default class Section {
       const rowTo = this.rowFrom + this.rowSpan - 1
       return this.getEmptyCellsAtCol(
         this.colFrom,
-        Math.min(rowTo, rowIdx),
-        rowTo
+        rowTo,
+        Math.min(rowTo, rowIdx)
       )
     }
   }
@@ -187,7 +189,9 @@ export default class Section {
    * Indicate that selection procell began.
    */
   begin(cell, positionOfAdjustment) {
-    this.setCell(cell)
+    if (cell) {
+      this.setCell(cell)
+    }
     this.batchedCells.forEach(cell => cell.deselect())
     this.batchedCells = [this.cell]
     this.positionOfAdjustment = positionOfAdjustment || null
@@ -197,7 +201,7 @@ export default class Section {
     this.rowIdxOfLastCell = this.cell.getRowIdxOfLastCell()
     this.table.removeHighlights()
 
-    this.inProgress = !cell.hasData(true) || positionOfAdjustment
+    this.inProgress = !this.cell.hasData(true) || positionOfAdjustment
   }
 
   /**

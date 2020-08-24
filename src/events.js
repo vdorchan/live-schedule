@@ -69,11 +69,11 @@ export default class Events {
     const { currentSelection } = this.table
 
     if (event.target.classList.contains(HIGHLIGHT_DOWN_RESIZE_CLASS)) {
-      return currentSelection.begin(cell, 'down')
+      return currentSelection.begin(null, 'down')
     }
 
     if (event.target.classList.contains(HIGHLIGHT_UP_RESIZE_CLASS)) {
-      return currentSelection.begin(cell, 'up')
+      return currentSelection.begin(null, 'up')
     }
 
     if (event.shiftKey) {
