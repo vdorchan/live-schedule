@@ -84,3 +84,7 @@ export function diff(a, b) {
   })
   return changedKeys
 }
+
+export function formatTimeRange(timeRange, formatStr) {
+  return timeRange.map(t => t.format(formatStr))
+}

@@ -1,6 +1,6 @@
 import Draw from './draw'
 import ContextMenu from './contextMenu'
-import { arrayRemoveItem, diff } from './helper'
+import { arrayRemoveItem, diff, formatTimeRange } from './helper'
 import { events } from './mixins/event'
 
 /**
@@ -82,10 +82,10 @@ export default class Table {
     const itemsToDelete = [...oldItems]
     const itemsToRender = []
 
-    items.forEach((item) => {
+    items.forEach(item => {
       const oldItem = arrayRemoveItem(
         itemsToDelete,
-        (i) => i.colIdx === item.colIdx && i.rowIdx === item.rowIdx
+        i => i.colIdx === item.colIdx && i.rowIdx === item.rowIdx
       )
       if (oldItem) {
         const changedKeys = diff(item.data, oldItem.data)
@@ -100,7 +100,7 @@ export default class Table {
     if (itemsToRender.length) {
       this.cells.render(itemsToRender)
     }
-    itemsToDelete.forEach((item) => {
+    itemsToDelete.forEach(item => {
       const cell = this.getCell(item.colIdx, item.rowIdx)
       if (cell.hasData()) {
         this.currentSelection.deleteCell(cell)
@@ -139,7 +139,7 @@ export default class Table {
       numberOfRows,
       cellBorderWidth,
       colHeaderWidth,
-      timeScale,
+      timeScale
     } = this.settings
     /**
      * Set global font config.
@@ -260,7 +260,7 @@ export default class Table {
 
     const cellsBetween = []
     this.cellsEach(
-      (cell) => {
+      cell => {
         if (filter && filter(cell)) {
           return false
         }
@@ -281,7 +281,7 @@ export default class Table {
     return this.getCellsBetween(
       cellFrom,
       cellTo,
-      (cell) => cell.hasData() && !cell.isSame(_cellFrom)
+      cell => cell.hasData() && !cell.isSame(_cellFrom)
     )
   }
 
@@ -329,7 +329,7 @@ export default class Table {
    */
   mouseInCell(coord) {
     if (!this.contextMenu.isVisible()) {
-      this.cellsEach((cell) => cell.mouseOut())
+      this.cellsEach(cell => cell.mouseOut())
       this.schedule.hideTooltip()
 
       let cell = this.getCellByCoord(coord, false)
@@ -346,7 +346,7 @@ export default class Table {
    * @param {Cell} cell
    */
   highlightSelections(cell) {
-    this.selections.forEach((selection) => selection.highlight())
+    this.selections.forEach(selection => selection.highlight())
   }
 
   /**
@@ -365,7 +365,7 @@ export default class Table {
   }
 
   clearSelection() {
-    this.selections.forEach((selection) => selection.deselect())
+    this.selections.forEach(selection => selection.deselect())
     this.selections = []
   }
 
@@ -380,18 +380,26 @@ export default class Table {
       currentSelection.finish()
 
       const selectedItems = []
-      this.selections.forEach((selection) =>
-        selection.batchedCells.forEach((cell) =>
+      this.selections.forEach(selection =>
+        selection.batchedCells.forEach(cell =>
           selectedItems.push({
             data: cell.data,
-            timeRange: cell.timeRange.map((t) =>
-              t.format('YYYY-MM-DD HH:mm:ss')
-            ),
+            timeRange: cell.timeRange.map(t => t.format('YYYY-MM-DD HH:mm:ss'))
           })
         )
       )
 
       this.schedule.emit(events.SELECTE, selectedItems)
+
+      const currentCell = currentSelection.getCell()
+      if (
+        currentCell.data && currentCell.data.liveTime && currentCell.timeRange.some(
+          (t, idx) => !t.isSame(currentCell.data.liveTime[idx])
+        )
+      ) {
+        this.schedule.emit(events.TIME_RANGE_CHANGE, formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss'))
+        console.log(888)
+      }
     }
   }
 
