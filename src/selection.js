@@ -192,7 +192,6 @@ export default class Section {
     if (cell) {
       this.setCell(cell)
     }
-    this.batchedCells.forEach(cell => cell.deselect())
     this.batchedCells = [this.cell]
     this.positionOfAdjustment = positionOfAdjustment || null
     this.rowFrom = this.cell.rowIdx
