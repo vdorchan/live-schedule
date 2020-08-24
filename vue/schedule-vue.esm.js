@@ -593,7 +593,7 @@ class Draw {
 
   _getImage(src) {
     return new Promise(resolve => {
-      let img = this.__cacheImgs.find(i => i === src);
+      let img = this.__cacheImgs.find(i => i.src === location.origin + src);
 
       if (img) {
         return resolve(img);
@@ -601,7 +601,11 @@ class Draw {
 
       img = new Image();
 
-      img.onload = () => resolve(img);
+      img.onload = () => {
+        this.__cacheImgs.push(img);
+
+        resolve(img);
+      };
 
       img.src = src;
     });
@@ -921,7 +925,6 @@ class Table {
     this.cells.setTable(this);
     this.rowHeader.setTable(this);
     this.colHeader.setTable(this);
-    this.container = null;
   }
 
   setItems(items, oldItems) {
@@ -949,7 +952,11 @@ class Table {
       const cell = this.getCell(item.colIdx, item.rowIdx);
 
       if (cell.hasData()) {
-        this.currentSelection.deleteCell(cell);
+        if (this.currentSelection) {
+          this.currentSelection.deleteCell(cell);
+        } else {
+          cell.delete();
+        }
       }
     });
     this.items = items;
@@ -1232,13 +1239,18 @@ class Table {
     } = this;
 
     if (currentSelection) {
+      let numberOfBatchedCells = 0;
       this.highlightSelections();
       currentSelection.finish();
       const selectedItems = [];
-      this.selections.forEach(selection => selection.batchedCells.forEach(cell => selectedItems.push({
-        data: cell.data,
-        timeRange: cell.timeRange.map(t => t.format('YYYY-MM-DD HH:mm:ss'))
-      })));
+      this.selections.forEach(selection => selection.batchedCells.forEach(cell => {
+        selectedItems.push({
+          data: cell.data,
+          timeRange: cell.timeRange.map(t => t.format('YYYY-MM-DD HH:mm:ss'))
+        });
+        numberOfBatchedCells++;
+      }));
+      numberOfBatchedCells > 1 ? this.schedule.container.classList.add('schedule-multi-select') : this.schedule.container.classList.remove('schedule-multi-select');
       this.schedule.emit(events$1.SELECTE, selectedItems);
       const currentCell = currentSelection.getCell();
 
@@ -1566,23 +1578,37 @@ class Cell extends BaseRender {
         lineHeight,
         iconMaxWidth
       } = this.table.settings;
-      y = y - ((texts || []).length + (icon ? 1 : 0) - 1) / 2 * lineHeight;
+      const imgPadding = 5;
+      const imgSize = Math.min(this.width - imgPadding, iconMaxWidth);
+      let maxNumberOfLines = 0;
 
-      if (icon && this.height > this.width) {
-        const imgSize = Math.min(this.width - 5, iconMaxWidth);
+      if (this.height < imgSize + lineHeight) {
+        if (texts || this.height < imgSize + imgPadding) {
+          icon = null;
+          maxNumberOfLines = 1;
+        }
+      } else if (texts) {
+        maxNumberOfLines = Math.min(texts.length, Math.floor((this.height - (icon ? imgSize : 0)) / lineHeight));
+      }
+
+      texts = texts.slice(0, maxNumberOfLines);
+      y -= (maxNumberOfLines - 1) / 2 * lineHeight;
+
+      if (icon) {
+        y -= imgSize;
         this.draw.image({
           src: icon,
           x: x - imgSize / 2,
-          y: y - imgSize / 2,
+          y: y,
           width: imgSize,
           height: imgSize
         });
-        y += lineHeight;
+        y += imgPadding + lineHeight;
       }
 
       if (texts) {
         const maxFontLength = this.width / parseInt(fontSize) + 1;
-        const posList = texts.forEach(text => {
+        texts.forEach(text => {
           this.draw.text({
             text: String(text).slice(0, maxFontLength),
             x,
@@ -1708,26 +1734,23 @@ class Cell extends BaseRender {
     }
 
     const oriMergedCells = this.__actualCell.mergedCells;
-    oriMergedCells.filter(cell => !cellsToMerge.includes(cell)).forEach(cell => {
-      cell.init();
-      cell.unMerge();
-      cell.render();
-    });
-    actualCell.mergedCells = cellsToMerge; // delete the cell if meet other merged cell
-
-    cellsToMerge.map(cell => {
-      if (cell.getCell() !== actualCell && cell.getRowSpan() > 1) {
-        cell.delete();
+    const cellsToRender = [];
+    [...oriMergedCells, ...cellsToMerge].filter(cell => cell !== actualCell).forEach(cell => {
+      if (!cellsToRender.find(c => c.isSamePosition(cell))) {
+        cell.init();
+        cell.unMerge();
+        cellsToRender.push(cell);
       }
 
-      cell.__actualCell = actualCell; // render if col is crowss col
-
-      if (cell.isCrossCol()) {
-        cell.render();
+      if (cellsToMerge.includes(cell)) {
+        cell.__actualCell = actualCell;
       }
     });
-    actualCell.render();
-    this.setTimeRange();
+    actualCell.mergedCells = [...cellsToMerge];
+    actualCell.__actualCell = actualCell;
+    cellsToRender.push(actualCell);
+    cellsToRender.forEach(cell => cell.render());
+    actualCell.setTimeRange();
     return actualCell;
   }
 
@@ -1773,6 +1796,10 @@ class Cell extends BaseRender {
 
   isSame(cell) {
     return this.getCell() === cell.getCell();
+  }
+
+  isSamePosition(cell) {
+    return this.colIdx === cell.colIdx && this.rowIdx === cell.rowIdx;
   }
 
   isVisible() {
@@ -2404,8 +2431,10 @@ class Section {
         return false;
       }
 
-      cellsToMergedList.push(cellsToMerged);
-      arrayRemoveItem(_batchedCells, cell => cellsToMerged.some(c => c.colIdx === cell.getCell().colIdx));
+      if (cellsToMerged.length) {
+        cellsToMergedList.push(cellsToMerged);
+        arrayRemoveItem(_batchedCells, cell => cellsToMerged.some(c => c.colIdx === cell.getCell().colIdx));
+      }
     }, this.colFrom, colIdx);
     const maxNumberOfMerge = cellsToMergedList.reduce((prev, current) => Math.min(prev, current.length), cellsToMergedList[0].length);
     cellsToMergedList.forEach(cellsToMerged => {
@@ -2472,7 +2501,7 @@ class Section {
       return this.getEmptyCellsAtCol(this.colFrom, this.rowFrom, Math.max(this.rowFrom, rowIdx - this.rowIdxOfLastCell + this.rowFrom + this.rowSpan - 1));
     } else if (this.positionOfAdjustment === 'up') {
       const rowTo = this.rowFrom + this.rowSpan - 1;
-      return this.getEmptyCellsAtCol(this.colFrom, Math.min(rowTo, rowIdx), rowTo);
+      return this.getEmptyCellsAtCol(this.colFrom, rowTo, Math.min(rowTo, rowIdx));
     }
   }
   /**
@@ -2498,8 +2527,10 @@ class Section {
 
 
   begin(cell, positionOfAdjustment) {
-    this.setCell(cell);
-    this.batchedCells.forEach(cell => cell.deselect());
+    if (cell) {
+      this.setCell(cell);
+    }
+
     this.batchedCells = [this.cell];
     this.positionOfAdjustment = positionOfAdjustment || null;
     this.rowFrom = this.cell.rowIdx;
@@ -2507,7 +2538,7 @@ class Section {
     this.rowSpan = this.cell.getRowSpan();
     this.rowIdxOfLastCell = this.cell.getRowIdxOfLastCell();
     this.table.removeHighlights();
-    this.inProgress = !cell.hasData(true) || positionOfAdjustment;
+    this.inProgress = !this.cell.hasData(true) || positionOfAdjustment;
   }
   /**
    * Indicate that selection procell finished.
@@ -2806,11 +2837,11 @@ class Events {
     } = this.table;
 
     if (event.target.classList.contains(HIGHLIGHT_DOWN_RESIZE_CLASS)) {
-      return currentSelection.begin(cell, 'down');
+      return currentSelection.begin(null, 'down');
     }
 
     if (event.target.classList.contains(HIGHLIGHT_UP_RESIZE_CLASS)) {
-      return currentSelection.begin(cell, 'up');
+      return currentSelection.begin(null, 'up');
     }
 
     if (event.shiftKey) {
@@ -3203,7 +3234,7 @@ function styleInject(css, ref) {
 var css_248z = ".schedule-canvas-container {\n  position: relative;\n}";
 styleInject(css_248z);
 
-var css_248z$1 = ".schedule-highlight {\n  position: absolute;\n  top: 0;\n  left: 0;\n  border: 2px solid #999999;\n  pointer-events: none;\n  margin: -2px;\n  visibility: hidden;\n}\n\n.schedule-highlight-up-resize {\n  position: absolute;\n  width: 100%;\n  height: 8px;\n  top: -2px;\n  left: 0;\n  cursor: row-resize;\n  pointer-events: all;\n}\n\n.schedule-highlight-down-resize {\n  position: absolute;\n  width: 100%;\n  height: 8px;\n  bottom: -2px;\n  left: 0;\n  cursor: row-resize;\n  pointer-events: all;\n}\n\n.schedule-highlight.disabled-up-resize {\n  border-top-style: dotted;\n}\n\n.schedule-highlight.disabled-up-resize .schedule-highlight-up-resize {\n  pointer-events: none;\n}\n\n.schedule-highlight.disabled-down-resize {\n  border-bottom-style: dotted;\n}\n\n.schedule-highlight.disabled-down-resize .schedule-highlight-down-resize {\n  pointer-events: none;\n}";
+var css_248z$1 = ".schedule-highlight {\n  position: absolute;\n  top: 0;\n  left: 0;\n  border: 2px solid #999999;\n  pointer-events: none;\n  margin: -2px;\n  visibility: hidden;\n}\n\n.schedule-highlight-up-resize {\n  position: absolute;\n  width: 100%;\n  height: 8px;\n  top: -2px;\n  left: 0;\n  cursor: row-resize;\n  pointer-events: all;\n}\n\n.schedule-highlight-down-resize {\n  position: absolute;\n  width: 100%;\n  height: 8px;\n  bottom: -2px;\n  left: 0;\n  cursor: row-resize;\n  pointer-events: all;\n}\n\n.schedule-highlight.disabled-up-resize {\n  border-top-style: dotted;\n}\n\n.schedule-highlight.disabled-up-resize .schedule-highlight-up-resize {\n  pointer-events: none;\n}\n\n.schedule-highlight.disabled-down-resize {\n  border-bottom-style: dotted;\n}\n\n.schedule-highlight.disabled-down-resize .schedule-highlight-down-resize {\n  pointer-events: none;\n}\n\n.schedule-multi-select .schedule-highlight-up-resize, \n.schedule-multi-select .schedule-highlight-down-resize {\n  pointer-events: none;\n}";
 styleInject(css_248z$1);
 
 var css_248z$2 = ".schedule-contextmenu {\n  position: absolute;\n  left: 0;\n  top: 0;\n  padding: 5px 0;\n  margin: 0;\n  background: #707070;\n  border: 1px solid #707070;\n  border-radius: 4px;\n  box-shadow: 2px 2px 8px 0px rgba(150, 150, 150, 0.2);\n  list-style: none;\n  font-size: 14px;\n  white-space: nowrap;\n  cursor: pointer;\n  z-index: 2800;\n  -webkit-tap-highlight-color: transparent;\n}\n\n.schedule-contextmenu-item {\n  padding: 5px 14px;\n  line-height: 1;\n  color: #fff;\n}\n\n.schedule-contextmenu-item:hover {\n  background: #585858;\n}";
