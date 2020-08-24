@@ -398,7 +398,6 @@ export default class Table {
         )
       ) {
         this.schedule.emit(events.TIME_RANGE_CHANGE, formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss'))
-        console.log(888)
       }
     }
   }
