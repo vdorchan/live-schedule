@@ -51,12 +51,13 @@ export default class Section {
     this.batchedCells = []
     const cellsToMergedList = []
 
-    this.schedule.showTooltip(this.table.getCell(colIdx, rowIdx))
+    const stopedCellConfig = { colIdx, rowIdx }
 
     numberEach(
-      (idx) => {
+      idx => {
         const cellsToMerged = this.adjust(idx, rowIdx)
         if (idx !== this.colFrom && this.colMeetData(cellsToMerged)) {
+          stopedCellConfig.colIdx = idx
           return false
         }
 
@@ -75,16 +76,25 @@ export default class Section {
       cellsToMergedList[0].length
     )
 
-    cellsToMergedList.forEach((cellsToMerged) => {
-      cellsToMerged =
-        this.rowFrom > rowIdx
-          ? cellsToMerged.reverse().slice(0, maxNumberOfMerge).reverse()
-          : cellsToMerged.slice(0, maxNumberOfMerge)
+    cellsToMergedList.forEach(cellsToMerged => {
+      const reverse = this.rowFrom > rowIdx
+      cellsToMerged = reverse
+        ? cellsToMerged
+            .reverse()
+            .slice(0, maxNumberOfMerge)
+            .reverse()
+        : cellsToMerged.slice(0, maxNumberOfMerge)
       const mergedCell = this.mergeRow(cellsToMerged)
       this.setCell(mergedCell)
       this.batchedCells.push(mergedCell)
+
+      stopedCellConfig.rowIdx = cellsToMerged[0].rowIdx
     })
     _batchedCells.forEach((cell) => cell.getCell().deselect())
+
+    this.schedule.showTooltip(
+      this.table.getCell(stopedCellConfig.colIdx, stopedCellConfig.rowIdx)
+    )
   }
 
   move(colIdx, rowIdx) {
@@ -103,7 +113,7 @@ export default class Section {
     }
 
     return cells[0].rowIdx > cells[1].rowIdx
-      ? cells.reverse().slice(0, length).reverse()
+      ? cells.reverse().slice(0, length) .reverse()
       : cells.slice(0, length)
   }
 
