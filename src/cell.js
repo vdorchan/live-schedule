@@ -374,6 +374,7 @@ export default class Cell extends BaseRender {
 
     const oriMergedCells = this.__actualCell.mergedCells
     oriMergedCells
+      .map((cell) => cell.unMerge())
       .filter((cell) => !cellsToMerge.includes(cell))
       .forEach((cell) => {
         cell.init()
@@ -401,6 +402,7 @@ export default class Cell extends BaseRender {
   unMerge() {
     this.mergedCells = [this]
     this.setTimeRange()
+    return this
   }
 
   getColHeight(includesMerged) {
