@@ -185,7 +185,8 @@ export default class Section {
     this.rowSpan = this.cell.getRowSpan()
     this.rowIdxOfLastCell = this.cell.getRowIdxOfLastCell()
     this.table.removeHighlights()
-    this.inProgress = true
+
+    this.inProgress = !cell.hasData(true) || positionOfAdjustment
   }
 
   /**
@@ -195,15 +196,6 @@ export default class Section {
     this.currentCell = null
     this.inProgress = false
     this.positionOfAdjustment = null
-
-    const selectedItems = this.batchedCells.map((cell) => ({
-      data: cell.data,
-      timeRange: cell.timeRange.map(t => t.format('YYYY-MM-DD HH:mm:ss'))
-    }))
-    this.schedule.emit(
-      events.SELECTE,
-      selectedItems
-    )
   }
 
   /**
@@ -215,15 +207,21 @@ export default class Section {
 
   /**
    * Deselect all cells.
-   * @param {array} cells
+   * @param {boolean} includesDataSelection
    */
-  deselect() {
+  deselect(includesDataSelection) {
     this.table.removeHighlights()
-    this.batchedCells.map((cell) => cell.getCell().deselect())
+    this.batchedCells.forEach((cell) => cell.getCell().deselect())
   }
 
   highlight() {
-    this.batchedCells.map((cell) => this.table.highlights.show(cell.getCell()))
+    this.batchedCells = this.batchedCells.filter((cell) => {
+      if (cell.selected) {
+        this.table.highlights.show(cell.getCell())
+        return true
+      }
+      return false
+    })
   }
 
   deleteCell(cell) {

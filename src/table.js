@@ -1,6 +1,7 @@
 import Draw from './draw'
 import ContextMenu from './contextMenu'
 import { arrayRemoveItem, diff } from './helper'
+import { events } from './mixins/event'
 
 /**
  * Table render and managing.
@@ -156,7 +157,6 @@ export default class Table {
     this.cellWidth = Math.floor(
       (tableWidth - cellBorderWidth - colHeaderWidth) / numberOfCols
     )
-
 
     // calculate height of row.
     const totalNumberOfRows = numberOfRows + (this.rowHeader ? 1 : 0)
@@ -367,6 +367,32 @@ export default class Table {
   clearSelection() {
     this.selections.forEach((selection) => selection.deselect())
     this.selections = []
+  }
+
+  getSelections() {
+    return this.selections
+  }
+
+  finishSelection() {
+    const { currentSelection, selections } = this
+    if (currentSelection) {
+      this.highlightSelections()
+      currentSelection.finish()
+
+      const selectedItems = []
+      this.selections.forEach((selection) =>
+        selection.batchedCells.forEach((cell) =>
+          selectedItems.push({
+            data: cell.data,
+            timeRange: cell.timeRange.map((t) =>
+              t.format('YYYY-MM-DD HH:mm:ss')
+            ),
+          })
+        )
+      )
+
+      this.schedule.emit(events.SELECTE, selectedItems)
+    }
   }
 
   showContextMenu(coord) {

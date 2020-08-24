@@ -2,7 +2,7 @@ import { ResizeObserver } from '@juggle/resize-observer'
 import Selection from './selection'
 import {
   HIGHLIGHT_UP_RESIZE_CLASS,
-  HIGHLIGHT_DOWN_RESIZE_CLASS,
+  HIGHLIGHT_DOWN_RESIZE_CLASS
 } from './highlights'
 import { CONTEXTMENU_ITEM_CLASS } from './contextMenu'
 import { events } from './mixins/event'
@@ -86,7 +86,7 @@ export default class Events {
       this.table.clearSelection()
     }
 
-    if (cell) {
+    if (cell && !cell.isSelected()) {
       const _currentSelection = new Selection(this.schedule, cell)
       _currentSelection.begin(cell)
       this.table.setSelection(_currentSelection)
@@ -100,11 +100,7 @@ export default class Events {
   onMouseUp() {
     event.preventDefault()
 
-    const { currentSelection } = this.table
-    if (currentSelection) {
-      this.table.highlightSelections()
-      currentSelection.finish()
-    }
+    this.table.finishSelection()
   }
 
   /**

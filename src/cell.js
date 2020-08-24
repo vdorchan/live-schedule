@@ -374,7 +374,6 @@ export default class Cell extends BaseRender {
 
     const oriMergedCells = this.__actualCell.mergedCells
     oriMergedCells
-      .map((cell) => cell.unMerge())
       .filter((cell) => !cellsToMerge.includes(cell))
       .forEach((cell) => {
         cell.init()
@@ -383,7 +382,12 @@ export default class Cell extends BaseRender {
       })
 
     actualCell.mergedCells = cellsToMerge
+
+    // delete the cell if meet other merged cell
     cellsToMerge.map((cell) => {
+      if (cell.getCell() !== actualCell && cell.getRowSpan() > 1) {
+        cell.delete()
+      }
       cell.__actualCell = actualCell
 
       // render if col is crowss col
@@ -450,6 +454,10 @@ export default class Cell extends BaseRender {
 
   isVisible() {
     return this.__actualCell === this
+  }
+
+  isSelected() {
+    return this.getCell().selected
   }
 
   hasData(includesMerged) {
