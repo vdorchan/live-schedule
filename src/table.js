@@ -74,8 +74,6 @@ export default class Table {
     this.cells.setTable(this)
     this.rowHeader.setTable(this)
     this.colHeader.setTable(this)
-
-    this.container = null
   }
 
   setItems(items, oldItems) {
@@ -376,18 +374,24 @@ export default class Table {
   finishSelection() {
     const { currentSelection, selections } = this
     if (currentSelection) {
+      let numberOfBatchedCells = 0
       this.highlightSelections()
       currentSelection.finish()
 
       const selectedItems = []
       this.selections.forEach(selection =>
-        selection.batchedCells.forEach(cell =>
+        selection.batchedCells.forEach(cell => {
           selectedItems.push({
             data: cell.data,
             timeRange: cell.timeRange.map(t => t.format('YYYY-MM-DD HH:mm:ss'))
           })
-        )
+          numberOfBatchedCells++
+        })
       )
+
+      numberOfBatchedCells > 1
+        ? this.schedule.container.classList.add('schedule-multi-select')
+        : this.schedule.container.classList.remove('schedule-multi-select')
 
       this.schedule.emit(events.SELECTE, selectedItems)
 

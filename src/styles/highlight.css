@@ -43,3 +43,8 @@
 .schedule-highlight.disabled-down-resize .schedule-highlight-down-resize {
   pointer-events: none;
 }
+
+.schedule-multi-select .schedule-highlight-up-resize, 
+.schedule-multi-select .schedule-highlight-down-resize {
+  pointer-events: none;
+}
