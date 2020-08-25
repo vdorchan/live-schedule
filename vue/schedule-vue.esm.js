@@ -1226,6 +1226,7 @@ class Table {
   clearSelection() {
     this.selections.forEach(selection => selection.deselect());
     this.selections = [];
+    this.currentSelection = null;
   }
 
   getSelections() {
@@ -1254,8 +1255,17 @@ class Table {
       this.schedule.emit(events$1.SELECTE, selectedItems);
       const currentCell = currentSelection.getCell();
 
-      if (currentCell.data && currentCell.data.liveTime && currentCell.timeRange.some((t, idx) => !t.isSame(currentCell.data.liveTime[idx]))) {
-        this.schedule.emit(events$1.TIME_RANGE_CHANGE, formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss'));
+      if (currentCell.data) {
+        const {
+          timeRangeKey
+        } = this.settings;
+        const timeRange = formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss');
+        const oriTimeRange = currentCell.data[timeRangeKey];
+
+        if (oriTimeRange && !isSame(timeRange, oriTimeRange)) {
+          currentCell.data[timeRangeKey] = timeRange;
+          this.schedule.emit(events$1.TIME_RANGE_CHANGE, timeRange, oriTimeRange);
+        }
       }
     }
   }
@@ -1388,10 +1398,10 @@ class Cell extends BaseRender {
     return cellColor;
   }
 
-  isCrossCol() {
+  isCrossCol(idx) {
     const _cell = this.getCell();
 
-    return _cell !== this && this.rowIdx === 0 && this.colIdx !== _cell.colIdx;
+    return _cell !== this && this.rowIdx === 0 && (idx ? this.colIdx === _cell.colIdx + idx : this.colIdx !== _cell.colIdx);
   }
 
   getIcon() {
@@ -1459,7 +1469,7 @@ class Cell extends BaseRender {
     const {
       cellWidth
     } = this.parent;
-    const cellHeight = this.getColHeight(false);
+    const cellHeight = this.getColHeight();
     const {
       cellBorderWidth
     } = this.table.settings;
@@ -1506,7 +1516,9 @@ class Cell extends BaseRender {
       textsKey
     } = this.table.settings;
     this.width = cellWidth - cellBorderWidth;
-    this.height = this.getColHeight(true) - cellBorderWidth;
+    this.height = this.getColHeight({
+      includesMerged: true
+    }) - cellBorderWidth;
     this.draw.rect({ ...this.getCoords(),
       width: this.width,
       height: this.height,
@@ -1540,9 +1552,15 @@ class Cell extends BaseRender {
     }
 
     this.renderRect(cellColor);
+    let crossColHeight = this.getCrossColHeight(1);
 
-    if (this.data) {
+    if (this.data && crossColHeight < this.height) {
       this.renderIconAndTexts(this.getIcon(), this.getTexts());
+    }
+
+    if (this.isCrossCol(1) && crossColHeight > this.height) {
+      const actualCell = this.getCell();
+      this.renderIconAndTexts(actualCell.getIcon(), actualCell.getTexts(), crossColHeight);
     }
 
     this.renderLabel(this.label);
@@ -1565,11 +1583,13 @@ class Cell extends BaseRender {
     });
   }
 
-  renderIconAndTexts(icon, texts) {
+  renderIconAndTexts(icon, texts, crossColHeight) {
     let {
       x,
       y
     } = this.getCoords(true);
+    const height = crossColHeight || this.height;
+    y = crossColHeight ? this.parent.startingCoords.y + height / 2 : y;
 
     if (texts || icon) {
       const {
@@ -1582,13 +1602,13 @@ class Cell extends BaseRender {
       const imgSize = Math.min(this.width - imgPadding, iconMaxWidth);
       let maxNumberOfLines = 0;
 
-      if (this.height < imgSize + lineHeight) {
-        if (texts || this.height < imgSize + imgPadding) {
+      if (height < imgSize + lineHeight) {
+        if (texts || height < imgSize + imgPadding) {
           icon = null;
           maxNumberOfLines = 1;
         }
       } else if (texts) {
-        maxNumberOfLines = Math.min(texts.length, Math.floor((this.height - (icon ? imgSize : 0)) / lineHeight));
+        maxNumberOfLines = Math.min(texts.length, Math.floor((height - (icon ? imgSize : 0)) / lineHeight));
       }
 
       texts = texts.slice(0, maxNumberOfLines);
@@ -1603,11 +1623,11 @@ class Cell extends BaseRender {
           width: imgSize,
           height: imgSize
         });
-        y += imgPadding + lineHeight;
+        y += imgSize + imgPadding * 2;
       }
 
       if (texts) {
-        const maxFontLength = this.width / parseInt(fontSize) + 1;
+        const maxFontLength = this.width / parseInt(fontSize);
         texts.forEach(text => {
           this.draw.text({
             text: String(text).slice(0, maxFontLength),
@@ -1736,6 +1756,11 @@ class Cell extends BaseRender {
     const oriMergedCells = this.__actualCell.mergedCells;
     const cellsToRender = [];
     [...oriMergedCells, ...cellsToMerge].filter(cell => cell !== actualCell).forEach(cell => {
+      // delete cell if meet other selected cell withourt data
+      if (cell.getCell() !== actualCell && !cell.hasData()) {
+        cell.delete();
+      }
+
       if (!cellsToRender.find(c => c.isSamePosition(cell))) {
         cell.init();
         cell.unMerge();
@@ -1760,16 +1785,36 @@ class Cell extends BaseRender {
     return this;
   }
 
-  getColHeight(includesMerged) {
+  getColHeight({
+    includesMerged,
+    includesColIdx
+  } = {}) {
     const cellHeight = this.parent.cellHeight;
 
     const _cell = this.isCrossCol() ? this.getCell() : this;
 
-    return includesMerged ? _cell.mergedCells.filter(cell => cell.colIdx === this.colIdx).length * cellHeight : cellHeight;
+    const colIdx = includesColIdx || this.colIdx;
+    return includesMerged || includesColIdx ? _cell.mergedCells.filter(cell => cell.colIdx === colIdx).length * cellHeight : cellHeight;
   }
 
-  getRowSpan() {
-    return this.mergedCells.length;
+  getCrossColHeight(idx) {
+    const includesColIdx = this.getCell().mergedCells[0].colIdx + idx;
+    return this.getColHeight({
+      includesColIdx
+    });
+  }
+
+  getRowSpan(colIdx) {
+    const {
+      mergedCells
+    } = this;
+
+    if (typeof colIdx !== 'number') {
+      return mergedCells.length;
+    }
+
+    colIdx += mergedCells[0].colIdx;
+    return mergedCells.filter(cell => cell.colIdx === colIdx).length;
   }
 
   getRowIdxOfLastCell() {
@@ -2332,17 +2377,32 @@ class Tooltip {
 
 
   refresh(callback) {
-    const {
+    let {
       color,
       text,
       icon,
       x,
-      y
+      y,
+      cellWidth
     } = typeof callback === 'function' ? callback(this._config) : callback;
     this.showIcon(icon);
     this.setBackgroundColor(color);
     this.setText(text);
+    const edgePadding = 100;
     const distanceToCol = 3;
+    const tooltipRect = this.tooltip.getBoundingClientRect();
+    const containerRect = this.container.getBoundingClientRect();
+
+    if (x + containerRect.x + tooltipRect.width + edgePadding > window.innerWidth) {
+      x -= tooltipRect.width + cellWidth + distanceToCol;
+    }
+
+    if (y + containerRect.y + tooltipRect.height > window.innerHeight) {
+      y = containerRect.height - tooltipRect.height;
+    }
+
+    x = Math.floor(x);
+    y = Math.floor(y);
     this.tooltip.style.transform = `translate3d(${x + distanceToCol}px, ${y}px, 0)`;
   }
 
@@ -2415,6 +2475,11 @@ class Section {
     this.positionOfAdjustment = null;
   }
 
+  select(colIdx, rowIdx) {
+    colIdx = Math.max(0, colIdx);
+    this.selectMultiCol(this.positionOfAdjustment ? this.colFrom : colIdx, rowIdx);
+  }
+
   selectMultiCol(colIdx, rowIdx) {
     const _batchedCells = [...this.batchedCells];
     this.batchedCells = [];
@@ -2454,10 +2519,10 @@ class Section {
   move(colIdx, rowIdx) {
     this.table.removeHighlights();
     const {
-      numberOfRows
+      numberOfRows,
+      timeScale
     } = this.table.settings;
-    const cellsToMerged = this.adjust(this.colFrom, rowIdx + (colIdx - this.colFrom) * numberOfRows);
-    this.mergeRow(cellsToMerged);
+    this.selectMultiCol(this.colFrom, rowIdx + (colIdx - this.colFrom) * numberOfRows / timeScale);
   }
 
   cutCells(cells, length) {
@@ -2578,6 +2643,13 @@ class Section {
 
       return false;
     });
+  }
+
+  refresh(cell) {
+    this.deselect();
+    this.setCell(cell);
+    this.batchedCells = [this.cell];
+    this.highlight();
   }
 
   deleteCell(cell) {
@@ -2888,7 +2960,7 @@ class Events {
     if (currentSelection && currentSelection.isInProgress()) {
       const colIdx = this.table.getColIdx(coord.x);
       const rowIdx = this.table.getRowIdx(coord.y);
-      currentSelection.selectMultiCol(colIdx, rowIdx);
+      currentSelection.select(colIdx, rowIdx);
     } else {
       this.table.mouseInCell(coord);
     }
@@ -3240,7 +3312,7 @@ styleInject(css_248z$1);
 var css_248z$2 = ".schedule-contextmenu {\n  position: absolute;\n  left: 0;\n  top: 0;\n  padding: 5px 0;\n  margin: 0;\n  background: #707070;\n  border: 1px solid #707070;\n  border-radius: 4px;\n  box-shadow: 2px 2px 8px 0px rgba(150, 150, 150, 0.2);\n  list-style: none;\n  font-size: 14px;\n  white-space: nowrap;\n  cursor: pointer;\n  z-index: 2800;\n  -webkit-tap-highlight-color: transparent;\n}\n\n.schedule-contextmenu-item {\n  padding: 5px 14px;\n  line-height: 1;\n  color: #fff;\n}\n\n.schedule-contextmenu-item:hover {\n  background: #585858;\n}";
 styleInject(css_248z$2);
 
-var css_248z$3 = ".schedule-tooltip {\n  position: absolute;\n  left: 0;\n  top: 0;\n  line-height: 20px;\n  padding: 5px;\n  opacity: 0.9;\n  color: #ffffff;\n  font-size: 14px;\n  pointer-events: none;\n  border-radius: 4px;\n  white-space: nowrap;\n  z-index: 999;\n  background:#707070;\n  visibility: hidden;\n}\n.schedule-tooltip-icon {\n  width: 24px;\n  height: 24px;\n}\n.schedule-tooltip p {\n  margin: 0;\n  max-width: 200px;\n}";
+var css_248z$3 = ".schedule-tooltip {\n  position: absolute;\n  left: 0;\n  top: 0;\n  line-height: 20px;\n  padding: 5px;\n  opacity: 0.9;\n  color: #ffffff;\n  font-size: 14px;\n  pointer-events: none;\n  border-radius: 4px;\n  z-index: 999;\n  background:#707070;\n  visibility: hidden;\n  word-break: break-all;\n}\n.schedule-tooltip-icon {\n  width: 24px;\n  height: 24px;\n}\n.schedule-tooltip p {\n  margin: 0;\n  max-width: 200px;\n}";
 styleInject(css_248z$3);
 
 /**
@@ -3340,9 +3412,55 @@ class Schedule {
   }
 
   setDataAtSelectedCell(callback) {
+    const selectedCells = [];
     this.table.cellsEach(cell => {
-      cell.setData(callback);
+      cell.selected && cell.isVisible() && selectedCells.push(cell);
     });
+    const data = typeof callback === 'function' ? callback() : callback || {};
+
+    if (selectedCells.length === 1) {
+      const currentSelectedCell = selectedCells[0];
+      const {
+        timeRangeKey
+      } = this.table.settings;
+
+      if (data[timeRangeKey] && currentSelectedCell.data[timeRangeKey] && !isSame(currentSelectedCell.data[timeRangeKey], data[timeRangeKey])) {
+        const {
+          colIdx,
+          rowIdx,
+          rowSpan
+        } = this.getCellConfigFromTimeRange(data[timeRangeKey]);
+        const cell = this.table.getCell(colIdx, rowIdx);
+        const oriData = { ...currentSelectedCell.data,
+          ...data
+        };
+        currentSelectedCell.delete();
+        const cellsToMerge = this.table.getCellsBetween(cell, this.table.getCell(cell.colIdx, cell.rowIdx + rowSpan));
+        cell.data = oriData;
+        cell.merge(cellsToMerge);
+        this.table.currentSelection.refresh(cell);
+        return;
+      }
+    }
+
+    selectedCells.forEach(cell => cell.setData(data));
+  }
+
+  getCellConfigFromTimeRange(timeRange) {
+    const {
+      timeScale
+    } = this.settings;
+    const [startTime, endTime] = timeRange;
+    const time = dayjs_min(startTime);
+    const colIdx = time.date() - 1;
+    const rowIdx = (time.hour() * 60 + time.minute()) / 60 / timeScale;
+    const minutes = Math.abs(time.diff(endTime, 'minute'));
+    const rowSpan = minutes / (timeScale * 60) - 1;
+    return {
+      colIdx,
+      rowIdx,
+      rowSpan
+    };
   }
 
   getItemsFromData(data) {
@@ -3351,12 +3469,11 @@ class Schedule {
       timeScale
     } = this.settings;
     return data.map(live => {
-      const [startTime, endTime] = live[timeRangeKey];
-      const time = dayjs_min(startTime);
-      const colIdx = time.date() - 1;
-      const rowIdx = (time.hour() * 60 + time.minute()) / 60 / timeScale;
-      const minutes = Math.abs(time.diff(endTime, 'minute'));
-      const rowSpan = minutes / (timeScale * 60) - 1;
+      const {
+        colIdx,
+        rowIdx,
+        rowSpan
+      } = this.getCellConfigFromTimeRange(live[timeRangeKey]);
       return {
         colIdx,
         rowIdx,
@@ -3401,7 +3518,8 @@ class Schedule {
       y,
       text: `<p>${this.getCellTimeStr(cell)}</p>${tooltipText}`,
       color: cell.hasData() ? cell.getColor() : null,
-      icon: cell.getIcon()
+      icon: cell.getIcon(),
+      cellWidth: cell.width
     };
   }
 
