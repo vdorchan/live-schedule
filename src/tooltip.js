@@ -50,12 +50,19 @@ export default class Tooltip {
     this.setBackgroundColor(color)
     this.setText(text)
 
-    const tooltipWidth = this.tooltip.getBoundingClientRect().width
     const edgePadding = 100
     const distanceToCol = 3
-    if (x + this.container.getBoundingClientRect().x + tooltipWidth + edgePadding > window.innerWidth) {
-      x -= tooltipWidth + cellWidth + distanceToCol
+    const tooltipRect = this.tooltip.getBoundingClientRect()
+    const containerRect = this.container.getBoundingClientRect()
+
+    if (x + containerRect.x + tooltipRect.width + edgePadding > window.innerWidth) {
+      x -= tooltipRect.width + cellWidth + distanceToCol
     }
+
+    if (y + containerRect.y + tooltipRect.height > window.innerHeight) {
+      y = containerRect.height - tooltipRect.height
+    }
+
     x = Math.floor(x)
     y = Math.floor(y)
     this.tooltip.style.transform = `translate3d(${x + distanceToCol}px, ${y}px, 0)`
