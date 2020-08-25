@@ -79,9 +79,11 @@ export default class Cell extends BaseRender {
     return cellColor
   }
 
-  isCrossCol() {
+  isCrossCol(idx) {
     const _cell = this.getCell()
-    return _cell !== this && this.rowIdx === 0 && this.colIdx !== _cell.colIdx
+    return _cell !== this &&
+      this.rowIdx === 0 &&
+      (idx ? this.colIdx === _cell.colIdx + idx : this.colIdx !== _cell.colIdx)
   }
 
   getIcon() {
@@ -141,7 +143,7 @@ export default class Cell extends BaseRender {
 
   getHighlightConfigs() {
     const { cellWidth } = this.parent
-    const cellHeight = this.getColHeight(false)
+    const cellHeight = this.getColHeight()
     const { cellBorderWidth } = this.table.settings
     const mergedCells = this.getMergedCells()
     let colIdx = null
@@ -182,7 +184,7 @@ export default class Cell extends BaseRender {
     } = this.table.settings
 
     this.width = cellWidth - cellBorderWidth
-    this.height = this.getColHeight(true) - cellBorderWidth
+    this.height = this.getColHeight({ includesMerged: true }) - cellBorderWidth
 
     this.draw.rect({
       ...this.getCoords(),
@@ -220,8 +222,15 @@ export default class Cell extends BaseRender {
 
     this.renderRect(cellColor)
 
-    if (this.data) {
+    let crossColHeight = this.getCrossColHeight(1)
+
+    if (this.data && crossColHeight < this.height) {
       this.renderIconAndTexts(this.getIcon(), this.getTexts())
+    }
+
+    if (this.isCrossCol(1) && crossColHeight > this.height) {
+      const actualCell = this.getCell()
+      this.renderIconAndTexts(actualCell.getIcon(), actualCell.getTexts(), crossColHeight)
     }
 
     this.renderLabel(this.label)
@@ -240,22 +249,25 @@ export default class Cell extends BaseRender {
     })
   }
 
-  renderIconAndTexts(icon, texts) {
+  renderIconAndTexts(icon, texts, crossColHeight) {
     let { x, y } = this.getCoords(true)
+    const height = crossColHeight || this.height
+    y = crossColHeight ? this.parent.startingCoords.y + height / 2 : y
+    
     if (texts || icon) {
       const { fontSize, fontColor, lineHeight, iconMaxWidth } = this.table.settings
       const imgPadding = 5
       const imgSize = Math.min(this.width - imgPadding, iconMaxWidth)
       let maxNumberOfLines = 0
-      if (this.height < imgSize + lineHeight) {
-        if (texts || this.height < (imgSize + imgPadding)) {
+      if (height < imgSize + lineHeight) {
+        if (texts || height < (imgSize + imgPadding)) {
           icon = null
           maxNumberOfLines = 1
         }
       } else if (texts) {
         maxNumberOfLines = Math.min(
           texts.length,
-          Math.floor((this.height - (icon ? imgSize : 0)) / lineHeight)
+          Math.floor((height - (icon ? imgSize : 0)) / lineHeight)
         )
       }
       texts = texts.slice(0, maxNumberOfLines)
@@ -423,17 +435,28 @@ export default class Cell extends BaseRender {
     return this
   }
 
-  getColHeight(includesMerged) {
+  getColHeight({ includesMerged, includesColIdx } = {}) {
     const cellHeight = this.parent.cellHeight
     const _cell = this.isCrossCol() ? this.getCell() : this
-    return includesMerged
-      ? _cell.mergedCells.filter((cell) => cell.colIdx === this.colIdx).length *
+    const colIdx = includesColIdx || this.colIdx
+    return (includesMerged || includesColIdx)
+      ? _cell.mergedCells.filter((cell) => cell.colIdx === colIdx).length *
           cellHeight
       : cellHeight
   }
 
-  getRowSpan() {
-    return this.mergedCells.length
+  getCrossColHeight(idx) {
+    const includesColIdx= this.getCell().mergedCells[0].colIdx + idx
+    return this.getColHeight({ includesColIdx })
+  }
+
+  getRowSpan(colIdx) {
+    const { mergedCells } = this
+    if (typeof colIdx !== 'number') {
+      return mergedCells.length
+    }
+    colIdx += mergedCells[0].colIdx
+    return mergedCells.filter(cell => cell.colIdx === colIdx).length
   }
 
   getRowIdxOfLastCell() {
