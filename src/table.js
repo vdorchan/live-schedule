@@ -402,13 +402,14 @@ export default class Table {
 
       const currentCell = currentSelection.getCell()
       const { timeRangeKey } = this.settings
+      const timeRange = formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss')
+      const oriTimeRange = currentCell.data[timeRangeKey]
+
       if (
         currentCell.data &&
         currentCell.data[timeRangeKey] &&
-        !isSame(currentCell.timeRange, currentCell.data[timeRangeKey])
+        !isSame(timeRange, oriTimeRange)
       ) {
-        const oriTimeRange = currentCell.data[timeRangeKey]
-        const timeRange = formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss')
         currentCell.data[timeRangeKey] = timeRange
         this.schedule.emit(events.TIME_RANGE_CHANGE, timeRange, oriTimeRange)
       }
