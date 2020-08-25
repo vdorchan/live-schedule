@@ -101,12 +101,11 @@ export default class Section {
 
   move(colIdx, rowIdx) {
     this.table.removeHighlights()
-    const { numberOfRows } = this.table.settings
-    const cellsToMerged = this.adjust(
+    const { numberOfRows, timeScale } = this.table.settings
+    this.selectMultiCol(
       this.colFrom,
-      rowIdx + (colIdx - this.colFrom) * numberOfRows
+      rowIdx + (colIdx - this.colFrom) * numberOfRows / timeScale
     )
-    this.mergeRow(cellsToMerged)
   }
 
   cutCells(cells, length) {
