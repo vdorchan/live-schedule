@@ -271,11 +271,11 @@ export default class Cell extends BaseRender {
           width: imgSize,
           height: imgSize,
         })
-        y += imgPadding + lineHeight
+        y += imgSize + imgPadding * 2
       }
 
       if (texts) {
-        const maxFontLength = this.width / parseInt(fontSize) + 1
+        const maxFontLength = this.width / parseInt(fontSize)
         texts.forEach((text) => {
           this.draw.text({
             text: String(text).slice(0, maxFontLength),
