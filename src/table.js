@@ -401,17 +401,18 @@ export default class Table {
       this.schedule.emit(events.SELECTE, selectedItems)
 
       const currentCell = currentSelection.getCell()
-      const { timeRangeKey } = this.settings
-      const timeRange = formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss')
-      const oriTimeRange = currentCell.data[timeRangeKey]
-
-      if (
-        currentCell.data &&
-        currentCell.data[timeRangeKey] &&
-        !isSame(timeRange, oriTimeRange)
-      ) {
-        currentCell.data[timeRangeKey] = timeRange
-        this.schedule.emit(events.TIME_RANGE_CHANGE, timeRange, oriTimeRange)
+      if (currentCell.data) {
+        const { timeRangeKey } = this.settings
+        const timeRange = formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss')
+        const oriTimeRange = currentCell.data[timeRangeKey]
+  
+        if (
+          oriTimeRange &&
+          !isSame(timeRange, oriTimeRange)
+        ) {
+          currentCell.data[timeRangeKey] = timeRange
+          this.schedule.emit(events.TIME_RANGE_CHANGE, timeRange, oriTimeRange)
+        }
       }
     }
   }
