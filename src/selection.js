@@ -47,6 +47,7 @@ export default class Section {
   }
 
   select(colIdx, rowIdx) {
+    colIdx = Math.max(0, colIdx)
     this.selectMultiCol(this.positionOfAdjustment ? this.colFrom : colIdx, rowIdx)
   }
 
