@@ -117,7 +117,7 @@ export default class Events {
     if (currentSelection && currentSelection.isInProgress()) {
       const colIdx = this.table.getColIdx(coord.x)
       const rowIdx = this.table.getRowIdx(coord.y)
-      currentSelection.selectMultiCol(colIdx, rowIdx)
+      currentSelection.select(colIdx, rowIdx)
     } else {
       this.table.mouseInCell(coord)
     }

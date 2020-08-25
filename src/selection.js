@@ -46,6 +46,10 @@ export default class Section {
     this.positionOfAdjustment = null
   }
 
+  select(colIdx, rowIdx) {
+    this.selectMultiCol(this.positionOfAdjustment ? this.colFrom : colIdx, rowIdx)
+  }
+
   selectMultiCol(colIdx, rowIdx) {
     const _batchedCells = [...this.batchedCells]
     this.batchedCells = []
@@ -77,6 +81,8 @@ export default class Section {
       (prev, current) => Math.min(prev, current.length),
       cellsToMergedList[0].length
     )
+
+    console.log(this.colFrom, colIdx, {cellsToMergedList});
 
     cellsToMergedList.forEach(cellsToMerged => {
       const reverse = this.rowFrom > rowIdx
@@ -238,6 +244,7 @@ export default class Section {
   }
 
   refresh(cell) {
+    console.log('refesh cell');
     this.deselect()
     this.setCell(cell)
     this.batchedCells = [this.cell]
