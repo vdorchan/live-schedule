@@ -43,12 +43,18 @@ export default class Tooltip {
    * @param {object||Function} callback
    */
   refresh(callback) {
-    const { color, text, icon, x, y } =
+    let { color, text, icon, x, y, cellWidth } =
       typeof callback === 'function' ? callback(this._config) : callback
+    const tooltipWidth = this.tooltip.getBoundingClientRect().width
+    const distanceToCol = 3
+    if (x + this.container.getBoundingClientRect().x + tooltipWidth > window.innerWidth) {
+      x -= tooltipWidth + cellWidth + distanceToCol
+    }
+    x = Math.floor(x)
+    y = Math.floor(y)
     this.showIcon(icon)
     this.setBackgroundColor(color)
     this.setText(text)
-    const distanceToCol = 3
     this.tooltip.style.transform = `translate3d(${x + distanceToCol}px, ${y}px, 0)`
   }
 

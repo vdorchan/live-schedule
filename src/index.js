@@ -228,6 +228,7 @@ export default class Schedule {
       text: `<p>${this.getCellTimeStr(cell)}</p>${tooltipText}`,
       color: cell.hasData() ? cell.getColor() : null,
       icon: cell.getIcon(),
+      cellWidth: cell.width
     }
   }
 

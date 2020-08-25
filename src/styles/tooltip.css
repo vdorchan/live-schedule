@@ -9,10 +9,10 @@
   font-size: 14px;
   pointer-events: none;
   border-radius: 4px;
-  white-space: nowrap;
   z-index: 999;
   background:#707070;
   visibility: hidden;
+  word-break: break-all;
 }
 .schedule-tooltip-icon {
   width: 24px;
