@@ -158,7 +158,6 @@ export default class Schedule {
           this.table.getCell(cell.colIdx, cell.rowIdx + rowSpan)
         )
         cell.data = oriData
-        console.log(cell.data);
         cell.merge(cellsToMerge)
         this.table.currentSelection.refresh(cell)
 

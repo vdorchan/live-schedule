@@ -83,8 +83,6 @@ export default class Section {
       cellsToMergedList[0].length
     )
 
-    console.log(this.colFrom, colIdx, {cellsToMergedList});
-
     cellsToMergedList.forEach(cellsToMerged => {
       const reverse = this.rowFrom > rowIdx
       cellsToMerged = reverse
@@ -245,7 +243,6 @@ export default class Section {
   }
 
   refresh(cell) {
-    console.log('refesh cell');
     this.deselect()
     this.setCell(cell)
     this.batchedCells = [this.cell]
