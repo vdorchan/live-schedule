@@ -392,6 +392,10 @@ export default class Cell extends BaseRender {
     ;[...oriMergedCells, ...cellsToMerge]
       .filter(cell => cell !== actualCell)
       .forEach(cell => {
+        // delete cell if meet other selected cell
+        if (cell.getCell() !== actualCell) {
+          cell.delete()
+        }
         if (!cellsToRender.find(c => c.isSamePosition(cell))) {
           cell.init()
           cell.unMerge()
