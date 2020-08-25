@@ -1,6 +1,6 @@
 import Draw from './draw'
 import ContextMenu from './contextMenu'
-import { arrayRemoveItem, diff, formatTimeRange } from './helper'
+import { arrayRemoveItem, diff, formatTimeRange, isSame } from './helper'
 import { events } from './mixins/event'
 
 /**
@@ -369,6 +369,7 @@ export default class Table {
   clearSelection() {
     this.selections.forEach(selection => selection.deselect())
     this.selections = []
+    this.currentSelection = null
   }
 
   getSelections() {
@@ -400,12 +401,16 @@ export default class Table {
       this.schedule.emit(events.SELECTE, selectedItems)
 
       const currentCell = currentSelection.getCell()
+      const { timeRangeKey } = this.settings
       if (
-        currentCell.data && currentCell.data.liveTime && currentCell.timeRange.some(
-          (t, idx) => !t.isSame(currentCell.data.liveTime[idx])
-        )
+        currentCell.data &&
+        currentCell.data[timeRangeKey] &&
+        !isSame(currentCell.timeRange, currentCell.data[timeRangeKey])
       ) {
-        this.schedule.emit(events.TIME_RANGE_CHANGE, formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss'))
+        const oriTimeRange = currentCell.data[timeRangeKey]
+        const timeRange = formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss')
+        currentCell.data[timeRangeKey] = timeRange
+        this.schedule.emit(events.TIME_RANGE_CHANGE, timeRange, oriTimeRange)
       }
     }
   }

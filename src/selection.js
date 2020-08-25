@@ -237,6 +237,13 @@ export default class Section {
     })
   }
 
+  refresh(cell) {
+    this.deselect()
+    this.setCell(cell)
+    this.batchedCells = [this.cell]
+    this.highlight()
+  }
+
   deleteCell(cell) {
     const selectedCell = this.getCell()
     const cellToDelete = cell || selectedCell

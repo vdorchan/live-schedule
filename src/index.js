@@ -14,6 +14,8 @@ import Events from './events'
 
 import settingsFactory from './defaultSettings'
 
+import { isSame } from './helper'
+
 import './styles/_base.css'
 import './styles/highlight.css'
 import './styles/contextMenu.css'
@@ -132,20 +134,56 @@ export default class Schedule {
   }
 
   setDataAtSelectedCell(callback) {
+    const selectedCells = []
     this.table.cellsEach((cell) => {
-      cell.setData(callback)
+      cell.selected && cell.isVisible() && selectedCells.push(cell)
     })
+
+    const data = typeof callback === 'function' ? callback() : callback || {}
+    if (selectedCells.length === 1) {
+      const currentSelectedCell = selectedCells[0]
+      const { timeRangeKey } = this.table.settings
+      if (
+        data[timeRangeKey] &&
+        currentSelectedCell.data[timeRangeKey] &&
+        !isSame(currentSelectedCell.data[timeRangeKey], data[timeRangeKey])
+      ) {
+        const { colIdx, rowIdx, rowSpan } = this.getCellConfigFromTimeRange(data[timeRangeKey])
+        const cell = this.table.getCell(colIdx, rowIdx)
+        const oriData = { ...currentSelectedCell.data, ...data }
+        currentSelectedCell.delete()
+
+        const cellsToMerge = this.table.getCellsBetween(
+          cell,
+          this.table.getCell(cell.colIdx, cell.rowIdx + rowSpan)
+        )
+        cell.data = oriData
+        console.log(cell.data);
+        cell.merge(cellsToMerge)
+        this.table.currentSelection.refresh(cell)
+
+        return
+      }
+    }
+    selectedCells.forEach(cell => cell.setData(data))
+  }
+
+  getCellConfigFromTimeRange(timeRange) {
+    const { timeScale } = this.settings
+    const [startTime, endTime] = timeRange
+    const time = dayjs(startTime)
+    const colIdx = time.date() - 1
+    const rowIdx = (time.hour() * 60 + time.minute()) / 60 / timeScale
+    const minutes = Math.abs(time.diff(endTime, 'minute'))
+    const rowSpan = minutes / (timeScale * 60) - 1
+
+    return { colIdx, rowIdx, rowSpan }
   }
 
   getItemsFromData(data) {
     const { timeRangeKey, timeScale } = this.settings
     return data.map((live) => {
-      const [startTime, endTime] = live[timeRangeKey]
-      const time = dayjs(startTime)
-      const colIdx = time.date() - 1
-      const rowIdx = (time.hour() * 60 + time.minute()) / 60 / timeScale
-      const minutes = Math.abs(time.diff(endTime, 'minute'))
-      const rowSpan = minutes / (timeScale * 60) - 1
+      const { colIdx, rowIdx, rowSpan } = this.getCellConfigFromTimeRange(live[timeRangeKey])
       return {
         colIdx,
         rowIdx,
