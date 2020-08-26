@@ -112,28 +112,12 @@ export default class Table {
     this.items = items
   }
 
-  resize(tableWidth, tableHeight) {
-    if (tableWidth === this.tableWidth && tableHeight === this.tableHeight) {
-      return
-    }
-    this.render(tableWidth, tableHeight)
-  }
-
   /**
    * Render the Table.
    * @param {number} tableWidth Width of Table.
    * @param {number} tableHeight Height of Table.
    */
   render(tableWidth, tableHeight) {
-    this.tableWidth = tableWidth
-    this.tableHeight = tableHeight
-
-    if (!this.draw) {
-      this.draw = new Draw(this.canvas, tableWidth, tableHeight)
-    } else {
-      this.draw.resize(tableWidth, tableHeight)
-    }
-
     const {
       fontSize,
       fontFamily,
@@ -143,17 +127,6 @@ export default class Table {
       colHeaderWidth,
       timeScale
     } = this.settings
-    /**
-     * Set global font config.
-     */
-    this.draw.ctx.font = `${fontSize}px ${fontFamily}`
-
-    /**
-     * Set instance of Draw.
-     */
-    this.cells.setRenderer(this.draw)
-    this.rowHeader.setRenderer(this.draw)
-    this.colHeader.setRenderer(this.draw)
 
     // calculate width of col.
     this.cellWidth = Math.floor(
@@ -168,6 +141,39 @@ export default class Table {
 
     // Set width of height of row header.
     this.settings.rowHeaderHeight = this.cellHeight / timeScale
+
+    tableWidth = this.cellWidth * numberOfCols + colHeaderWidth + cellBorderWidth
+    tableHeight = this.cellHeight / timeScale * totalNumberOfRows + cellBorderWidth
+
+    if (isSame(tableWidth, this.tableWidth) && isSame(tableHeight, this.tableHeight)) {
+      return
+    }
+
+    this.tableWidth = tableWidth
+    this.tableHeight = tableHeight
+
+    // set a timeout for trigger after setting
+    setTimeout(() => {
+      this.schedule.emit(events.RESIZE, this.tableWidth, this.tableHeight)
+    }, 0)
+
+    if (!this.draw) {
+      this.draw = new Draw(this.canvas, this.tableWidth, this.tableHeight)
+    } else {
+      this.draw.resize(this.tableWidth, this.tableHeight)
+    }
+
+    /**
+     * Set global font config.
+     */
+    this.draw.ctx.font = `${fontSize}px ${fontFamily}`
+
+    /**
+     * Set instance of Draw.
+     */
+    this.cells.setRenderer(this.draw)
+    this.rowHeader.setRenderer(this.draw)
+    this.colHeader.setRenderer(this.draw)
 
     this.cells.render()
     this.rowHeader.render()

@@ -105,7 +105,7 @@ export default class Schedule {
 
     const ro = new ResizeObserver((entries, _) => {
       const { width, height } = entries[0].contentRect
-      this.table.resize(width, height)
+      this.table.render(width, height)
     })
     ro.observe(this.rootNode)
   }

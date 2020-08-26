@@ -2,7 +2,8 @@ export const events = {
   CONTEXT_MENU_ITEM_SELECT: 'contextMenuItemSelect',
   SELECTE: 'select',
   DATA_CHANGE: 'dataChange',
-  TIME_RANGE_CHANGE: 'timeRangeChange'
+  TIME_RANGE_CHANGE: 'timeRangeChange',
+  RESIZE: 'resize'
 }
 
 const eventMixin = {
