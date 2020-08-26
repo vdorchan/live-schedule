@@ -96,7 +96,7 @@ export default class Schedule {
     this.container = document.createElement('div')
     this.container.className = 'schedule-canvas-container'
     this.container.appendChild(this.canvas)
-    this.rootNode.appendChild(this.container)
+    this.rootNode.prepend(this.container)
   }
 
   render() {

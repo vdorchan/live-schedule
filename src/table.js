@@ -152,6 +152,9 @@ export default class Table {
     this.tableWidth = tableWidth
     this.tableHeight = tableHeight
 
+    this.schedule.container.style.width = this.tableWidth + 'px'
+    this.schedule.container.style.height = this.tableHeight + 'px'
+
     // set a timeout for trigger after setting
     setTimeout(() => {
       this.schedule.emit(events.RESIZE, this.tableWidth, this.tableHeight)
