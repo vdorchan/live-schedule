@@ -8,6 +8,13 @@ import livereload from 'rollup-plugin-livereload'
 import serve from 'rollup-plugin-serve'
 import Vue from 'rollup-plugin-vue'
 
+import pkg from './package.json'
+
+const babelRuntimeVersion = pkg.dependencies['@babel/runtime'].replace(
+  /^[^0-9]*/,
+  ''
+)
+
 export default [
   // UMD Development
   {
@@ -22,6 +29,10 @@ export default [
       nodeResolve(),
       babel({
         exclude: 'node_modules/**',
+        plugins: [
+          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
+        ],
+        babelHelpers: 'runtime',
       }),
       commonjs(),
       postcss(),
@@ -45,6 +56,10 @@ export default [
       nodeResolve(),
       babel({
         exclude: 'node_modules/**',
+        plugins: [
+          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
+        ],
+        babelHelpers: 'runtime',
       }),
       replace({
         'process.env.NODE_ENV': JSON.stringify('production'),
@@ -74,6 +89,10 @@ export default [
       nodeResolve(),
       babel({
         exclude: 'node_modules/**',
+        plugins: [
+          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
+        ],
+        babelHelpers: 'runtime',
       }),
       replace({
         'process.env.NODE_ENV': JSON.stringify('development'),
@@ -97,6 +116,10 @@ export default [
       nodeResolve(),
       babel({
         exclude: 'node_modules/**',
+        plugins: [
+          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion, useESModules: true }],
+        ],
+        babelHelpers: 'runtime',
       }),
       replace({
         'process.env.NODE_ENV': JSON.stringify('development'),

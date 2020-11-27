@@ -1,6 +1,6 @@
 {
   "name": "@molife/schedule",
-  "version": "0.0.8",
+  "version": "0.0.12",
   "main": "dist/schedule.min.js",
   "module": "dist/schedule.esm.js",
   "license": "MIT",
@@ -14,12 +14,15 @@
     "pre-commit": "lint"
   },
   "dependencies": {
+    "@babel/runtime": "^7.11.2",
     "@juggle/resize-observer": "^3.2.0",
     "dayjs": "^1.8.33",
     "keycode": "^2.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",
+    "@babel/plugin-transform-runtime": "^7.11.0",
+    "@babel/preset-env": "^7.11.0",
     "@rollup/plugin-babel": "^5.1.0",
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-node-resolve": "^8.4.0",
@@ -48,8 +51,5 @@
     "type": "git",
     "url": "git@47.111.115.117:chenwudong/schedule.git"
   },
-  "author": "",
-  "publishConfig" : {
-    "registry" : "http://47.111.115.117:9082/repository/moli-npm-hosted/"
-  }
+  "author": ""
 }
