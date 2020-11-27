@@ -155,9 +155,9 @@ export default class Events {
   }
 
   onKeydown(event) {
-    if (keycode(event) === 'backspace') {
-      this.table.currentSelection.deleteCell()
-    }
+    // if (keycode(event) === 'backspace') {
+    //   this.table.currentSelection.deleteCell()
+    // }
   }
 
   /**
