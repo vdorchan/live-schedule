@@ -1,6 +1,6 @@
 {
   "name": "@molife/schedule",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "main": "dist/schedule.min.js",
   "module": "dist/schedule.esm.js",
   "license": "MIT",
