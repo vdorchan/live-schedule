@@ -49,6 +49,17 @@ var ResizeObserverBoxOptions;
     ResizeObserverBoxOptions["DEVICE_PIXEL_CONTENT_BOX"] = "device-pixel-content-box";
 })(ResizeObserverBoxOptions || (ResizeObserverBoxOptions = {}));
 
+var freeze = function (obj) { return Object.freeze(obj); };
+
+var ResizeObserverSize = (function () {
+    function ResizeObserverSize(inlineSize, blockSize) {
+        this.inlineSize = inlineSize;
+        this.blockSize = blockSize;
+        freeze(this);
+    }
+    return ResizeObserverSize;
+}());
+
 var DOMRectReadOnly = (function () {
     function DOMRectReadOnly(x, y, width, height) {
         this.x = x;
@@ -59,7 +70,7 @@ var DOMRectReadOnly = (function () {
         this.left = this.x;
         this.bottom = this.top + this.height;
         this.right = this.left + this.width;
-        return Object.freeze(this);
+        return freeze(this);
     }
     DOMRectReadOnly.prototype.toJSON = function () {
         var _a = this, x = _a.x, y = _a.y, top = _a.top, right = _a.right, bottom = _a.bottom, left = _a.left, width = _a.width, height = _a.height;
@@ -114,12 +125,9 @@ var size = function (inlineSize, blockSize, switchSizes) {
     if (inlineSize === void 0) { inlineSize = 0; }
     if (blockSize === void 0) { blockSize = 0; }
     if (switchSizes === void 0) { switchSizes = false; }
-    return Object.freeze({
-        inlineSize: (switchSizes ? blockSize : inlineSize) || 0,
-        blockSize: (switchSizes ? inlineSize : blockSize) || 0
-    });
+    return new ResizeObserverSize((switchSizes ? blockSize : inlineSize) || 0, (switchSizes ? inlineSize : blockSize) || 0);
 };
-var zeroBoxes = Object.freeze({
+var zeroBoxes = freeze({
     devicePixelContentBoxSize: size(),
     borderBoxSize: size(),
     contentBoxSize: size(),
@@ -160,7 +168,7 @@ var calculateBoxSizes = function (target, forceRecalculation) {
     var contentHeight = svg ? svg.height : parseDimension(cs.height) - heightReduction - horizontalScrollbarThickness;
     var borderBoxWidth = contentWidth + horizontalPadding + verticalScrollbarThickness + horizontalBorderArea;
     var borderBoxHeight = contentHeight + verticalPadding + horizontalScrollbarThickness + verticalBorderArea;
-    var boxes = Object.freeze({
+    var boxes = freeze({
         devicePixelContentBoxSize: size(Math.round(contentWidth * devicePixelRatio), Math.round(contentHeight * devicePixelRatio), switchSizes),
         borderBoxSize: size(borderBoxWidth, borderBoxHeight, switchSizes),
         contentBoxSize: size(contentWidth, contentHeight, switchSizes),
@@ -186,9 +194,9 @@ var ResizeObserverEntry = (function () {
         var boxes = calculateBoxSizes(target);
         this.target = target;
         this.contentRect = boxes.contentRect;
-        this.borderBoxSize = [boxes.borderBoxSize];
-        this.contentBoxSize = [boxes.contentBoxSize];
-        this.devicePixelContentBoxSize = [boxes.devicePixelContentBoxSize];
+        this.borderBoxSize = freeze([boxes.borderBoxSize]);
+        this.contentBoxSize = freeze([boxes.contentBoxSize]);
+        this.devicePixelContentBoxSize = freeze([boxes.devicePixelContentBoxSize]);
     }
     return ResizeObserverEntry;
 }());
@@ -521,7 +529,7 @@ function commonjsRequire () {
 }
 
 var dayjs_min = createCommonjsModule(function (module, exports) {
-!function(t,e){module.exports=e();}(commonjsGlobal,function(){var t="millisecond",e="second",n="minute",r="hour",i="day",s="week",u="month",a="quarter",o="year",f="date",h=/^(\d{4})[-/]?(\d{1,2})?[-/]?(\d{0,2})[^0-9]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?.?(\d{1,3})?$/,c=/\[([^\]]+)]|Y{2,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g,d=function(t,e,n){var r=String(t);return !r||r.length>=e?t:""+Array(e+1-r.length).join(n)+t},$={s:d,z:function(t){var e=-t.utcOffset(),n=Math.abs(e),r=Math.floor(n/60),i=n%60;return (e<=0?"+":"-")+d(r,2,"0")+":"+d(i,2,"0")},m:function t(e,n){if(e.date()<n.date())return -t(n,e);var r=12*(n.year()-e.year())+(n.month()-e.month()),i=e.add(r,u),s=n-i<0,a=e.add(r+(s?-1:1),u);return +(-(r+(n-i)/(s?i-a:a-i))||0)},a:function(t){return t<0?Math.ceil(t)||0:Math.floor(t)},p:function(h){return {M:u,y:o,w:s,d:i,D:f,h:r,m:n,s:e,ms:t,Q:a}[h]||String(h||"").toLowerCase().replace(/s$/,"")},u:function(t){return void 0===t}},l={name:"en",weekdays:"Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),months:"January_February_March_April_May_June_July_August_September_October_November_December".split("_")},y="en",M={};M[y]=l;var m=function(t){return t instanceof S},D=function(t,e,n){var r;if(!t)return y;if("string"==typeof t)M[t]&&(r=t),e&&(M[t]=e,r=t);else {var i=t.name;M[i]=t,r=i;}return !n&&r&&(y=r),r||!n&&y},v=function(t,e){if(m(t))return t.clone();var n="object"==typeof e?e:{};return n.date=t,n.args=arguments,new S(n)},g=$;g.l=D,g.i=m,g.w=function(t,e){return v(t,{locale:e.$L,utc:e.$u,$offset:e.$offset})};var S=function(){function d(t){this.$L=this.$L||D(t.locale,null,!0),this.parse(t);}var $=d.prototype;return $.parse=function(t){this.$d=function(t){var e=t.date,n=t.utc;if(null===e)return new Date(NaN);if(g.u(e))return new Date;if(e instanceof Date)return new Date(e);if("string"==typeof e&&!/Z$/i.test(e)){var r=e.match(h);if(r){var i=r[2]-1||0;return n?new Date(Date.UTC(r[1],i,r[3]||1,r[4]||0,r[5]||0,r[6]||0,r[7]||0)):new Date(r[1],i,r[3]||1,r[4]||0,r[5]||0,r[6]||0,r[7]||0)}}return new Date(e)}(t),this.init();},$.init=function(){var t=this.$d;this.$y=t.getFullYear(),this.$M=t.getMonth(),this.$D=t.getDate(),this.$W=t.getDay(),this.$H=t.getHours(),this.$m=t.getMinutes(),this.$s=t.getSeconds(),this.$ms=t.getMilliseconds();},$.$utils=function(){return g},$.isValid=function(){return !("Invalid Date"===this.$d.toString())},$.isSame=function(t,e){var n=v(t);return this.startOf(e)<=n&&n<=this.endOf(e)},$.isAfter=function(t,e){return v(t)<this.startOf(e)},$.isBefore=function(t,e){return this.endOf(e)<v(t)},$.$g=function(t,e,n){return g.u(t)?this[e]:this.set(n,t)},$.unix=function(){return Math.floor(this.valueOf()/1e3)},$.valueOf=function(){return this.$d.getTime()},$.startOf=function(t,a){var h=this,c=!!g.u(a)||a,d=g.p(t),$=function(t,e){var n=g.w(h.$u?Date.UTC(h.$y,e,t):new Date(h.$y,e,t),h);return c?n:n.endOf(i)},l=function(t,e){return g.w(h.toDate()[t].apply(h.toDate("s"),(c?[0,0,0,0]:[23,59,59,999]).slice(e)),h)},y=this.$W,M=this.$M,m=this.$D,D="set"+(this.$u?"UTC":"");switch(d){case o:return c?$(1,0):$(31,11);case u:return c?$(1,M):$(0,M+1);case s:var v=this.$locale().weekStart||0,S=(y<v?y+7:y)-v;return $(c?m-S:m+(6-S),M);case i:case f:return l(D+"Hours",0);case r:return l(D+"Minutes",1);case n:return l(D+"Seconds",2);case e:return l(D+"Milliseconds",3);default:return this.clone()}},$.endOf=function(t){return this.startOf(t,!1)},$.$set=function(s,a){var h,c=g.p(s),d="set"+(this.$u?"UTC":""),$=(h={},h[i]=d+"Date",h[f]=d+"Date",h[u]=d+"Month",h[o]=d+"FullYear",h[r]=d+"Hours",h[n]=d+"Minutes",h[e]=d+"Seconds",h[t]=d+"Milliseconds",h)[c],l=c===i?this.$D+(a-this.$W):a;if(c===u||c===o){var y=this.clone().set(f,1);y.$d[$](l),y.init(),this.$d=y.set(f,Math.min(this.$D,y.daysInMonth())).$d;}else $&&this.$d[$](l);return this.init(),this},$.set=function(t,e){return this.clone().$set(t,e)},$.get=function(t){return this[g.p(t)]()},$.add=function(t,a){var f,h=this;t=Number(t);var c=g.p(a),d=function(e){var n=v(h);return g.w(n.date(n.date()+Math.round(e*t)),h)};if(c===u)return this.set(u,this.$M+t);if(c===o)return this.set(o,this.$y+t);if(c===i)return d(1);if(c===s)return d(7);var $=(f={},f[n]=6e4,f[r]=36e5,f[e]=1e3,f)[c]||1,l=this.$d.getTime()+t*$;return g.w(l,this)},$.subtract=function(t,e){return this.add(-1*t,e)},$.format=function(t){var e=this;if(!this.isValid())return "Invalid Date";var n=t||"YYYY-MM-DDTHH:mm:ssZ",r=g.z(this),i=this.$locale(),s=this.$H,u=this.$m,a=this.$M,o=i.weekdays,f=i.months,h=function(t,r,i,s){return t&&(t[r]||t(e,n))||i[r].substr(0,s)},d=function(t){return g.s(s%12||12,t,"0")},$=i.meridiem||function(t,e,n){var r=t<12?"AM":"PM";return n?r.toLowerCase():r},l={YY:String(this.$y).slice(-2),YYYY:this.$y,M:a+1,MM:g.s(a+1,2,"0"),MMM:h(i.monthsShort,a,f,3),MMMM:h(f,a),D:this.$D,DD:g.s(this.$D,2,"0"),d:String(this.$W),dd:h(i.weekdaysMin,this.$W,o,2),ddd:h(i.weekdaysShort,this.$W,o,3),dddd:o[this.$W],H:String(s),HH:g.s(s,2,"0"),h:d(1),hh:d(2),a:$(s,u,!0),A:$(s,u,!1),m:String(u),mm:g.s(u,2,"0"),s:String(this.$s),ss:g.s(this.$s,2,"0"),SSS:g.s(this.$ms,3,"0"),Z:r};return n.replace(c,function(t,e){return e||l[t]||r.replace(":","")})},$.utcOffset=function(){return 15*-Math.round(this.$d.getTimezoneOffset()/15)},$.diff=function(t,f,h){var c,d=g.p(f),$=v(t),l=6e4*($.utcOffset()-this.utcOffset()),y=this-$,M=g.m(this,$);return M=(c={},c[o]=M/12,c[u]=M,c[a]=M/3,c[s]=(y-l)/6048e5,c[i]=(y-l)/864e5,c[r]=y/36e5,c[n]=y/6e4,c[e]=y/1e3,c)[d]||y,h?M:g.a(M)},$.daysInMonth=function(){return this.endOf(u).$D},$.$locale=function(){return M[this.$L]},$.locale=function(t,e){if(!t)return this.$L;var n=this.clone(),r=D(t,e,!0);return r&&(n.$L=r),n},$.clone=function(){return g.w(this.$d,this)},$.toDate=function(){return new Date(this.valueOf())},$.toJSON=function(){return this.isValid()?this.toISOString():null},$.toISOString=function(){return this.$d.toISOString()},$.toString=function(){return this.$d.toUTCString()},d}(),p=S.prototype;return v.prototype=p,[["$ms",t],["$s",e],["$m",n],["$H",r],["$W",i],["$M",u],["$y",o],["$D",f]].forEach(function(t){p[t[1]]=function(e){return this.$g(e,t[0],t[1])};}),v.extend=function(t,e){return t(e,S,v),v},v.locale=D,v.isDayjs=m,v.unix=function(t){return v(1e3*t)},v.en=M[y],v.Ls=M,v});
+!function(t,e){module.exports=e();}(commonjsGlobal,function(){var t="millisecond",e="second",n="minute",r="hour",i="day",s="week",u="month",a="quarter",o="year",f="date",h=/^(\d{4})[-/]?(\d{1,2})?[-/]?(\d{0,2})[^0-9]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/,c=/\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g,d={name:"en",weekdays:"Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),months:"January_February_March_April_May_June_July_August_September_October_November_December".split("_")},$=function(t,e,n){var r=String(t);return !r||r.length>=e?t:""+Array(e+1-r.length).join(n)+t},l={s:$,z:function(t){var e=-t.utcOffset(),n=Math.abs(e),r=Math.floor(n/60),i=n%60;return (e<=0?"+":"-")+$(r,2,"0")+":"+$(i,2,"0")},m:function t(e,n){if(e.date()<n.date())return -t(n,e);var r=12*(n.year()-e.year())+(n.month()-e.month()),i=e.clone().add(r,u),s=n-i<0,a=e.clone().add(r+(s?-1:1),u);return +(-(r+(n-i)/(s?i-a:a-i))||0)},a:function(t){return t<0?Math.ceil(t)||0:Math.floor(t)},p:function(h){return {M:u,y:o,w:s,d:i,D:f,h:r,m:n,s:e,ms:t,Q:a}[h]||String(h||"").toLowerCase().replace(/s$/,"")},u:function(t){return void 0===t}},y="en",M={};M[y]=d;var m=function(t){return t instanceof S},D=function(t,e,n){var r;if(!t)return y;if("string"==typeof t)M[t]&&(r=t),e&&(M[t]=e,r=t);else {var i=t.name;M[i]=t,r=i;}return !n&&r&&(y=r),r||!n&&y},v=function(t,e){if(m(t))return t.clone();var n="object"==typeof e?e:{};return n.date=t,n.args=arguments,new S(n)},g=l;g.l=D,g.i=m,g.w=function(t,e){return v(t,{locale:e.$L,utc:e.$u,x:e.$x,$offset:e.$offset})};var S=function(){function d(t){this.$L=D(t.locale,null,!0),this.parse(t);}var $=d.prototype;return $.parse=function(t){this.$d=function(t){var e=t.date,n=t.utc;if(null===e)return new Date(NaN);if(g.u(e))return new Date;if(e instanceof Date)return new Date(e);if("string"==typeof e&&!/Z$/i.test(e)){var r=e.match(h);if(r){var i=r[2]-1||0,s=(r[7]||"0").substring(0,3);return n?new Date(Date.UTC(r[1],i,r[3]||1,r[4]||0,r[5]||0,r[6]||0,s)):new Date(r[1],i,r[3]||1,r[4]||0,r[5]||0,r[6]||0,s)}}return new Date(e)}(t),this.$x=t.x||{},this.init();},$.init=function(){var t=this.$d;this.$y=t.getFullYear(),this.$M=t.getMonth(),this.$D=t.getDate(),this.$W=t.getDay(),this.$H=t.getHours(),this.$m=t.getMinutes(),this.$s=t.getSeconds(),this.$ms=t.getMilliseconds();},$.$utils=function(){return g},$.isValid=function(){return !("Invalid Date"===this.$d.toString())},$.isSame=function(t,e){var n=v(t);return this.startOf(e)<=n&&n<=this.endOf(e)},$.isAfter=function(t,e){return v(t)<this.startOf(e)},$.isBefore=function(t,e){return this.endOf(e)<v(t)},$.$g=function(t,e,n){return g.u(t)?this[e]:this.set(n,t)},$.unix=function(){return Math.floor(this.valueOf()/1e3)},$.valueOf=function(){return this.$d.getTime()},$.startOf=function(t,a){var h=this,c=!!g.u(a)||a,d=g.p(t),$=function(t,e){var n=g.w(h.$u?Date.UTC(h.$y,e,t):new Date(h.$y,e,t),h);return c?n:n.endOf(i)},l=function(t,e){return g.w(h.toDate()[t].apply(h.toDate("s"),(c?[0,0,0,0]:[23,59,59,999]).slice(e)),h)},y=this.$W,M=this.$M,m=this.$D,D="set"+(this.$u?"UTC":"");switch(d){case o:return c?$(1,0):$(31,11);case u:return c?$(1,M):$(0,M+1);case s:var v=this.$locale().weekStart||0,S=(y<v?y+7:y)-v;return $(c?m-S:m+(6-S),M);case i:case f:return l(D+"Hours",0);case r:return l(D+"Minutes",1);case n:return l(D+"Seconds",2);case e:return l(D+"Milliseconds",3);default:return this.clone()}},$.endOf=function(t){return this.startOf(t,!1)},$.$set=function(s,a){var h,c=g.p(s),d="set"+(this.$u?"UTC":""),$=(h={},h[i]=d+"Date",h[f]=d+"Date",h[u]=d+"Month",h[o]=d+"FullYear",h[r]=d+"Hours",h[n]=d+"Minutes",h[e]=d+"Seconds",h[t]=d+"Milliseconds",h)[c],l=c===i?this.$D+(a-this.$W):a;if(c===u||c===o){var y=this.clone().set(f,1);y.$d[$](l),y.init(),this.$d=y.set(f,Math.min(this.$D,y.daysInMonth())).$d;}else $&&this.$d[$](l);return this.init(),this},$.set=function(t,e){return this.clone().$set(t,e)},$.get=function(t){return this[g.p(t)]()},$.add=function(t,a){var f,h=this;t=Number(t);var c=g.p(a),d=function(e){var n=v(h);return g.w(n.date(n.date()+Math.round(e*t)),h)};if(c===u)return this.set(u,this.$M+t);if(c===o)return this.set(o,this.$y+t);if(c===i)return d(1);if(c===s)return d(7);var $=(f={},f[n]=6e4,f[r]=36e5,f[e]=1e3,f)[c]||1,l=this.$d.getTime()+t*$;return g.w(l,this)},$.subtract=function(t,e){return this.add(-1*t,e)},$.format=function(t){var e=this;if(!this.isValid())return "Invalid Date";var n=t||"YYYY-MM-DDTHH:mm:ssZ",r=g.z(this),i=this.$locale(),s=this.$H,u=this.$m,a=this.$M,o=i.weekdays,f=i.months,h=function(t,r,i,s){return t&&(t[r]||t(e,n))||i[r].substr(0,s)},d=function(t){return g.s(s%12||12,t,"0")},$=i.meridiem||function(t,e,n){var r=t<12?"AM":"PM";return n?r.toLowerCase():r},l={YY:String(this.$y).slice(-2),YYYY:this.$y,M:a+1,MM:g.s(a+1,2,"0"),MMM:h(i.monthsShort,a,f,3),MMMM:h(f,a),D:this.$D,DD:g.s(this.$D,2,"0"),d:String(this.$W),dd:h(i.weekdaysMin,this.$W,o,2),ddd:h(i.weekdaysShort,this.$W,o,3),dddd:o[this.$W],H:String(s),HH:g.s(s,2,"0"),h:d(1),hh:d(2),a:$(s,u,!0),A:$(s,u,!1),m:String(u),mm:g.s(u,2,"0"),s:String(this.$s),ss:g.s(this.$s,2,"0"),SSS:g.s(this.$ms,3,"0"),Z:r};return n.replace(c,function(t,e){return e||l[t]||r.replace(":","")})},$.utcOffset=function(){return 15*-Math.round(this.$d.getTimezoneOffset()/15)},$.diff=function(t,f,h){var c,d=g.p(f),$=v(t),l=6e4*($.utcOffset()-this.utcOffset()),y=this-$,M=g.m(this,$);return M=(c={},c[o]=M/12,c[u]=M,c[a]=M/3,c[s]=(y-l)/6048e5,c[i]=(y-l)/864e5,c[r]=y/36e5,c[n]=y/6e4,c[e]=y/1e3,c)[d]||y,h?M:g.a(M)},$.daysInMonth=function(){return this.endOf(u).$D},$.$locale=function(){return M[this.$L]},$.locale=function(t,e){if(!t)return this.$L;var n=this.clone(),r=D(t,e,!0);return r&&(n.$L=r),n},$.clone=function(){return g.w(this.$d,this)},$.toDate=function(){return new Date(this.valueOf())},$.toJSON=function(){return this.isValid()?this.toISOString():null},$.toISOString=function(){return this.$d.toISOString()},$.toString=function(){return this.$d.toUTCString()},d}(),p=S.prototype;return v.prototype=p,[["$ms",t],["$s",e],["$m",n],["$H",r],["$W",i],["$M",u],["$y",o],["$D",f]].forEach(function(t){p[t[1]]=function(e){return this.$g(e,t[0],t[1])};}),v.extend=function(t,e){return t.$i||(t(e,S,v),t.$i=!0),v},v.locale=D,v.isDayjs=m,v.unix=function(t){return v(1e3*t)},v.en=M[y],v.Ls=M,v.p={},v});
 });
 
 function numberEach(cb, from, to) {
@@ -538,7 +546,7 @@ function numberEach(cb, from, to) {
   var isStop = false;
 
   while (!isEnd() && !isStop) {
-    isStop = cb(iterate(from)) === false;
+    isStop = cb(iterate()) === false;
   }
 }
 function getAlphaFromHex(hex) {
@@ -860,7 +868,10 @@ var events$1 = {
   SELECTE: 'select',
   DATA_CHANGE: 'dataChange',
   TIME_RANGE_CHANGE: 'timeRangeChange',
-  RESIZE: 'resize'
+  RESIZE: 'resize',
+  CELL_CLICK: 'cellClick',
+  ROW_HEADER_CLICK: 'rowHeaderClick',
+  COLUMN_HEADER_CLICK: 'columnHeaderClick'
 };
 var eventMixin = {
   /**
@@ -1158,6 +1169,20 @@ var Table = /*#__PURE__*/function () {
     var colIdx = Math.floor((x - this.cells.startingCoords.x) / this.cellWidth);
     var rowIdx = Math.floor((y - this.cells.startingCoords.y) / this.cellHeight);
     return this.getCell(colIdx, rowIdx, crossCol);
+  };
+
+  _proto.getRowHeaderByCoord = function getRowHeaderByCoord(_ref3) {
+    var x = _ref3.x,
+        y = _ref3.y;
+    var colIdx = Math.floor((x - this.rowHeader.startingCoords.x) / this.rowHeader.cellWidth);
+    return this.rowHeader._cells[colIdx];
+  };
+
+  _proto.getColumnHeaderByCoord = function getColumnHeaderByCoord(_ref4) {
+    var x = _ref4.x,
+        y = _ref4.y;
+    var rowIdx = Math.floor((y - this.colHeader.startingCoords.y) / this.colHeader.cellHeight);
+    return this.colHeader._cells[rowIdx];
   }
   /**
    *
@@ -1381,10 +1406,19 @@ var Table = /*#__PURE__*/function () {
   return Table;
 }();
 
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+
+  return _setPrototypeOf(o, p);
+}
+
 function _inheritsLoose(subClass, superClass) {
   subClass.prototype = Object.create(superClass.prototype);
   subClass.prototype.constructor = subClass;
-  subClass.__proto__ = superClass;
+  _setPrototypeOf(subClass, superClass);
 }
 
 function _assertThisInitialized(self) {
@@ -1450,12 +1484,15 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
         rowIdx = _ref.rowIdx,
         label = _ref.label,
         parent = _ref.parent,
-        dashLine = _ref.dashLine;
+        dashLine = _ref.dashLine,
+        _ref$type = _ref.type,
+        type = _ref$type === void 0 ? 'cell' : _ref$type;
     _this = _BaseRender.call(this) || this;
     _this.colIdx = colIdx;
     _this.rowIdx = rowIdx;
     _this.label = label;
     _this.parent = parent;
+    _this.type = type;
     _this.borderWidth = 1;
     _this.borderTop = 1;
     _this.borderRight = 1;
@@ -1595,6 +1632,35 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
     return data[key];
   };
 
+  _proto.getHeaderValue = function getHeaderValue() {
+    var _this$table$settings4 = this.table.settings,
+        renderColumnHeader = _this$table$settings4.renderColumnHeader,
+        renderRowHeader = _this$table$settings4.renderRowHeader,
+        headerTextColor = _this$table$settings4.headerTextColor;
+    var data = {
+      label: this.label,
+      icon: null,
+      color: headerTextColor
+    };
+
+    if (this.type === 'columnHeader' && typeof renderColumnHeader === 'function') {
+      var obj = renderColumnHeader(_extends({}, this, {
+        center: this.getCoords(true)
+      }));
+      data = _extends({}, data, obj);
+    }
+
+    if (this.type === 'rowHeader' && typeof renderRowHeader === 'function') {
+      var _obj2 = renderRowHeader(_extends({}, this, {
+        center: this.getCoords(true)
+      }));
+
+      data = _extends({}, data, _obj2);
+    }
+
+    return data;
+  };
+
   _proto.getHighlightConfigs = function getHighlightConfigs() {
     var cellWidth = this.parent.cellWidth;
     var cellHeight = this.getColHeight();
@@ -1629,15 +1695,15 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
     var data = this.data,
         rowIdx = this.rowIdx;
     var cellWidth = this.parent.cellWidth;
-    var _this$table$settings4 = this.table.settings,
-        cellBorderWidth = _this$table$settings4.cellBorderWidth,
-        cellSelectedColor = _this$table$settings4.cellSelectedColor,
-        cellActiveColor = _this$table$settings4.cellActiveColor,
-        cellBorderColor = _this$table$settings4.cellBorderColor,
-        bgColor = _this$table$settings4.bgColor,
-        colorKey = _this$table$settings4.colorKey,
-        iconKey = _this$table$settings4.iconKey,
-        textsKey = _this$table$settings4.textsKey;
+    var _this$table$settings5 = this.table.settings,
+        cellBorderWidth = _this$table$settings5.cellBorderWidth,
+        cellSelectedColor = _this$table$settings5.cellSelectedColor,
+        cellActiveColor = _this$table$settings5.cellActiveColor,
+        cellBorderColor = _this$table$settings5.cellBorderColor,
+        bgColor = _this$table$settings5.bgColor,
+        colorKey = _this$table$settings5.colorKey,
+        iconKey = _this$table$settings5.iconKey,
+        textsKey = _this$table$settings5.textsKey;
     this.width = cellWidth - cellBorderWidth;
     this.height = this.getColHeight({
       includesMerged: true
@@ -1686,7 +1752,35 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
     this.renderLabel(this.label);
   };
 
-  _proto.renderLabel = function renderLabel(label) {
+  _proto.renderHeader = function renderHeader() {
+    if (this.hidden) {
+      return;
+    }
+
+    var bgColor = this.table.settings.bgColor;
+    var cellColor = this.getColor();
+
+    if (!cellColor) {
+      return;
+    } // Fill background color if color has alpha.
+
+
+    if (hexHasAlpha(cellColor)) {
+      this.renderRect(bgColor);
+    }
+
+    this.renderRect(cellColor);
+
+    var _this$getHeaderValue = this.getHeaderValue(),
+        icon = _this$getHeaderValue.icon,
+        label = _this$getHeaderValue.label,
+        color = _this$getHeaderValue.color;
+
+    this.renderHeaderIcon(icon);
+    this.renderLabel(label, color);
+  };
+
+  _proto.renderLabel = function renderLabel(label, color) {
     if (typeof label !== 'string') {
       return;
     }
@@ -1699,8 +1793,16 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
       text: label,
       x: x,
       y: y,
-      fill: this.table.settings.headerTextColor
+      fill: color || this.table.settings.headerTextColor
     });
+  };
+
+  _proto.renderHeaderIcon = function renderHeaderIcon(icon) {
+    if (!icon) {
+      return;
+    }
+
+    this.draw.image(icon);
   };
 
   _proto.renderIconAndTexts = function renderIconAndTexts(icon, texts, crossColHeight) {
@@ -1714,11 +1816,11 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
     y = crossColHeight ? this.parent.startingCoords.y + height / 2 : y;
 
     if (texts || icon) {
-      var _this$table$settings5 = this.table.settings,
-          fontSize = _this$table$settings5.fontSize,
-          fontColor = _this$table$settings5.fontColor,
-          lineHeight = _this$table$settings5.lineHeight,
-          iconMaxWidth = _this$table$settings5.iconMaxWidth;
+      var _this$table$settings6 = this.table.settings,
+          fontSize = _this$table$settings6.fontSize,
+          fontColor = _this$table$settings6.fontColor,
+          lineHeight = _this$table$settings6.lineHeight,
+          iconMaxWidth = _this$table$settings6.iconMaxWidth;
       var imgPadding = 5;
       var imgSize = Math.min(this.width - imgPadding, iconMaxWidth);
       var maxNumberOfLines = 0;
@@ -1780,10 +1882,10 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
         data = callback(cell.data || {});
       }
 
-      var _this$table$settings6 = this.table.settings,
-          colorKey = _this$table$settings6.colorKey,
-          iconKey = _this$table$settings6.iconKey,
-          textsKey = _this$table$settings6.textsKey;
+      var _this$table$settings7 = this.table.settings,
+          colorKey = _this$table$settings7.colorKey,
+          iconKey = _this$table$settings7.iconKey,
+          textsKey = _this$table$settings7.textsKey;
 
       var oriData = _extends({}, this.data);
 
@@ -2224,6 +2326,7 @@ var RowHeader = /*#__PURE__*/function (_BaseRender) {
     for (var colIdx = 0; colIdx < this.table.settings.numberOfCols; colIdx++) {
       this._cells[colIdx] = [];
       var cell = new Cell({
+        type: 'rowHeader',
         colIdx: colIdx,
         rowIdx: 0,
         label: String(colIdx + 1),
@@ -2256,7 +2359,7 @@ var RowHeader = /*#__PURE__*/function (_BaseRender) {
     this.adjust();
 
     this._cells.forEach(function (cell) {
-      return cell.render();
+      return cell.renderHeader();
     });
   };
 
@@ -2276,6 +2379,7 @@ var ColHeader = /*#__PURE__*/function (_BaseRender) {
 
     _this = _BaseRender.call(this) || this;
     _this._cells = [];
+    _this.headerType = 'column';
     /**
      * Reference to the starting coords of cell.
      */
@@ -2293,6 +2397,7 @@ var ColHeader = /*#__PURE__*/function (_BaseRender) {
     for (var rowIdx = 0; rowIdx < this.table.settings.numberOfRows + 1; rowIdx++) {
       this._cells[rowIdx] = [];
       var cell = new Cell({
+        type: 'columnHeader',
         colIdx: 0,
         rowIdx: rowIdx,
         label: rowIdx === 0 ? '' : rowIdx - 1 + "-" + rowIdx,
@@ -2344,11 +2449,13 @@ var ColHeader = /*#__PURE__*/function (_BaseRender) {
   };
 
   _proto.render = function render() {
+    var _this2 = this;
+
     if (!this._cells.length) this.init();
     this.adjust();
 
     this._cells.forEach(function (cell) {
-      return cell.render();
+      return cell.renderHeader(_this2.headerType);
     });
 
     this.renderCornerLeft();
@@ -2864,7 +2971,7 @@ var Section = /*#__PURE__*/function () {
   return Section;
 }();
 
-var keycode = createCommonjsModule(function (module, exports) {
+var _keycode_2_2_0_keycode = createCommonjsModule(function (module, exports) {
 // Source: http://jsfiddle.net/vWx8V/
 // http://stackoverflow.com/questions/5603195/full-list-of-javascript-keycodes
 
@@ -3058,6 +3165,7 @@ var Events = /*#__PURE__*/function () {
     this.onContextMenu = this.onContextMenu.bind(this);
     this.onContextMenuItemSelect = this.onContextMenuItemSelect.bind(this);
     this.onKeydown = this.onKeydown.bind(this);
+    this.onCanvasClick = this.onCanvasClick.bind(this);
     var readOnly = this.table.settings.readOnly;
 
     if (!readOnly) {
@@ -3068,6 +3176,7 @@ var Events = /*#__PURE__*/function () {
     }
 
     window.addEventListener('mousemove', this.onMouseMove);
+    this.canvas.addEventListener('click', this.onCanvasClick);
     this.table.contextMenu.onContextMenuItemSelect(this.onContextMenuItemSelect);
   }
 
@@ -3087,7 +3196,31 @@ var Events = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.addEventListener = function addEventListener() {}
+  _proto.addEventListener = function addEventListener() {};
+
+  _proto.onCanvasClick = function onCanvasClick(event) {
+    var coord = this.getCoords(event);
+    var cell = this.table.getCellByCoord(coord, false);
+
+    if (cell) {
+      this.schedule.emit(events$1.CELL_CLICK, cell);
+      return;
+    }
+
+    var rowHeader = this.table.getRowHeaderByCoord(coord);
+
+    if (rowHeader) {
+      this.schedule.emit(events$1.ROW_HEADER_CLICK, rowHeader);
+      return;
+    }
+
+    var columnHeader = this.table.getColumnHeaderByCoord(coord);
+
+    if (columnHeader) {
+      this.schedule.emit(events$1.COLUMN_HEADER_CLICK, rowHeader);
+      return;
+    }
+  }
   /**
    *
    */
@@ -3101,7 +3234,7 @@ var Events = /*#__PURE__*/function () {
     }
 
     var coord = this.getCoords(event);
-    var cell = this.table.getCellByCoord(coord);
+    var cell = this.table.getCellByCoord(coord, false);
     var currentSelection = this.table.currentSelection;
 
     if (event.target.classList.contains(HIGHLIGHT_DOWN_RESIZE_CLASS)) {
@@ -3202,6 +3335,7 @@ var Events = /*#__PURE__*/function () {
     window.removeEventListener('mousemove', this.onMouseMove);
     this.container.removeEventListener('contextmenu', this.onContextMenu);
     document.removeEventListener('keydown', this.onKeydown);
+    this.canvas.removeEventListener('click', this.onCanvasClick);
   };
 
   _proto.getCoords = function getCoords(event) {
@@ -3454,6 +3588,22 @@ var settingsFactory = (function () {
     renderCell: void 0,
 
     /**
+    * 自定义渲染表头，return 一个对象，包含 label字符串、color字符串、icon对象
+    * 当前格子的 data 将作为参数返回
+    * @param {Function}
+    * @default undefined
+    */
+    renderColumnHeader: void 0,
+
+    /**
+     * 自定义渲染表头，return 一个对象，包含 label字符串、color字符串、icon对象
+     * 当前格子的 data 将作为参数返回
+     * @param {Function}
+     * @default undefined
+     */
+    renderRowHeader: void 0,
+
+    /**
      * 右键菜单项目列表，然后可以通过 on 方法监听设置事件方法
      * @param {object[]}
      * @default undefined
@@ -3501,7 +3651,7 @@ styleInject(css_248z);
 var css_248z$1 = ".schedule-highlight {\n  position: absolute;\n  top: 0;\n  left: 0;\n  border: 2px solid #999999;\n  pointer-events: none;\n  margin: -2px;\n  visibility: hidden;\n}\n\n.schedule-highlight-up-resize {\n  position: absolute;\n  width: 100%;\n  height: 8px;\n  top: -2px;\n  left: 0;\n  cursor: row-resize;\n  pointer-events: all;\n}\n\n.schedule-highlight-down-resize {\n  position: absolute;\n  width: 100%;\n  height: 8px;\n  bottom: -2px;\n  left: 0;\n  cursor: row-resize;\n  pointer-events: all;\n}\n\n.schedule-highlight.disabled-up-resize {\n  border-top-style: dotted;\n}\n\n.schedule-highlight.disabled-up-resize .schedule-highlight-up-resize {\n  pointer-events: none;\n}\n\n.schedule-highlight.disabled-down-resize {\n  border-bottom-style: dotted;\n}\n\n.schedule-highlight.disabled-down-resize .schedule-highlight-down-resize {\n  pointer-events: none;\n}\n\n.schedule-multi-select .schedule-highlight-up-resize, \n.schedule-multi-select .schedule-highlight-down-resize {\n  pointer-events: none;\n}";
 styleInject(css_248z$1);
 
-var css_248z$2 = ".schedule-contextmenu {\n  position: absolute;\n  left: 0;\n  top: 0;\n  padding: 5px 0;\n  margin: 0;\n  background: #707070;\n  border: 1px solid #707070;\n  border-radius: 4px;\n  box-shadow: 2px 2px 8px 0px rgba(150, 150, 150, 0.2);\n  list-style: none;\n  font-size: 14px;\n  white-space: nowrap;\n  cursor: pointer;\n  z-index: 2800;\n  -webkit-tap-highlight-color: transparent;\n}\n\n.schedule-contextmenu-item {\n  padding: 5px 14px;\n  line-height: 1;\n  color: #fff;\n}\n\n.schedule-contextmenu-item:hover {\n  background: #585858;\n}";
+var css_248z$2 = ".schedule-contextmenu {\n  position: absolute;\n  left: 0;\n  top: 0;\n  padding: 5px 0;\n  margin: 0;\n  background: #707070;\n  border: 1px solid #707070;\n  border-radius: 4px;\n  -webkit-box-shadow: 2px 2px 8px 0px rgba(150, 150, 150, 0.2);\n          box-shadow: 2px 2px 8px 0px rgba(150, 150, 150, 0.2);\n  list-style: none;\n  font-size: 14px;\n  white-space: nowrap;\n  cursor: pointer;\n  z-index: 2800;\n  -webkit-tap-highlight-color: transparent;\n}\n\n.schedule-contextmenu-item {\n  padding: 5px 14px;\n  line-height: 1;\n  color: #fff;\n}\n\n.schedule-contextmenu-item:hover {\n  background: #585858;\n}";
 styleInject(css_248z$2);
 
 var css_248z$3 = ".schedule-tooltip {\n  position: absolute;\n  left: 0;\n  top: 0;\n  line-height: 20px;\n  padding: 5px;\n  opacity: 0.9;\n  color: #ffffff;\n  font-size: 14px;\n  pointer-events: none;\n  border-radius: 4px;\n  z-index: 999;\n  background:#707070;\n  visibility: hidden;\n  word-break: break-all;\n}\n.schedule-tooltip-icon {\n  width: 24px;\n  height: 24px;\n}\n.schedule-tooltip p {\n  margin: 0;\n  max-width: 200px;\n}";
@@ -3651,6 +3801,32 @@ var Schedule = /*#__PURE__*/function () {
     });
   };
 
+  _proto.renderHeader = function renderHeader(type, callback) {
+    switch (type) {
+      case 'columnHeader':
+        {
+          this.table.colHeader.render();
+          break;
+        }
+
+      case 'rowHeader':
+        {
+          this.table.rowHeader.render();
+          break;
+        }
+
+      default:
+        {
+          this.table.colHeader.render();
+          this.table.rowHeader.render();
+          break;
+        }
+    }
+
+    typeof callback === 'function' && callback();
+    return true;
+  };
+
   _proto.getCellConfigFromTimeRange = function getCellConfigFromTimeRange(timeRange) {
     var timeScale = this.settings.timeScale;
     var startTime = timeRange[0],
@@ -3772,54 +3948,54 @@ Object.assign(Schedule.prototype, eventMixin);
 Schedule.settingsFactory = settingsFactory;
 
 //
+
 var script = {
   name: 'Schedule',
-  props: function () {
-    var props = {};
-    var settings = Schedule.settingsFactory();
-    Object.keys(settings).forEach(function (key) {
+  props: (() => {
+    const props = {};
+    const settings = Schedule.settingsFactory();
+    Object.keys(settings).forEach((key) => {
       props[key] = {
-        default: settings[key]
+        default: settings[key],
       };
     });
-    return props;
-  }(),
+    return props
+  })(),
+
   methods: {
-    init: function init() {
-      var _this = this;
-
+    init () {
       this.schedule = new Schedule(this.$refs.schedule, this.$props || {});
-      Object.values(events$1).forEach(function (eventName) {
-        return _this.schedule.on(eventName, function () {
-          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-          }
+      Object.values(events$1).forEach(eventName => this.schedule.on(eventName, (...args) => this.$emit(eventName, ...args)));
 
-          return _this.$emit.apply(_this, [eventName].concat(args));
-        });
-      });
-      this.$watch('data', function (data) {
-        _this.setData(data);
+      this.$watch('data', data => {
+        this.setData(data);
       });
     },
-    setData: function setData(data) {
+
+    setData (data) {
       this.schedule.setData(data);
     },
-    setDataAtSelectedCell: function setDataAtSelectedCell() {
-      var _this$schedule;
 
-      return (_this$schedule = this.schedule).setDataAtSelectedCell.apply(_this$schedule, arguments);
+    setDataAtSelectedCell (...args) {
+      return this.schedule.setDataAtSelectedCell(...args)
     },
-    getCanvas: function getCanvas() {
-      return this.schedule.getCanvas();
+
+    renderHeader (...args) {
+      return this.schedule.renderHeader(...args)
+    },
+
+    getCanvas () {
+      return this.schedule.getCanvas()
     }
   },
-  mounted: function mounted() {
+
+  mounted () {
     this.init();
   },
-  beforeDestroy: function beforeDestroy() {
+
+  beforeDestroy () {
     this.schedule.destroy();
-  }
+  },
 };
 
 function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier
@@ -3978,11 +4154,11 @@ __vue_render__._withStripped = true;
   /* style */
   const __vue_inject_styles__ = function (inject) {
     if (!inject) return
-    inject("data-v-d7f93434_0", { source: ".schedule[data-v-d7f93434] {\n  width: 100%;\n  height: 100%;\n}\n\n/*# sourceMappingURL=schedule.vue.map */", map: {"version":3,"sources":["/Users/vdorchan/Documents/www/MOLI/Projects/schedule/src/components/schedule.vue","schedule.vue"],"names":[],"mappings":"AA4DA;EACA,WAAA;EACA,YAAA;AC3DA;;AAEA,uCAAuC","file":"schedule.vue","sourcesContent":["<template>\n  <div\n    class=\"schedule\"\n    ref=\"schedule\"\n  >\n    <slot></slot>\n  </div>\n</template>\n\n<script>\nimport Schedule from '../index'\nimport { events } from '../mixins/event'\n\nexport default {\n  name: 'Schedule',\n  props: (() => {\n    const props = {}\n    const settings = Schedule.settingsFactory()\n    Object.keys(settings).forEach((key) => {\n      props[key] = {\n        default: settings[key],\n      }\n    })\n    return props\n  })(),\n\n  methods: {\n    init () {\n      this.schedule = new Schedule(this.$refs.schedule, this.$props || {})\n      Object.values(events).forEach(eventName => this.schedule.on(eventName, (...args) => this.$emit(eventName, ...args)))\n\n      this.$watch('data', data => {\n        this.setData(data)\n      })\n    },\n\n    setData (data) {\n      this.schedule.setData(data)\n    },\n\n    setDataAtSelectedCell (...args) {\n      return this.schedule.setDataAtSelectedCell(...args)\n    },\n\n    getCanvas () {\n      return this.schedule.getCanvas()\n    }\n  },\n\n  mounted () {\n    this.init()\n  },\n\n  beforeDestroy () {\n    this.schedule.destroy()\n  },\n}\n</script>\n\n<style lang=\"scss\" scoped>\n.schedule {\n  width: 100%;\n  height: 100%;\n}\n</style>",".schedule {\n  width: 100%;\n  height: 100%;\n}\n\n/*# sourceMappingURL=schedule.vue.map */"]}, media: undefined });
+    inject("data-v-2b456dcb_0", { source: ".schedule[data-v-2b456dcb] {\n  width: 100%;\n  height: 100%;\n}\n\n/*# sourceMappingURL=schedule.vue.map */", map: {"version":3,"sources":["/Users/harryhuang/MMG/project/livehelperfront/src/components/schedule/src/components/schedule.vue","schedule.vue"],"names":[],"mappings":"AAgEA;EACA,WAAA;EACA,YAAA;AC/DA;;AAEA,uCAAuC","file":"schedule.vue","sourcesContent":["<template>\n  <div\n    class=\"schedule\"\n    ref=\"schedule\"\n  >\n    <slot></slot>\n  </div>\n</template>\n\n<script>\nimport Schedule from '../index'\nimport { events } from '../mixins/event'\n\nexport default {\n  name: 'Schedule',\n  props: (() => {\n    const props = {}\n    const settings = Schedule.settingsFactory()\n    Object.keys(settings).forEach((key) => {\n      props[key] = {\n        default: settings[key],\n      }\n    })\n    return props\n  })(),\n\n  methods: {\n    init () {\n      this.schedule = new Schedule(this.$refs.schedule, this.$props || {})\n      Object.values(events).forEach(eventName => this.schedule.on(eventName, (...args) => this.$emit(eventName, ...args)))\n\n      this.$watch('data', data => {\n        this.setData(data)\n      })\n    },\n\n    setData (data) {\n      this.schedule.setData(data)\n    },\n\n    setDataAtSelectedCell (...args) {\n      return this.schedule.setDataAtSelectedCell(...args)\n    },\n\n    renderHeader (...args) {\n      return this.schedule.renderHeader(...args)\n    },\n\n    getCanvas () {\n      return this.schedule.getCanvas()\n    }\n  },\n\n  mounted () {\n    this.init()\n  },\n\n  beforeDestroy () {\n    this.schedule.destroy()\n  },\n}\n</script>\n\n<style lang=\"scss\" scoped>\n.schedule {\n  width: 100%;\n  height: 100%;\n}\n</style>\n",".schedule {\n  width: 100%;\n  height: 100%;\n}\n\n/*# sourceMappingURL=schedule.vue.map */"]}, media: undefined });
 
   };
   /* scoped */
-  const __vue_scope_id__ = "data-v-d7f93434";
+  const __vue_scope_id__ = "data-v-2b456dcb";
   /* module identifier */
   const __vue_module_identifier__ = undefined;
   /* functional template */

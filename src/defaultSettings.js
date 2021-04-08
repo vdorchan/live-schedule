@@ -235,6 +235,22 @@ export default () => {
      */
     renderCell: void 0,
 
+     /**
+     * 自定义渲染表头，return 一个对象，包含 label字符串、color字符串、icon对象
+     * 当前格子的 data 将作为参数返回
+     * @param {Function}
+     * @default undefined
+     */
+    renderColumnHeader: void 0,
+
+    /**
+     * 自定义渲染表头，return 一个对象，包含 label字符串、color字符串、icon对象
+     * 当前格子的 data 将作为参数返回
+     * @param {Function}
+     * @default undefined
+     */
+    renderRowHeader: void 0,
+
     /**
      * 右键菜单项目列表，然后可以通过 on 方法监听设置事件方法
      * @param {object[]}

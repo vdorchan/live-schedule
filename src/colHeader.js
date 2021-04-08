@@ -28,6 +28,7 @@ export default class ColHeader extends BaseRender {
     ) {
       this._cells[rowIdx] = []
       const cell = new Cell({
+        type: 'columnHeader',
         colIdx: 0,
         rowIdx,
         label: rowIdx === 0 ? '' : `${rowIdx - 1}-${rowIdx}`,
@@ -75,7 +76,7 @@ export default class ColHeader extends BaseRender {
   render() {
     if (!this._cells.length) this.init()
     this.adjust()
-    this._cells.forEach((cell) => cell.render())
+    this._cells.forEach((cell) => cell.renderHeader(this.headerType))
     this.renderCornerLeft()
   }
 }

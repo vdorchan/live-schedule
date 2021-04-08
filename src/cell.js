@@ -6,13 +6,14 @@ import eventMixin from './mixins/event'
  * @class {Cell}
  */
 export default class Cell extends BaseRender {
-  constructor({ colIdx, rowIdx, label, parent, dashLine }) {
+  constructor({ colIdx, rowIdx, label, parent, dashLine, type = 'cell' }) {
     super()
 
     this.colIdx = colIdx
     this.rowIdx = rowIdx
     this.label = label
     this.parent = parent
+    this.type = type
 
     this.borderWidth = 1
     this.borderTop = 1
@@ -141,6 +142,30 @@ export default class Cell extends BaseRender {
     return data[key]
   }
 
+  getHeaderValue() {
+    const { renderColumnHeader, renderRowHeader, headerTextColor } = this.table.settings
+    let data = {
+      label: this.label,
+      icon: null,
+      color: headerTextColor,
+    }
+    if (this.type === 'columnHeader' && typeof renderColumnHeader === 'function') {
+      const obj = renderColumnHeader({...this, center: this.getCoords(true) })
+      data = {
+        ...data,
+        ...obj,
+      }
+    }
+    if (this.type === 'rowHeader' && typeof renderRowHeader === 'function') {
+      const obj = renderRowHeader({...this, center: this.getCoords(true) })
+      data = {
+        ...data,
+        ...obj,
+      }
+    }
+    return data
+  }
+
   getHighlightConfigs() {
     const { cellWidth } = this.parent
     const cellHeight = this.getColHeight()
@@ -236,7 +261,32 @@ export default class Cell extends BaseRender {
     this.renderLabel(this.label)
   }
 
-  renderLabel(label) {
+  renderHeader() {
+    if (this.hidden) {
+      return
+    }
+
+    const { bgColor } = this.table.settings
+
+    const cellColor = this.getColor()
+
+    if (!cellColor) {
+      return
+    }
+
+    // Fill background color if color has alpha.
+    if (hexHasAlpha(cellColor)) {
+      this.renderRect(bgColor)
+    }
+
+    this.renderRect(cellColor)
+
+    const { icon, label, color } = this.getHeaderValue()
+    this.renderHeaderIcon(icon)
+    this.renderLabel(label, color)
+  }
+
+  renderLabel(label, color) {
     if (typeof label !== 'string') {
       return
     }
@@ -245,15 +295,23 @@ export default class Cell extends BaseRender {
       text: label,
       x,
       y,
-      fill: this.table.settings.headerTextColor,
+      fill: color || this.table.settings.headerTextColor,
     })
+  }
+
+  renderHeaderIcon(icon) {
+    if (!icon) {
+      return
+    }
+
+    this.draw.image(icon)
   }
 
   renderIconAndTexts(icon, texts, crossColHeight) {
     let { x, y } = this.getCoords(true)
     const height = crossColHeight || this.height
     y = crossColHeight ? this.parent.startingCoords.y + height / 2 : y
-    
+
     if (texts || icon) {
       const { fontSize, fontColor, lineHeight, iconMaxWidth } = this.table.settings
       const imgPadding = 5

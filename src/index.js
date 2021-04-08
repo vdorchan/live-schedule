@@ -167,6 +167,26 @@ export default class Schedule {
     selectedCells.forEach(cell => cell.setData(data))
   }
 
+  renderHeader(type, callback) {
+    switch (type) {
+      case 'columnHeader': {
+        this.table.colHeader.render()
+        break
+      }
+      case 'rowHeader': {
+        this.table.rowHeader.render()
+        break
+      }
+      default: {
+        this.table.colHeader.render()
+        this.table.rowHeader.render()
+        break
+      }
+    }
+    typeof callback === 'function' && callback()
+    return true
+  }
+
   getCellConfigFromTimeRange(timeRange) {
     const { timeScale } = this.settings
     const [startTime, endTime] = timeRange

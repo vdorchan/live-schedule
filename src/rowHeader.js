@@ -24,6 +24,7 @@ export default class RowHeader extends BaseRender {
     for (let colIdx = 0; colIdx < this.table.settings.numberOfCols; colIdx++) {
       this._cells[colIdx] = []
       const cell = new Cell({
+        type: 'rowHeader',
         colIdx,
         rowIdx: 0,
         label: String(colIdx + 1),
@@ -50,6 +51,6 @@ export default class RowHeader extends BaseRender {
   render() {
     if (!this._cells.length) this.init()
     this.adjust()
-    this._cells.forEach((cell) => cell.render())
+    this._cells.forEach((cell) => cell.renderHeader())
   }
 }

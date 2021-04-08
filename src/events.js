@@ -24,6 +24,7 @@ export default class Events {
     this.onContextMenu = this.onContextMenu.bind(this)
     this.onContextMenuItemSelect = this.onContextMenuItemSelect.bind(this)
     this.onKeydown = this.onKeydown.bind(this)
+    this.onCanvasClick = this.onCanvasClick.bind(this)
 
     const { readOnly } = this.table.settings
 
@@ -34,6 +35,7 @@ export default class Events {
       document.addEventListener('keydown', this.onKeydown)
     }
     window.addEventListener('mousemove', this.onMouseMove)
+    this.canvas.addEventListener('click', this.onCanvasClick)
 
     this.table.contextMenu.onContextMenuItemSelect(this.onContextMenuItemSelect)
   }
@@ -53,6 +55,27 @@ export default class Events {
    */
   addEventListener() {}
 
+  onCanvasClick(event) {
+    const coord = this.getCoords(event)
+    const cell = this.table.getCellByCoord(coord, false)
+    if (cell) {
+      this.schedule.emit(events.CELL_CLICK, cell)
+      return
+    }
+
+    const rowHeader = this.table.getRowHeaderByCoord(coord)
+    if (rowHeader) {
+      this.schedule.emit(events.ROW_HEADER_CLICK, rowHeader)
+      return
+    }
+
+    const columnHeader = this.table.getColumnHeaderByCoord(coord)
+    if (columnHeader) {
+      this.schedule.emit(events.COLUMN_HEADER_CLICK, rowHeader)
+      return
+    }
+  }
+
   /**
    *
    */
@@ -64,7 +87,7 @@ export default class Events {
     }
 
     const coord = this.getCoords(event)
-    const cell = this.table.getCellByCoord(coord)
+    const cell = this.table.getCellByCoord(coord, false)
 
     const { currentSelection } = this.table
 
@@ -169,6 +192,7 @@ export default class Events {
     window.removeEventListener('mousemove', this.onMouseMove)
     this.container.removeEventListener('contextmenu', this.onContextMenu)
     document.removeEventListener('keydown', this.onKeydown)
+    this.canvas.removeEventListener('click', this.onCanvasClick)
   }
 
   getCoords(event) {

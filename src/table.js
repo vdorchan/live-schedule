@@ -244,6 +244,20 @@ export default class Table {
     return this.getCell(colIdx, rowIdx, crossCol)
   }
 
+  getRowHeaderByCoord({ x, y }) {
+    const colIdx = Math.floor(
+      (x - this.rowHeader.startingCoords.x) / this.rowHeader.cellWidth
+    )
+    return this.rowHeader._cells[colIdx]
+  }
+
+  getColumnHeaderByCoord({ x, y }) {
+    const rowIdx = Math.floor(
+      (y - this.colHeader.startingCoords.y) / this.colHeader.cellHeight
+    )
+    return this.colHeader._cells[rowIdx]
+  }
+
   /**
    *
    * @param {array} cells
@@ -414,7 +428,7 @@ export default class Table {
         const { timeRangeKey } = this.settings
         const timeRange = formatTimeRange(currentCell.timeRange, 'YYYY-MM-DD HH:mm:ss')
         const oriTimeRange = currentCell.data[timeRangeKey]
-  
+
         if (
           oriTimeRange &&
           !isSame(timeRange, oriTimeRange)

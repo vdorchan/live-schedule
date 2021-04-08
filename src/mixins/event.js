@@ -3,7 +3,10 @@ export const events = {
   SELECTE: 'select',
   DATA_CHANGE: 'dataChange',
   TIME_RANGE_CHANGE: 'timeRangeChange',
-  RESIZE: 'resize'
+  RESIZE: 'resize',
+  CELL_CLICK: 'cellClick',
+  ROW_HEADER_CLICK: 'rowHeaderClick',
+  COLUMN_HEADER_CLICK: 'columnHeaderClick'
 }
 
 const eventMixin = {

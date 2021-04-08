@@ -42,6 +42,10 @@ export default {
       return this.schedule.setDataAtSelectedCell(...args)
     },
 
+    renderHeader (...args) {
+      return this.schedule.renderHeader(...args)
+    },
+
     getCanvas () {
       return this.schedule.getCanvas()
     }
