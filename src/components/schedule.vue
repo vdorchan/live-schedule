@@ -38,6 +38,10 @@ export default {
       this.schedule.setData(data)
     },
 
+    setSetting(setting) {
+      this.schedule.setSetting(setting)
+    },
+
     setDataAtSelectedCell (...args) {
       return this.schedule.setDataAtSelectedCell(...args)
     },

@@ -50,6 +50,13 @@ export default () => {
     readOnly: false,
 
     /**
+     * 是否激活，可以操作
+     * @param {boolean}
+     * @default true
+     */
+    active: true,
+
+    /**
      * 表格背景色.
      * @param {string}
      * @default '#fff'

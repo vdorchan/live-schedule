@@ -133,6 +133,13 @@ export default class Schedule {
     this.table.setItems(items, oldItem)
   }
 
+  setSetting(setting) {
+    this.settings = {
+      ...this.settings,
+      ...setting
+    }
+  }
+
   setDataAtSelectedCell(callback) {
     const selectedCells = []
     this.table.cellsEach((cell) => {

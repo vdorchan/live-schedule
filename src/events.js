@@ -121,7 +121,8 @@ export default class Events {
    *
    */
   onMouseUp() {
-    event.preventDefault()
+    // event.preventDefault()
+    if (!this.schedule.settings.active) return
 
     this.table.finishSelection()
   }
@@ -130,10 +131,10 @@ export default class Events {
    *
    */
   onMouseMove(event) {
-    event.preventDefault()
+    // event.preventDefault()
+    if (!this.schedule.settings.active) return
 
     const coord = this.getCoords(event)
-    const cell = this.table.getCellByCoord(coord)
 
     const { currentSelection } = this.table
 

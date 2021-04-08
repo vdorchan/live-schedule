@@ -2379,7 +2379,6 @@ var ColHeader = /*#__PURE__*/function (_BaseRender) {
 
     _this = _BaseRender.call(this) || this;
     _this._cells = [];
-    _this.headerType = 'column';
     /**
      * Reference to the starting coords of cell.
      */
@@ -3270,7 +3269,8 @@ var Events = /*#__PURE__*/function () {
   ;
 
   _proto.onMouseUp = function onMouseUp() {
-    event.preventDefault();
+    // event.preventDefault()
+    if (!this.schedule.settings.active) return;
     this.table.finishSelection();
   }
   /**
@@ -3279,9 +3279,9 @@ var Events = /*#__PURE__*/function () {
   ;
 
   _proto.onMouseMove = function onMouseMove(event) {
-    event.preventDefault();
+    // event.preventDefault()
+    if (!this.schedule.settings.active) return;
     var coord = this.getCoords(event);
-    var cell = this.table.getCellByCoord(coord);
     var currentSelection = this.table.currentSelection;
 
     if (currentSelection && currentSelection.isInProgress()) {
@@ -3402,6 +3402,13 @@ var settingsFactory = (function () {
      * @default false
      */
     readOnly: false,
+
+    /**
+     * 是否激活，可以操作
+     * @param {boolean}
+     * @default true
+     */
+    active: true,
 
     /**
      * 表格背景色.
@@ -3766,6 +3773,10 @@ var Schedule = /*#__PURE__*/function () {
     this.table.setItems(items, oldItem);
   };
 
+  _proto.setSetting = function setSetting(setting) {
+    this.settings = _extends({}, this.settings, setting);
+  };
+
   _proto.setDataAtSelectedCell = function setDataAtSelectedCell(callback) {
     var selectedCells = [];
     this.table.cellsEach(function (cell) {
@@ -3976,6 +3987,10 @@ var script = {
       this.schedule.setData(data);
     },
 
+    setSetting(setting) {
+      this.schedule.setSetting(setting);
+    },
+
     setDataAtSelectedCell (...args) {
       return this.schedule.setDataAtSelectedCell(...args)
     },
@@ -4154,11 +4169,11 @@ __vue_render__._withStripped = true;
   /* style */
   const __vue_inject_styles__ = function (inject) {
     if (!inject) return
-    inject("data-v-2b456dcb_0", { source: ".schedule[data-v-2b456dcb] {\n  width: 100%;\n  height: 100%;\n}\n\n/*# sourceMappingURL=schedule.vue.map */", map: {"version":3,"sources":["/Users/harryhuang/MMG/project/livehelperfront/src/components/schedule/src/components/schedule.vue","schedule.vue"],"names":[],"mappings":"AAgEA;EACA,WAAA;EACA,YAAA;AC/DA;;AAEA,uCAAuC","file":"schedule.vue","sourcesContent":["<template>\n  <div\n    class=\"schedule\"\n    ref=\"schedule\"\n  >\n    <slot></slot>\n  </div>\n</template>\n\n<script>\nimport Schedule from '../index'\nimport { events } from '../mixins/event'\n\nexport default {\n  name: 'Schedule',\n  props: (() => {\n    const props = {}\n    const settings = Schedule.settingsFactory()\n    Object.keys(settings).forEach((key) => {\n      props[key] = {\n        default: settings[key],\n      }\n    })\n    return props\n  })(),\n\n  methods: {\n    init () {\n      this.schedule = new Schedule(this.$refs.schedule, this.$props || {})\n      Object.values(events).forEach(eventName => this.schedule.on(eventName, (...args) => this.$emit(eventName, ...args)))\n\n      this.$watch('data', data => {\n        this.setData(data)\n      })\n    },\n\n    setData (data) {\n      this.schedule.setData(data)\n    },\n\n    setDataAtSelectedCell (...args) {\n      return this.schedule.setDataAtSelectedCell(...args)\n    },\n\n    renderHeader (...args) {\n      return this.schedule.renderHeader(...args)\n    },\n\n    getCanvas () {\n      return this.schedule.getCanvas()\n    }\n  },\n\n  mounted () {\n    this.init()\n  },\n\n  beforeDestroy () {\n    this.schedule.destroy()\n  },\n}\n</script>\n\n<style lang=\"scss\" scoped>\n.schedule {\n  width: 100%;\n  height: 100%;\n}\n</style>\n",".schedule {\n  width: 100%;\n  height: 100%;\n}\n\n/*# sourceMappingURL=schedule.vue.map */"]}, media: undefined });
+    inject("data-v-14502d7c_0", { source: ".schedule[data-v-14502d7c] {\n  width: 100%;\n  height: 100%;\n}\n\n/*# sourceMappingURL=schedule.vue.map */", map: {"version":3,"sources":["/Users/harryhuang/MMG/project/livehelperfront/src/components/schedule/src/components/schedule.vue","schedule.vue"],"names":[],"mappings":"AAoEA;EACA,WAAA;EACA,YAAA;ACnEA;;AAEA,uCAAuC","file":"schedule.vue","sourcesContent":["<template>\n  <div\n    class=\"schedule\"\n    ref=\"schedule\"\n  >\n    <slot></slot>\n  </div>\n</template>\n\n<script>\nimport Schedule from '../index'\nimport { events } from '../mixins/event'\n\nexport default {\n  name: 'Schedule',\n  props: (() => {\n    const props = {}\n    const settings = Schedule.settingsFactory()\n    Object.keys(settings).forEach((key) => {\n      props[key] = {\n        default: settings[key],\n      }\n    })\n    return props\n  })(),\n\n  methods: {\n    init () {\n      this.schedule = new Schedule(this.$refs.schedule, this.$props || {})\n      Object.values(events).forEach(eventName => this.schedule.on(eventName, (...args) => this.$emit(eventName, ...args)))\n\n      this.$watch('data', data => {\n        this.setData(data)\n      })\n    },\n\n    setData (data) {\n      this.schedule.setData(data)\n    },\n\n    setSetting(setting) {\n      this.schedule.setSetting(setting)\n    },\n\n    setDataAtSelectedCell (...args) {\n      return this.schedule.setDataAtSelectedCell(...args)\n    },\n\n    renderHeader (...args) {\n      return this.schedule.renderHeader(...args)\n    },\n\n    getCanvas () {\n      return this.schedule.getCanvas()\n    }\n  },\n\n  mounted () {\n    this.init()\n  },\n\n  beforeDestroy () {\n    this.schedule.destroy()\n  },\n}\n</script>\n\n<style lang=\"scss\" scoped>\n.schedule {\n  width: 100%;\n  height: 100%;\n}\n</style>\n",".schedule {\n  width: 100%;\n  height: 100%;\n}\n\n/*# sourceMappingURL=schedule.vue.map */"]}, media: undefined });
 
   };
   /* scoped */
-  const __vue_scope_id__ = "data-v-2b456dcb";
+  const __vue_scope_id__ = "data-v-14502d7c";
   /* module identifier */
   const __vue_module_identifier__ = undefined;
   /* functional template */
