@@ -41,6 +41,12 @@ yarn
 yarn build
 ```
 
+## 发布
+
+```bash
+npm publish
+```
+
 ##   类构造方法
 
 Schedule(rootNode, userSettings)
@@ -102,6 +108,7 @@ userSettings: Object 定义如下：
           { key: "youtube", value: "https://live.baowenonline.com/platform-icons/youtube.png" },
           { key: "qita", value: "https://live.baowenonline.com/platform-icons/qita.png" }
         ]
+        statusIcon: 'https://live.baowenonline.com/icons/status_backfill.png'
       }
 }
 

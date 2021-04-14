@@ -179,6 +179,20 @@ export default () => {
     iconKey: 'icon',
 
     /**
+     * 状态图标对应的 key 值
+     * @param {number}
+     * @default 'icon'
+     */
+    statusIconKey: 'statusIcon',
+
+    /**
+     * status icon 最大宽度
+     * @param {number}
+     * @default 36
+     */
+     statusIconMaxWidth: 36,
+
+    /**
      * 格子显示的文案 key 值，字符串数组，隔行显示
      * @param {string[]}
      * @default 'texts'

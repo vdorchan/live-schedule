@@ -1,6 +1,6 @@
 {
   "name": "moli-schedule",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "main": "dist/schedule.min.js",
   "module": "dist/schedule.esm.js",
   "license": "MIT",

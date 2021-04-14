@@ -91,6 +91,10 @@ export default class Cell extends BaseRender {
     return this.getDataValue('icon')
   }
 
+  getStatusIcon() {
+    return this.getDataValue('statusIcon')
+  }
+
   getTexts() {
     return this.getDataValue('texts')
   }
@@ -250,12 +254,21 @@ export default class Cell extends BaseRender {
     let crossColHeight = this.getCrossColHeight(1)
 
     if (this.data && crossColHeight < this.height) {
-      this.renderIconAndTexts(this.getIcon(), this.getTexts())
+      this.renderIconAndTexts({
+        icon: this.getIcon(),
+        texts: this.getTexts(),
+        statusIcon: this.getStatusIcon()
+      })
     }
 
     if (this.isCrossCol(1) && crossColHeight > this.height) {
       const actualCell = this.getCell()
-      this.renderIconAndTexts(actualCell.getIcon(), actualCell.getTexts(), crossColHeight)
+      this.renderIconAndTexts({
+        icon: actualCell.getIcon(),
+        texts: actualCell.getTexts(),
+        statusIcon: actualCell.getStatusIcon(),
+        crossColHeight
+      })
     }
 
     this.renderLabel(this.label)
@@ -307,17 +320,36 @@ export default class Cell extends BaseRender {
     this.draw.image(icon)
   }
 
-  renderIconAndTexts(icon, texts, crossColHeight) {
+  renderIconAndTexts({ icon, texts, crossColHeight, statusIcon }) {
     let { x, y } = this.getCoords(true)
     const height = crossColHeight || this.height
     y = crossColHeight ? this.parent.startingCoords.y + height / 2 : y
+    const imgPadding = 5
+    const { fontSize, fontColor, lineHeight, iconMaxWidth, statusIconMaxWidth } = this.table.settings
+    const statusIconSize = Math.min(this.width - imgPadding, statusIconMaxWidth)
+    const statusIconHeight = height <= this.parent.cellHeight ?  this.parent.cellHeight - imgPadding : statusIconSize / 2
 
-    if (texts || icon) {
-      const { fontSize, fontColor, lineHeight, iconMaxWidth } = this.table.settings
-      const imgPadding = 5
+    if (texts || icon || statusIcon) {
       const imgSize = Math.min(this.width - imgPadding, iconMaxWidth)
       let maxNumberOfLines = 0
-      if (height < imgSize + lineHeight) {
+      if (statusIcon) {
+        if (height <= statusIconHeight + imgPadding) {
+          icon = null
+          maxNumberOfLines = 0
+        } else if (height < statusIconHeight + (icon ? imgSize : 0) + texts.length * lineHeight) {
+          icon = null
+          maxNumberOfLines = Math.min(
+            texts.length,
+            Math.floor((height - statusIconHeight) / lineHeight)
+          )
+        } else {
+          maxNumberOfLines = Math.min(
+            texts.length,
+            Math.floor((height - (icon ? imgSize : 0) - statusIconHeight) / lineHeight)
+          )
+        }
+
+      } else if (height < imgSize + lineHeight) {
         if (texts || height < (imgSize + imgPadding)) {
           icon = null
           maxNumberOfLines = 1
@@ -328,9 +360,9 @@ export default class Cell extends BaseRender {
           Math.floor((height - (icon ? imgSize : 0)) / lineHeight)
         )
       }
-      texts = texts.slice(0, maxNumberOfLines)
+      texts = texts && texts.slice(0, maxNumberOfLines)
 
-      y -= (maxNumberOfLines - 1) / 2 * lineHeight
+      maxNumberOfLines > 0 && (y -= (maxNumberOfLines - (statusIcon ? 0 : 1)) / 2 * lineHeight)
 
       if (icon) {
         y -= imgSize
@@ -356,6 +388,19 @@ export default class Cell extends BaseRender {
           y += lineHeight
         })
       }
+
+      if (statusIcon) {
+        y -= statusIconHeight / 2
+
+        this.draw.image({
+          src: statusIcon,
+          x: x - statusIconSize / 2,
+          y: y,
+          width: statusIconSize,
+          height: statusIconHeight,
+        })
+        y += statusIconHeight + imgPadding * 2
+      }
     }
   }
 
@@ -374,12 +419,13 @@ export default class Cell extends BaseRender {
         data = callback(cell.data || {})
       }
 
-      const { colorKey, iconKey, textsKey } = this.table.settings
+      const { colorKey, iconKey, textsKey, statusIconKey } = this.table.settings
       const oriData = { ...this.data }
       this.data = data
 
       this.renderIfPropsChanged(
         {
+          [statusIconKey]: this.getDataValue('statusIcon', data),
           [colorKey]: this.getDataValue('color', data),
           [iconKey]: this.getDataValue('icon', data),
           [textsKey]: this.getDataValue('texts', data),

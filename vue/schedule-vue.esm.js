@@ -1571,6 +1571,10 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
     return this.getDataValue('icon');
   };
 
+  _proto.getStatusIcon = function getStatusIcon() {
+    return this.getDataValue('statusIcon');
+  };
+
   _proto.getTexts = function getTexts() {
     return this.getDataValue('texts');
   };
@@ -1741,12 +1745,21 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
     var crossColHeight = this.getCrossColHeight(1);
 
     if (this.data && crossColHeight < this.height) {
-      this.renderIconAndTexts(this.getIcon(), this.getTexts());
+      this.renderIconAndTexts({
+        icon: this.getIcon(),
+        texts: this.getTexts(),
+        statusIcon: this.getStatusIcon()
+      });
     }
 
     if (this.isCrossCol(1) && crossColHeight > this.height) {
       var actualCell = this.getCell();
-      this.renderIconAndTexts(actualCell.getIcon(), actualCell.getTexts(), crossColHeight);
+      this.renderIconAndTexts({
+        icon: actualCell.getIcon(),
+        texts: actualCell.getTexts(),
+        statusIcon: actualCell.getStatusIcon(),
+        crossColHeight: crossColHeight
+      });
     }
 
     this.renderLabel(this.label);
@@ -1805,8 +1818,13 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
     this.draw.image(icon);
   };
 
-  _proto.renderIconAndTexts = function renderIconAndTexts(icon, texts, crossColHeight) {
+  _proto.renderIconAndTexts = function renderIconAndTexts(_ref2) {
     var _this2 = this;
+
+    var icon = _ref2.icon,
+        texts = _ref2.texts,
+        crossColHeight = _ref2.crossColHeight,
+        statusIcon = _ref2.statusIcon;
 
     var _this$getCoords2 = this.getCoords(true),
         x = _this$getCoords2.x,
@@ -1814,18 +1832,31 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
 
     var height = crossColHeight || this.height;
     y = crossColHeight ? this.parent.startingCoords.y + height / 2 : y;
+    var imgPadding = 5;
+    var _this$table$settings6 = this.table.settings,
+        fontSize = _this$table$settings6.fontSize,
+        fontColor = _this$table$settings6.fontColor,
+        lineHeight = _this$table$settings6.lineHeight,
+        iconMaxWidth = _this$table$settings6.iconMaxWidth,
+        statusIconMaxWidth = _this$table$settings6.statusIconMaxWidth;
+    var statusIconSize = Math.min(this.width - imgPadding, statusIconMaxWidth);
+    var statusIconHeight = height <= this.parent.cellHeight ? this.parent.cellHeight - imgPadding : statusIconSize / 2;
 
-    if (texts || icon) {
-      var _this$table$settings6 = this.table.settings,
-          fontSize = _this$table$settings6.fontSize,
-          fontColor = _this$table$settings6.fontColor,
-          lineHeight = _this$table$settings6.lineHeight,
-          iconMaxWidth = _this$table$settings6.iconMaxWidth;
-      var imgPadding = 5;
+    if (texts || icon || statusIcon) {
       var imgSize = Math.min(this.width - imgPadding, iconMaxWidth);
       var maxNumberOfLines = 0;
 
-      if (height < imgSize + lineHeight) {
+      if (statusIcon) {
+        if (height <= statusIconHeight + imgPadding) {
+          icon = null;
+          maxNumberOfLines = 0;
+        } else if (height < statusIconHeight + (icon ? imgSize : 0) + texts.length * lineHeight) {
+          icon = null;
+          maxNumberOfLines = Math.min(texts.length, Math.floor((height - statusIconHeight) / lineHeight));
+        } else {
+          maxNumberOfLines = Math.min(texts.length, Math.floor((height - (icon ? imgSize : 0) - statusIconHeight) / lineHeight));
+        }
+      } else if (height < imgSize + lineHeight) {
         if (texts || height < imgSize + imgPadding) {
           icon = null;
           maxNumberOfLines = 1;
@@ -1834,8 +1865,8 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
         maxNumberOfLines = Math.min(texts.length, Math.floor((height - (icon ? imgSize : 0)) / lineHeight));
       }
 
-      texts = texts.slice(0, maxNumberOfLines);
-      y -= (maxNumberOfLines - 1) / 2 * lineHeight;
+      texts = texts && texts.slice(0, maxNumberOfLines);
+      maxNumberOfLines > 0 && (y -= (maxNumberOfLines - (statusIcon ? 0 : 1)) / 2 * lineHeight);
 
       if (icon) {
         y -= imgSize;
@@ -1862,6 +1893,18 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
           y += lineHeight;
         });
       }
+
+      if (statusIcon) {
+        y -= statusIconHeight / 2;
+        this.draw.image({
+          src: statusIcon,
+          x: x - statusIconSize / 2,
+          y: y,
+          width: statusIconSize,
+          height: statusIconHeight
+        });
+        y += statusIconHeight + imgPadding * 2;
+      }
     }
   };
 
@@ -1885,12 +1928,13 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
       var _this$table$settings7 = this.table.settings,
           colorKey = _this$table$settings7.colorKey,
           iconKey = _this$table$settings7.iconKey,
-          textsKey = _this$table$settings7.textsKey;
+          textsKey = _this$table$settings7.textsKey,
+          statusIconKey = _this$table$settings7.statusIconKey;
 
       var oriData = _extends({}, this.data);
 
       this.data = data;
-      this.renderIfPropsChanged((_this$renderIfPropsCh = {}, _this$renderIfPropsCh[colorKey] = this.getDataValue('color', data), _this$renderIfPropsCh[iconKey] = this.getDataValue('icon', data), _this$renderIfPropsCh[textsKey] = this.getDataValue('texts', data), _this$renderIfPropsCh), oriData);
+      this.renderIfPropsChanged((_this$renderIfPropsCh = {}, _this$renderIfPropsCh[statusIconKey] = this.getDataValue('statusIcon', data), _this$renderIfPropsCh[colorKey] = this.getDataValue('color', data), _this$renderIfPropsCh[iconKey] = this.getDataValue('icon', data), _this$renderIfPropsCh[textsKey] = this.getDataValue('texts', data), _this$renderIfPropsCh), oriData);
       return true;
     }
 
@@ -2018,9 +2062,9 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
   };
 
   _proto.getColHeight = function getColHeight(_temp) {
-    var _ref2 = _temp === void 0 ? {} : _temp,
-        includesMerged = _ref2.includesMerged,
-        includesColIdx = _ref2.includesColIdx;
+    var _ref3 = _temp === void 0 ? {} : _temp,
+        includesMerged = _ref3.includesMerged,
+        includesColIdx = _ref3.includesColIdx;
 
     var cellHeight = this.parent.cellHeight;
 
@@ -3529,6 +3573,20 @@ var settingsFactory = (function () {
      * @default 'icon'
      */
     iconKey: 'icon',
+
+    /**
+     * 状态图标对应的 key 值
+     * @param {number}
+     * @default 'icon'
+     */
+    statusIconKey: 'statusIcon',
+
+    /**
+     * status icon 最大宽度
+     * @param {number}
+     * @default 36
+     */
+    statusIconMaxWidth: 36,
 
     /**
      * 格子显示的文案 key 值，字符串数组，隔行显示
