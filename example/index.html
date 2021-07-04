@@ -34,10 +34,12 @@
     .feature {
       pointer-events: none;
     }
+    #yearMonth {
+      padding: 10px 0;
+    }
 
     #schedule {
       flex: 1;
-      padding: 30px 0;
       width: calc(100vw - 310px);
       height: 100vh;
       box-sizing: border-box;
@@ -99,7 +101,7 @@
         <li style="background: #442BB0;" onclick="setColor('L5')">L5</li>
       </ul>
 
-      <h4>写几个字</h4>
+      <h4>选个人</h4>
       <p>
         <label for="text1">大姚<Input value="大姚" class="text" id="text1" type="checkbox" onchange="setText()" /></label>
         <label for="text2">库日天<Input value="123444库日天123" class="text" id="text2" type="checkbox"
@@ -112,94 +114,120 @@
         <label for="icon1">
           空<input name="icon" id="icon1" value="" type="radio" />
         </label>
-        <label for="taobao">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/taobao.png" />
-          <Input name="icon" id="taobao" value="taobao" type="radio" />
+        <label for="淘宝">
+          <img width="20" height="20" src="./platform-icons/taobao.png" />
+          <Input name="icon" id="淘宝" value="淘宝" type="radio" />
         </label>
-        <label for="jd">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/jd.png" />
-          <Input name="icon" id="jd" value="jd" type="radio" />
+        <label for="京东">
+          <img width="20" height="20" src="./platform-icons/jd.png" />
+          <Input name="icon" id="京东" value="京东" type="radio" />
         </label>
-        <label for="douyin">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/douyin.png" />
-          <Input name="icon" id="douyin" value="douyin" type="radio" />
+        <label for="抖音">
+          <img width="20" height="20" src="./platform-icons/douyin.png" />
+          <Input name="icon" id="抖音" value="抖音" type="radio" />
         </label>
-        <label for="suning">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/suning.png" />
-          <Input name="icon" id="suning" value="suning" type="radio" />
+        <label for="苏宁">
+          <img width="20" height="20" src="./platform-icons/suning.png" />
+          <Input name="icon" id="苏宁" value="苏宁" type="radio" />
         </label>
-        <label for="wx">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/wx.png" />
-          <Input name="icon" id="wx" value="wx" type="radio" />
+        <label for="微信">
+          <img width="20" height="20" src="./platform-icons/wx.png" />
+          <Input name="icon" id="微信" value="微信" type="radio" />
         </label>
-        <label for="lazada">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/lazada.png" />
-          <Input name="icon" id="lazada" value="lazada" type="radio" />
+        <label for="Lazada">
+          <img width="20" height="20" src="./platform-icons/lazada.png" />
+          <Input name="icon" id="Lazada" value="Lazada" type="radio" />
         </label>
         <label for="tiktok">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/tiktok.png" />
+          <img width="20" height="20" src="./platform-icons/tiktok.png" />
           <Input name="icon" id="tiktok" value="tiktok" type="radio" />
         </label>
         <label for="shopee">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/shopee.png" />
+          <img width="20" height="20" src="./platform-icons/shopee.png" />
           <Input name="icon" id="shopee" value="shopee" type="radio" />
         </label>
         <label for="facebook">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/facebook.png" />
+          <img width="20" height="20" src="./platform-icons/facebook.png" />
           <Input name="icon" id="facebook" value="facebook" type="radio" />
         </label>
-        <label for="ins">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/ins.png" />
-          <Input name="icon" id="ins" value="ins" type="radio" />
+        <label for="instagram">
+          <img width="20" height="20" src="./platform-icons/ins.png" />
+          <Input name="icon" id="instagram" value="instagram" type="radio" />
         </label>
         <label for="youtube">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/youtube.png" />
+          <img width="20" height="20" src="./platform-icons/youtube.png" />
           <Input name="icon" id="youtube" value="youtube" type="radio" />
         </label>
-        <label for="qita">
-          <img width="20" height="20" src="https://live.baowenonline.com/platform-icons/qita.png" />
-          <Input name="icon" id="qita" value="qita" type="radio" />
+        <label for="其他">
+          <img width="20" height="20" src="./platform-icons/qita.png" />
+          <Input name="icon" id="其他" value="其他" type="radio" />
         </label>
       </p>
     </div>
 
-    <div id="schedule"></div>
-
+    <div>
+      <div id="yearMonth"></div>
+      <div id="schedule"></div>
+    </div>
   </div>
 
   <script src="../dist/schedule.js"></script>
   <script>
+    const yearMonth = /\d{4}-\d{2}/.exec(new Date(Date.now() - new Date().getTimezoneOffset() * 60 * 1000).toISOString())[0]
+    document.getElementById('yearMonth').innerHTML = `当前年月：${yearMonth}`
+
+    const platformIcons = [
+      { id: '淘宝', icon: 'taobao.png' },
+      { id: '京东', icon: 'jd.png' },
+      { id: '抖音', icon: 'douyin.png' },
+      { id: '苏宁', icon: 'suning.png' },
+      { id: '微信', icon: 'wx.png' },
+      { id: 'Lazada', icon: 'lazada.png' },
+      { id: 'tiktok', icon: 'tiktok.png' },
+      { id: 'shopee', icon: 'shopee.png' },
+      { id: 'facebook', icon: 'facebook.png' },
+      { id: 'instagram', icon: 'ins.png' },
+      { id: 'youtube', icon: 'youtube.png' },
+      { id: '其他', icon: 'qita.png' }
+    ]
+
+    const levels = [
+      { name: '#64c42d', id: 'L1' },
+      { name: '#e8a32f', id: 'L2' },
+      { name: '#f76b69', id: 'L3' },
+      { name: '#2a8df8', id: 'L4' },
+      { name: '#442bb0', id: 'L5' }
+    ]
+
     const schedule = new Schedule(document.getElementById('schedule'), {
-      data: [{ "id": 10958, "startTime": "2020-07-05 03:00:00", "endTime": "2020-07-06 8:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10959, "startTime": "2020-07-09 01:00:00", "endTime": "2020-07-09 09:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L1", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10960, "startTime": "2020-07-12 04:00:00", "endTime": "2020-07-12 09:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 10961, "startTime": "2020-07-16 04:00:00", "endTime": "2020-07-16 10:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L3", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 12313, "startTime": "2020-07-19 05:00:00", "endTime": "2020-07-19 12:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L2", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": "微信", "storeId": null, "storeName": null }, { "id": 12314, "startTime": "2020-07-23 08:00:00", "endTime": "2020-07-23 13:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "L3", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": null, "storeId": null, "storeName": null }, { "id": 12919, "startTime": "2020-07-14 07:00:00", "endTime": "2020-07-14 15:00:00", "liveNumber": null, "liveDuration": null, "slAnchors": [], "anchorLevel": "", "operationUser": null, "operationUserId": null, "controlUser": null, "controlUserId": null, "platform": "Lazada", "storeId": null, "storeName": null }].map(l => ({ ...l, liveTime: [l.startTime, l.endTime]})),
-
-      colorKey: 'anchorLevel',
-      iconKey: 'platform',
-      textsKey: 'slAnchors',
-
+      yearMonth: /\d{4}-\d{2}/.exec(new Date(Date.now() - new Date().getTimezoneOffset() * 60 * 1000).toISOString())[0],
+      data: [
+        {
+          id: 10958,
+          liveTime: ["2020-07-05 03:00:00", "2020-07-06 8:00:00"],
+          anchors: [],
+          anchorLevel: "L2",
+        },
+        {
+          id: 10958,
+          liveTime: ["2020-07-28 10:00:00", "2020-07-28 18:00:00"],
+          anchors: [],
+          anchorLevel: "L5",
+        }
+      ],
       timeRangeKey: 'liveTime',
+      renderCell(data) {
+        if (!data) {
+          return null
+        }
 
-      dataMaps: {
-        color: [
-          { key: 'L1', value: '#64C42D' },
-          { key: 'L2', value: '#E8A32F' },
-          { key: 'L3', value: '#F76B69' },
-          { key: 'L4', value: '#2A8DF8' },
-          { key: 'L5', value: '#442BB0' },
-        ],
-        icon: [
-          { key: "taobao", value: "https://live.baowenonline.com/platform-icons/taobao.png" },
-          { key: "jd", value: "https://live.baowenonline.com/platform-icons/jd.png" },
-          { key: "douyin", value: "https://live.baowenonline.com/platform-icons/douyin.png" },
-          { key: "suning", value: "https://live.baowenonline.com/platform-icons/suning.png" },
-          { key: "wx", value: "https://live.baowenonline.com/platform-icons/wx.png" },
-          { key: "lazada", value: "https://live.baowenonline.com/platform-icons/lazada.png" },
-          { key: "tiktok", value: "https://live.baowenonline.com/platform-icons/tiktok.png" },
-          { key: "shopee", value: "https://live.baowenonline.com/platform-icons/shopee.png" },
-          { key: "facebook", value: "https://live.baowenonline.com/platform-icons/facebook.png" },
-          { key: "ins", value: "https://live.baowenonline.com/platform-icons/ins.png" },
-          { key: "youtube", value: "https://live.baowenonline.com/platform-icons/youtube.png" },
-          { key: "qita", value: "https://live.baowenonline.com/platform-icons/qita.png" }
-        ]
+        const { anchorLevel, anchors = [], platform } = data
+
+        return {
+          color: levels.find(l => l.id === anchorLevel)?.name,
+          texts: anchors.length ? anchors.map(anchor => anchor) : anchorLevel ? [anchorLevel] : [],
+          icon: platform ? `./platform-icons/${platformIcons.find(p => platform === p.id).icon}` : null,
+        }
       },
 
       renderTooltip(data) {
@@ -213,20 +241,23 @@
         return `
           ${Object.keys(data).map(key => (data[key] && titleMap[key]) ? `<p>${titleMap[key]}: ${data[key]}<p/>` : '').join('')}
           <p>${data.anchorLevel || ''}</p>
-          <p>${(data.slAnchors || []).join(',')}</p>
+          <p>${(data.anchors || []).join(',')}</p>
         `
       },
 
       contextMenuItems: [
         { action: 'alert', title: '弹一个' },
-      ]
+      ],
     })
 
     schedule.on('contextMenuItemSelect', (action, item) => {
-      console.log({ action })
       if (action === 'alert') {
         alert('弹一个')
       }
+    })
+
+    schedule.on('select', (items) => {
+      console.log({ items })
     })
 
     function setColor(anchorLevel) {
@@ -237,10 +268,10 @@
     }
 
     function setText() {
-      const slAnchors = [...document.querySelectorAll('.text')].map(checkbox => checkbox.checked ? checkbox.value : '').filter(text => text)
+      const anchors = [...document.querySelectorAll('.text')].map(checkbox => checkbox.checked ? checkbox.value : '').filter(text => text)
       schedule.setDataAtSelectedCell(data => ({
         ...data,
-        slAnchors
+        anchors
       }))
     }
 
