@@ -88,3 +88,9 @@ export function diff(a, b) {
 export function formatTimeRange(timeRange, formatStr) {
   return timeRange.map(t => t.format(formatStr))
 }
+
+export function getAbsoluteUrl(url) {
+  var a = document.createElement('A');
+  a.href = url
+  return a.href
+}

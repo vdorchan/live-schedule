@@ -1,4 +1,4 @@
-import { getAlphaFromHex } from './helper'
+import { getAlphaFromHex, getAbsoluteUrl } from './helper'
 
 function dpr() {
   return window.devicePixelRatio || 1
@@ -14,18 +14,20 @@ export default class Draw {
     this.ctx = el.getContext('2d')
     this.resize(width, height)
 
-    this.__cacheImgs = []
+    this.__cacheImgs = new Map()
   }
 
   _getImage(src) {
+    src = getAbsoluteUrl(src)
+    let img = this.__cacheImgs.get(src)
+    if (img) {
+      return Promise.resolve(img)
+    }
+  
     return new Promise((resolve) => {
-      let img = this.__cacheImgs.find((i) => i.src === location.origin + src)
-      if (img) {
-        return resolve(img)
-      }
       img = new Image()
       img.onload = () => {
-        this.__cacheImgs.push(img)
+        this.__cacheImgs.set(src, img)
         resolve(img)
       }
       img.src = src
@@ -95,6 +97,7 @@ export default class Draw {
   }
 
   async image(config = {}) {
+    console.log('draw image');
     const { x, y, width, height, src } = config
     const img = await this._getImage(src)
 

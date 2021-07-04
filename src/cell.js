@@ -119,6 +119,12 @@ export default class Cell extends BaseRender {
 
   getDataValue(key, data = this.data) {
     const { renderCell, dataMaps } = this.table.settings
+
+    let map
+    if (dataMaps) {
+      map = dataMaps[key]
+    }
+
     key = this.table.settings[`${key}Key`]
     if (typeof renderCell === 'function') {
       const obj = renderCell(data)
@@ -129,10 +135,6 @@ export default class Cell extends BaseRender {
       return null
     }
 
-    let map
-    if (dataMaps) {
-      map = dataMaps[key]
-    }
     if (map) {
       const obj = map.find((o) => o.key === data[key])
       return obj ? obj.value : null
