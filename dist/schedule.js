@@ -1,5 +1,30 @@
+
+(function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':12345/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(window.document);
+(function (global, factory) {
+typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+typeof define === 'function' && define.amd ? define(factory) :
+(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Schedule = factory());
+}(this, (function () { 'use strict';
+
+var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function createCommonjsModule(fn, basedir, module) {
+	return module = {
+	  path: basedir,
+	  exports: {},
+	  require: function (path, base) {
+      return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
+    }
+	}, fn(module, module.exports), module.exports;
+}
+
+function commonjsRequire () {
+	throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
+}
+
+var _extends_1 = createCommonjsModule(function (module) {
 function _extends() {
-  _extends = Object.assign || function (target) {
+  module.exports = _extends = Object.assign || function (target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i];
 
@@ -13,8 +38,13 @@ function _extends() {
     return target;
   };
 
+  module.exports["default"] = module.exports, module.exports.__esModule = true;
   return _extends.apply(this, arguments);
 }
+
+module.exports = _extends;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
 
 var resizeObservers = [];
 
@@ -515,22 +545,6 @@ var ResizeObserver = (function () {
     return ResizeObserver;
 }());
 
-var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-function createCommonjsModule(fn, basedir, module) {
-	return module = {
-	  path: basedir,
-	  exports: {},
-	  require: function (path, base) {
-      return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
-    }
-	}, fn(module, module.exports), module.exports;
-}
-
-function commonjsRequire () {
-	throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
-}
-
 var dayjs_min = createCommonjsModule(function (module, exports) {
 !function(t,e){module.exports=e();}(commonjsGlobal,(function(){var t=1e3,e=6e4,n=36e5,r="millisecond",i="second",s="minute",u="hour",a="day",o="week",f="month",h="quarter",c="year",d="date",$="Invalid Date",l=/^(\d{4})[-/]?(\d{1,2})?[-/]?(\d{0,2})[^0-9]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/,y=/\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g,M={name:"en",weekdays:"Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),months:"January_February_March_April_May_June_July_August_September_October_November_December".split("_")},m=function(t,e,n){var r=String(t);return !r||r.length>=e?t:""+Array(e+1-r.length).join(n)+t},g={s:m,z:function(t){var e=-t.utcOffset(),n=Math.abs(e),r=Math.floor(n/60),i=n%60;return (e<=0?"+":"-")+m(r,2,"0")+":"+m(i,2,"0")},m:function t(e,n){if(e.date()<n.date())return -t(n,e);var r=12*(n.year()-e.year())+(n.month()-e.month()),i=e.clone().add(r,f),s=n-i<0,u=e.clone().add(r+(s?-1:1),f);return +(-(r+(n-i)/(s?i-u:u-i))||0)},a:function(t){return t<0?Math.ceil(t)||0:Math.floor(t)},p:function(t){return {M:f,y:c,w:o,d:a,D:d,h:u,m:s,s:i,ms:r,Q:h}[t]||String(t||"").toLowerCase().replace(/s$/,"")},u:function(t){return void 0===t}},D="en",v={};v[D]=M;var p=function(t){return t instanceof _},S=function(t,e,n){var r;if(!t)return D;if("string"==typeof t)v[t]&&(r=t),e&&(v[t]=e,r=t);else {var i=t.name;v[i]=t,r=i;}return !n&&r&&(D=r),r||!n&&D},w=function(t,e){if(p(t))return t.clone();var n="object"==typeof e?e:{};return n.date=t,n.args=arguments,new _(n)},O=g;O.l=S,O.i=p,O.w=function(t,e){return w(t,{locale:e.$L,utc:e.$u,x:e.$x,$offset:e.$offset})};var _=function(){function M(t){this.$L=S(t.locale,null,!0),this.parse(t);}var m=M.prototype;return m.parse=function(t){this.$d=function(t){var e=t.date,n=t.utc;if(null===e)return new Date(NaN);if(O.u(e))return new Date;if(e instanceof Date)return new Date(e);if("string"==typeof e&&!/Z$/i.test(e)){var r=e.match(l);if(r){var i=r[2]-1||0,s=(r[7]||"0").substring(0,3);return n?new Date(Date.UTC(r[1],i,r[3]||1,r[4]||0,r[5]||0,r[6]||0,s)):new Date(r[1],i,r[3]||1,r[4]||0,r[5]||0,r[6]||0,s)}}return new Date(e)}(t),this.$x=t.x||{},this.init();},m.init=function(){var t=this.$d;this.$y=t.getFullYear(),this.$M=t.getMonth(),this.$D=t.getDate(),this.$W=t.getDay(),this.$H=t.getHours(),this.$m=t.getMinutes(),this.$s=t.getSeconds(),this.$ms=t.getMilliseconds();},m.$utils=function(){return O},m.isValid=function(){return !(this.$d.toString()===$)},m.isSame=function(t,e){var n=w(t);return this.startOf(e)<=n&&n<=this.endOf(e)},m.isAfter=function(t,e){return w(t)<this.startOf(e)},m.isBefore=function(t,e){return this.endOf(e)<w(t)},m.$g=function(t,e,n){return O.u(t)?this[e]:this.set(n,t)},m.unix=function(){return Math.floor(this.valueOf()/1e3)},m.valueOf=function(){return this.$d.getTime()},m.startOf=function(t,e){var n=this,r=!!O.u(e)||e,h=O.p(t),$=function(t,e){var i=O.w(n.$u?Date.UTC(n.$y,e,t):new Date(n.$y,e,t),n);return r?i:i.endOf(a)},l=function(t,e){return O.w(n.toDate()[t].apply(n.toDate("s"),(r?[0,0,0,0]:[23,59,59,999]).slice(e)),n)},y=this.$W,M=this.$M,m=this.$D,g="set"+(this.$u?"UTC":"");switch(h){case c:return r?$(1,0):$(31,11);case f:return r?$(1,M):$(0,M+1);case o:var D=this.$locale().weekStart||0,v=(y<D?y+7:y)-D;return $(r?m-v:m+(6-v),M);case a:case d:return l(g+"Hours",0);case u:return l(g+"Minutes",1);case s:return l(g+"Seconds",2);case i:return l(g+"Milliseconds",3);default:return this.clone()}},m.endOf=function(t){return this.startOf(t,!1)},m.$set=function(t,e){var n,o=O.p(t),h="set"+(this.$u?"UTC":""),$=(n={},n[a]=h+"Date",n[d]=h+"Date",n[f]=h+"Month",n[c]=h+"FullYear",n[u]=h+"Hours",n[s]=h+"Minutes",n[i]=h+"Seconds",n[r]=h+"Milliseconds",n)[o],l=o===a?this.$D+(e-this.$W):e;if(o===f||o===c){var y=this.clone().set(d,1);y.$d[$](l),y.init(),this.$d=y.set(d,Math.min(this.$D,y.daysInMonth())).$d;}else $&&this.$d[$](l);return this.init(),this},m.set=function(t,e){return this.clone().$set(t,e)},m.get=function(t){return this[O.p(t)]()},m.add=function(r,h){var d,$=this;r=Number(r);var l=O.p(h),y=function(t){var e=w($);return O.w(e.date(e.date()+Math.round(t*r)),$)};if(l===f)return this.set(f,this.$M+r);if(l===c)return this.set(c,this.$y+r);if(l===a)return y(1);if(l===o)return y(7);var M=(d={},d[s]=e,d[u]=n,d[i]=t,d)[l]||1,m=this.$d.getTime()+r*M;return O.w(m,this)},m.subtract=function(t,e){return this.add(-1*t,e)},m.format=function(t){var e=this;if(!this.isValid())return $;var n=t||"YYYY-MM-DDTHH:mm:ssZ",r=O.z(this),i=this.$locale(),s=this.$H,u=this.$m,a=this.$M,o=i.weekdays,f=i.months,h=function(t,r,i,s){return t&&(t[r]||t(e,n))||i[r].substr(0,s)},c=function(t){return O.s(s%12||12,t,"0")},d=i.meridiem||function(t,e,n){var r=t<12?"AM":"PM";return n?r.toLowerCase():r},l={YY:String(this.$y).slice(-2),YYYY:this.$y,M:a+1,MM:O.s(a+1,2,"0"),MMM:h(i.monthsShort,a,f,3),MMMM:h(f,a),D:this.$D,DD:O.s(this.$D,2,"0"),d:String(this.$W),dd:h(i.weekdaysMin,this.$W,o,2),ddd:h(i.weekdaysShort,this.$W,o,3),dddd:o[this.$W],H:String(s),HH:O.s(s,2,"0"),h:c(1),hh:c(2),a:d(s,u,!0),A:d(s,u,!1),m:String(u),mm:O.s(u,2,"0"),s:String(this.$s),ss:O.s(this.$s,2,"0"),SSS:O.s(this.$ms,3,"0"),Z:r};return n.replace(y,(function(t,e){return e||l[t]||r.replace(":","")}))},m.utcOffset=function(){return 15*-Math.round(this.$d.getTimezoneOffset()/15)},m.diff=function(r,d,$){var l,y=O.p(d),M=w(r),m=(M.utcOffset()-this.utcOffset())*e,g=this-M,D=O.m(this,M);return D=(l={},l[c]=D/12,l[f]=D,l[h]=D/3,l[o]=(g-m)/6048e5,l[a]=(g-m)/864e5,l[u]=g/n,l[s]=g/e,l[i]=g/t,l)[y]||g,$?D:O.a(D)},m.daysInMonth=function(){return this.endOf(f).$D},m.$locale=function(){return v[this.$L]},m.locale=function(t,e){if(!t)return this.$L;var n=this.clone(),r=S(t,e,!0);return r&&(n.$L=r),n},m.clone=function(){return O.w(this.$d,this)},m.toDate=function(){return new Date(this.valueOf())},m.toJSON=function(){return this.isValid()?this.toISOString():null},m.toISOString=function(){return this.$d.toISOString()},m.toString=function(){return this.$d.toUTCString()},M}(),b=_.prototype;return w.prototype=b,[["$ms",r],["$s",i],["$m",s],["$H",u],["$W",a],["$M",f],["$y",c],["$D",d]].forEach((function(t){b[t[1]]=function(e){return this.$g(e,t[0],t[1])};})),w.extend=function(t,e){return t.$i||(t(e,_,w),t.$i=!0),w},w.locale=S,w.isDayjs=p,w.unix=function(t){return w(1e3*t)},w.en=v[D],w.Ls=v,w.p={},w}));
 });
@@ -707,7 +721,7 @@ var Draw = /*#__PURE__*/function () {
     ctx.restore();
 
     if (borderColor) {
-      this.border(_extends({}, config, {
+      this.border(_extends_1({}, config, {
         x: config.x - borderWidth,
         y: config.y - borderWidth,
         borderWidth: borderWidth,
@@ -1398,21 +1412,33 @@ var Table = /*#__PURE__*/function () {
   return Table;
 }();
 
+var setPrototypeOf = createCommonjsModule(function (module) {
 function _setPrototypeOf(o, p) {
-  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+  module.exports = _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
     o.__proto__ = p;
     return o;
   };
 
+  module.exports["default"] = module.exports, module.exports.__esModule = true;
   return _setPrototypeOf(o, p);
 }
 
+module.exports = _setPrototypeOf;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+var inheritsLoose = createCommonjsModule(function (module) {
 function _inheritsLoose(subClass, superClass) {
   subClass.prototype = Object.create(superClass.prototype);
   subClass.prototype.constructor = subClass;
-  _setPrototypeOf(subClass, superClass);
+  setPrototypeOf(subClass, superClass);
 }
 
+module.exports = _inheritsLoose;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+var assertThisInitialized = createCommonjsModule(function (module) {
 function _assertThisInitialized(self) {
   if (self === void 0) {
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -1420,6 +1446,10 @@ function _assertThisInitialized(self) {
 
   return self;
 }
+
+module.exports = _assertThisInitialized;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
 
 /**
  * @class {BaseRender}
@@ -1467,7 +1497,7 @@ var BaseRender = /*#__PURE__*/function () {
  */
 
 var Cell = /*#__PURE__*/function (_BaseRender) {
-  _inheritsLoose(Cell, _BaseRender);
+  inheritsLoose(Cell, _BaseRender);
 
   function Cell(_ref) {
     var _this;
@@ -1488,7 +1518,7 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
     _this.borderBottom = 1;
     _this.borderLeft = 1;
     _this.dashLine = dashLine;
-    _this.mergedCells = [_assertThisInitialized(_this)];
+    _this.mergedCells = [assertThisInitialized(_this)];
 
     _this.setTable(parent.table);
 
@@ -1668,7 +1698,7 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
     this.height = this.getColHeight({
       includesMerged: true
     }) - cellBorderWidth;
-    this.draw.rect(_extends({}, this.getCoords(), {
+    this.draw.rect(_extends_1({}, this.getCoords(), {
       width: this.width,
       height: this.height,
       fill: cellColor,
@@ -1800,7 +1830,7 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
         this.data = (_this$data = {}, _this$data[timeRangeKey] = this.timeRange, _this$data);
       }
 
-      var data = _extends({}, this.data, callback || {});
+      var data = _extends_1({}, this.data, callback || {});
 
       if (typeof callback === 'function') {
         data = callback(cell.data || {});
@@ -1811,7 +1841,7 @@ var Cell = /*#__PURE__*/function (_BaseRender) {
           iconKey = _this$table$settings6.iconKey,
           textsKey = _this$table$settings6.textsKey;
 
-      var oriData = _extends({}, this.data);
+      var oriData = _extends_1({}, this.data);
 
       this.data = data;
       this.renderIfPropsChanged((_this$renderIfPropsCh = {}, _this$renderIfPropsCh[colorKey] = this.getDataValue('color', data), _this$renderIfPropsCh[iconKey] = this.getDataValue('icon', data), _this$renderIfPropsCh[textsKey] = this.getDataValue('texts', data), _this$renderIfPropsCh), oriData);
@@ -2028,7 +2058,7 @@ Object.assign(Cell.prototype, eventMixin);
  */
 
 var Cells = /*#__PURE__*/function (_BaseRender) {
-  _inheritsLoose(Cells, _BaseRender);
+  inheritsLoose(Cells, _BaseRender);
 
   function Cells() {
     var _this;
@@ -2226,7 +2256,7 @@ var Cells = /*#__PURE__*/function (_BaseRender) {
  */
 
 var RowHeader = /*#__PURE__*/function (_BaseRender) {
-  _inheritsLoose(RowHeader, _BaseRender);
+  inheritsLoose(RowHeader, _BaseRender);
 
   function RowHeader() {
     var _this;
@@ -2295,7 +2325,7 @@ var RowHeader = /*#__PURE__*/function (_BaseRender) {
  */
 
 var ColHeader = /*#__PURE__*/function (_BaseRender) {
-  _inheritsLoose(ColHeader, _BaseRender);
+  inheritsLoose(ColHeader, _BaseRender);
 
   function ColHeader() {
     var _this;
@@ -3566,7 +3596,7 @@ var Schedule = /*#__PURE__*/function () {
     this.userSettings = userSettings;
     this.createCanvas();
     this.defaultSettings = settingsFactory();
-    this.settings = _extends({}, this.defaultSettings, this.userSettings);
+    this.settings = _extends_1({}, this.defaultSettings, this.userSettings);
     this.settings.contextMenuItems = this.combineContextMenuItems(userSettings.contextMenuItems || [], [{
       action: 'delete',
       title: '删除'
@@ -3661,7 +3691,7 @@ var Schedule = /*#__PURE__*/function () {
 
         var cell = this.table.getCell(colIdx, rowIdx);
 
-        var oriData = _extends({}, currentSelectedCell.data, data);
+        var oriData = _extends_1({}, currentSelectedCell.data, data);
 
         currentSelectedCell.delete();
         var cellsToMerge = this.table.getCellsBetween(cell, this.table.getCell(cell.colIdx, cell.rowIdx + rowSpan));
@@ -3797,235 +3827,6 @@ var Schedule = /*#__PURE__*/function () {
 Object.assign(Schedule.prototype, eventMixin);
 Schedule.settingsFactory = settingsFactory;
 
-//
+return Schedule;
 
-var script = {
-  name: 'Schedule',
-  props: (() => {
-    const props = {};
-    const settings = Schedule.settingsFactory();
-    Object.keys(settings).forEach((key) => {
-      props[key] = {
-        default: settings[key],
-      };
-    });
-    return props
-  })(),
-
-  methods: {
-    init () {
-      this.schedule = new Schedule(this.$refs.schedule, this.$props || {});
-      Object.values(events).forEach(eventName => this.schedule.on(eventName, (...args) => this.$emit(eventName, ...args)));
-
-      this.$watch('data', data => {
-        this.setData(data);
-      });
-    },
-
-    setData (data) {
-      this.schedule.setData(data);
-    },
-
-    setDataAtSelectedCell (...args) {
-      return this.schedule.setDataAtSelectedCell(...args)
-    },
-
-    getCanvas () {
-      return this.schedule.getCanvas()
-    }
-  },
-
-  mounted () {
-    this.init();
-  },
-
-  beforeDestroy () {
-    this.schedule.destroy();
-  },
-};
-
-function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier
-/* server only */
-, shadowMode, createInjector, createInjectorSSR, createInjectorShadow) {
-  if (typeof shadowMode !== 'boolean') {
-    createInjectorSSR = createInjector;
-    createInjector = shadowMode;
-    shadowMode = false;
-  } // Vue.extend constructor export interop.
-
-
-  var options = typeof script === 'function' ? script.options : script; // render functions
-
-  if (template && template.render) {
-    options.render = template.render;
-    options.staticRenderFns = template.staticRenderFns;
-    options._compiled = true; // functional template
-
-    if (isFunctionalTemplate) {
-      options.functional = true;
-    }
-  } // scopedId
-
-
-  if (scopeId) {
-    options._scopeId = scopeId;
-  }
-
-  var hook;
-
-  if (moduleIdentifier) {
-    // server build
-    hook = function hook(context) {
-      // 2.3 injection
-      context = context || // cached call
-      this.$vnode && this.$vnode.ssrContext || // stateful
-      this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext; // functional
-      // 2.2 with runInNewContext: true
-
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__;
-      } // inject component styles
-
-
-      if (style) {
-        style.call(this, createInjectorSSR(context));
-      } // register component module identifier for async chunk inference
-
-
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier);
-      }
-    }; // used by ssr in case component is cached and beforeCreate
-    // never gets called
-
-
-    options._ssrRegister = hook;
-  } else if (style) {
-    hook = shadowMode ? function () {
-      style.call(this, createInjectorShadow(this.$root.$options.shadowRoot));
-    } : function (context) {
-      style.call(this, createInjector(context));
-    };
-  }
-
-  if (hook) {
-    if (options.functional) {
-      // register for functional component in vue file
-      var originalRender = options.render;
-
-      options.render = function renderWithStyleInjection(h, context) {
-        hook.call(context);
-        return originalRender(h, context);
-      };
-    } else {
-      // inject component registration as beforeCreate hook
-      var existing = options.beforeCreate;
-      options.beforeCreate = existing ? [].concat(existing, hook) : [hook];
-    }
-  }
-
-  return script;
-}
-
-var normalizeComponent_1 = normalizeComponent;
-
-var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
-function createInjector(context) {
-  return function (id, style) {
-    return addStyle(id, style);
-  };
-}
-var HEAD = document.head || document.getElementsByTagName('head')[0];
-var styles = {};
-
-function addStyle(id, css) {
-  var group = isOldIE ? css.media || 'default' : id;
-  var style = styles[group] || (styles[group] = {
-    ids: new Set(),
-    styles: []
-  });
-
-  if (!style.ids.has(id)) {
-    style.ids.add(id);
-    var code = css.source;
-
-    if (css.map) {
-      // https://developer.chrome.com/devtools/docs/javascript-debugging
-      // this makes source maps inside style tags work properly in Chrome
-      code += '\n/*# sourceURL=' + css.map.sources[0] + ' */'; // http://stackoverflow.com/a/26603875
-
-      code += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) + ' */';
-    }
-
-    if (!style.element) {
-      style.element = document.createElement('style');
-      style.element.type = 'text/css';
-      if (css.media) style.element.setAttribute('media', css.media);
-      HEAD.appendChild(style.element);
-    }
-
-    if ('styleSheet' in style.element) {
-      style.styles.push(code);
-      style.element.styleSheet.cssText = style.styles.filter(Boolean).join('\n');
-    } else {
-      var index = style.ids.size - 1;
-      var textNode = document.createTextNode(code);
-      var nodes = style.element.childNodes;
-      if (nodes[index]) style.element.removeChild(nodes[index]);
-      if (nodes.length) style.element.insertBefore(textNode, nodes[index]);else style.element.appendChild(textNode);
-    }
-  }
-}
-
-var browser = createInjector;
-
-/* script */
-const __vue_script__ = script;
-
-/* template */
-var __vue_render__ = function() {
-  var _vm = this;
-  var _h = _vm.$createElement;
-  var _c = _vm._self._c || _h;
-  return _c(
-    "div",
-    { ref: "schedule", staticClass: "schedule" },
-    [_vm._t("default")],
-    2
-  )
-};
-var __vue_staticRenderFns__ = [];
-__vue_render__._withStripped = true;
-
-  /* style */
-  const __vue_inject_styles__ = function (inject) {
-    if (!inject) return
-    inject("data-v-4c33ce8e_0", { source: ".schedule[data-v-4c33ce8e] {\n  width: 100%;\n  height: 100%;\n}\n\n/*# sourceMappingURL=schedule.vue.map */", map: {"version":3,"sources":["/Users/vdorchan/Projects/live-schedule/src/components/schedule.vue","schedule.vue"],"names":[],"mappings":"AA4DA;EACA,WAAA;EACA,YAAA;AC3DA;;AAEA,uCAAuC","file":"schedule.vue","sourcesContent":["<template>\n  <div\n    class=\"schedule\"\n    ref=\"schedule\"\n  >\n    <slot></slot>\n  </div>\n</template>\n\n<script>\nimport Schedule from '../index'\nimport { events } from '../mixins/event'\n\nexport default {\n  name: 'Schedule',\n  props: (() => {\n    const props = {}\n    const settings = Schedule.settingsFactory()\n    Object.keys(settings).forEach((key) => {\n      props[key] = {\n        default: settings[key],\n      }\n    })\n    return props\n  })(),\n\n  methods: {\n    init () {\n      this.schedule = new Schedule(this.$refs.schedule, this.$props || {})\n      Object.values(events).forEach(eventName => this.schedule.on(eventName, (...args) => this.$emit(eventName, ...args)))\n\n      this.$watch('data', data => {\n        this.setData(data)\n      })\n    },\n\n    setData (data) {\n      this.schedule.setData(data)\n    },\n\n    setDataAtSelectedCell (...args) {\n      return this.schedule.setDataAtSelectedCell(...args)\n    },\n\n    getCanvas () {\n      return this.schedule.getCanvas()\n    }\n  },\n\n  mounted () {\n    this.init()\n  },\n\n  beforeDestroy () {\n    this.schedule.destroy()\n  },\n}\n</script>\n\n<style lang=\"scss\" scoped>\n.schedule {\n  width: 100%;\n  height: 100%;\n}\n</style>",".schedule {\n  width: 100%;\n  height: 100%;\n}\n\n/*# sourceMappingURL=schedule.vue.map */"]}, media: undefined });
-
-  };
-  /* scoped */
-  const __vue_scope_id__ = "data-v-4c33ce8e";
-  /* module identifier */
-  const __vue_module_identifier__ = undefined;
-  /* functional template */
-  const __vue_is_functional_template__ = false;
-  /* style inject SSR */
-  
-  /* style inject shadow dom */
-  
-
-  
-  const __vue_component__ = /*#__PURE__*/normalizeComponent_1(
-    { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
-    __vue_inject_styles__,
-    __vue_script__,
-    __vue_scope_id__,
-    __vue_is_functional_template__,
-    __vue_module_identifier__,
-    false,
-    browser,
-    undefined,
-    undefined
-  );
-
-export { __vue_component__ as Schedule };
+})));
